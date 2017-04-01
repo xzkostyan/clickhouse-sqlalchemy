@@ -1,4 +1,4 @@
-from sqlalchemy import Column, func, literal, exc
+from sqlalchemy import Column, func, literal, exc, case
 
 from src.base import ClickHouseExecutionContext
 from src.schema import Table
@@ -58,7 +58,18 @@ class SelectTestCase(BaseTestCase):
         with self.assertRaises(exc.CompileError) as ex:
             self.compile(session.query(table.c.x).offset(5), literal_binds=True)
 
-        self.assertEqual(unicode(ex.exception), "Offset without limit is not supported")
+        self.assertEqual(unicode(ex.exception), 'OFFSET without LIMIT is not supported')
+
+    def test_case(self):
+        with self.assertRaises(exc.CompileError) as ex:
+            self.compile(case([(literal(1), 0)]))
+
+        self.assertEqual(unicode(ex.exception), 'ELSE clause is required in CASE')
+
+        self.assertEqual(
+            self.compile(case([(literal(1), 0)], else_=1), literal_binds=True),
+            'CASE WHEN 1 THEN 0 ELSE 1 END'
+        )
 
 
 class SelectEscapingTestCase(BaseTestCase):

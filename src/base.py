@@ -53,6 +53,23 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         # count accepts zero arguments.
         return 'count()'
 
+    def visit_case(self, clause, **kwargs):
+        text = 'CASE '
+        if clause.value is not None:
+            text += clause.value._compiler_dispatch(self, **kwargs) + " "
+        for cond, result in clause.whens:
+            text += 'WHEN ' + cond._compiler_dispatch(
+                self, **kwargs
+            ) + ' THEN ' + result._compiler_dispatch(
+                self, **kwargs) + " "
+        if clause.else_ is None:
+            raise exc.CompileError('ELSE clause is required in CASE')
+
+        text += 'ELSE ' + clause.else_._compiler_dispatch(
+            self, **kwargs
+        ) + ' END'
+        return text
+
     def visit_if__func(self, func, **kw):
         return "(%s) ? (%s) : (%s)" % (
             self.process(func.clauses.clauses[0], **kw),
@@ -73,7 +90,7 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             text += self.process(select._limit_clause, **kw)
         else:
             if select._offset_clause is not None:
-                raise exc.CompileError('Offset without limit is not supported')
+                raise exc.CompileError('OFFSET without LIMIT is not supported')
 
         return text
 
