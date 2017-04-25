@@ -34,10 +34,9 @@ setup(name='clickhouse-sqlalchemy',
       # Registering `clickhouse` as dialect.
       entry_points={
           'sqlalchemy.dialects': [
-              'clickhouse=clickhouse_sqlalchemy:CockroachDBDialect',
+              'clickhouse=clickhouse_sqlalchemy.base',
           ]
       },
       test_suite='nose.collector',
-      tests_require=['nose', 'SQLAlchemy>=1.0', 'mock==1.0.1', 'requests',
-                     'responses'],
+      tests_require=['nose', 'SQLAlchemy', 'mock', 'requests', 'responses'],
       zip_safe=False)

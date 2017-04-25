@@ -8,3 +8,5 @@ pipeline:
     image: ${PYTHON_IMAGE}
     commands:
       - python setup.py test
+      - pip install .
+      - python -c 'import clickhouse_sqlalchemy'
