@@ -4,14 +4,10 @@ import codecs
 
 
 def unescape(value):
-    print(value)
     return codecs.escape_decode(value)[0].decode('utf-8')
 
 
 def parse_tsv(line):
     if line[-1] == '\n':
         line = line[:-1]
-
-    print(type(line))
-    return [unescape(value) for value in
-            line.split(b'\t')]
+    return [unescape(value) for value in line.split(b'\t')]
