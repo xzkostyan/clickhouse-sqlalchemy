@@ -1,0 +1,10 @@
+matrix:
+  PYTHON_IMAGE:
+    - kszucs/miniconda2
+    - kszucs/miniconda3
+
+pipeline:
+  test:
+    image: ${PYTHON_IMAGE}
+    commands:
+      - python setup.py test

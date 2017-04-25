@@ -1,3 +1,9 @@
+|Build Status|
+
+.. |Build Status| image:: http://drone.lensa.com:8000/api/badges/kszucs/clickhouse-sqlalchemy/status.svg
+   :target: http://drone.lensa.com:8000/kszucs/clickhouse-sqlalchemy
+
+
 ClickHouse SQLAlchemy
 =====================
 

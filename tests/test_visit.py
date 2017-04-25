@@ -1,6 +1,6 @@
 from sqlalchemy import sql
 
-from tests.testcase import BaseTestCase
+from .testcase import BaseTestCase
 
 
 class VisitTestCase(BaseTestCase):

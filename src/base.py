@@ -1,13 +1,15 @@
+from __future__ import absolute_import, division, print_function
+
 import re
 
-import sqlalchemy.types as sqltypes
+from sqlalchemy import types as sqltypes
 from sqlalchemy import util as sa_util, exc
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import compiler, expression
 from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
 
 from . import types, connector
-
+from .compat import unicode
 
 # Export connector version
 VERSION = (0, 0, 1, None)
