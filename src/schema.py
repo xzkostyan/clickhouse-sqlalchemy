@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 from sqlalchemy import Table as TableBase
 from sqlalchemy.sql.base import _bind_or_error
 

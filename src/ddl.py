@@ -1,4 +1,7 @@
-from sqlalchemy.sql.ddl import SchemaDropper as SchemaDropperBase, DropTable as DropTableBase
+from __future__ import absolute_import, division, print_function
+
+from sqlalchemy.sql.ddl import SchemaDropper as SchemaDropperBase
+from sqlalchemy.sql.ddl import DropTable as DropTableBase
 
 
 class DropTable(DropTableBase):

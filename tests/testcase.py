@@ -1,10 +1,12 @@
 import re
 
+from src.compat import unicode
+
 from unittest import TestCase
 from sqlalchemy import MetaData
 from sqlalchemy.orm import Query
 
-from tests.session import session
+from .session import session
 
 
 class BaseTestCase(TestCase):
@@ -23,7 +25,9 @@ class BaseTestCase(TestCase):
         if literal_binds:
             compile_kwargs['literal_binds'] = True
 
-        return clause.compile(dialect=session.bind.dialect, compile_kwargs=compile_kwargs)
+        return clause.compile(dialect=session.bind.dialect,
+                              compile_kwargs=compile_kwargs)
 
     def compile(self, clause, **kwargs):
-        return self.strip_spaces.sub('', unicode(self._compile(clause, **kwargs)))
+        query = unicode(self._compile(clause, **kwargs))
+        return self.strip_spaces.sub('', query)

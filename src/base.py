@@ -1,13 +1,15 @@
+from __future__ import absolute_import, division, print_function
+
 import re
 
-import sqlalchemy.types as sqltypes
+from sqlalchemy import types as sqltypes
 from sqlalchemy import util as sa_util, exc
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import compiler, expression
 from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
 
 from . import types, connector
-
+from .compat import unicode
 
 # Export connector version
 VERSION = (0, 0, 1, None)
@@ -40,6 +42,7 @@ ischema_names = {
 
 
 class ClickHouseIdentifierPreparer(compiler.IdentifierPreparer):
+
     def quote_identifier(self, value):
         # Never quote identifiers.
         return self._escape_identifier(value)
@@ -49,6 +52,7 @@ class ClickHouseIdentifierPreparer(compiler.IdentifierPreparer):
 
 
 class ClickHouseCompiler(compiler.SQLCompiler):
+
     def visit_count_func(self, fn, **kw):
         # count accepts zero arguments.
         return 'count()'
@@ -62,7 +66,8 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
     def visit_column(self, column, include_table=True, **kwargs):
         # Columns prefixed with table name are not supported
-        return super(ClickHouseCompiler, self).visit_column(column, include_table=False, **kwargs)
+        return super(ClickHouseCompiler, self).visit_column(
+            column, include_table=False, **kwargs)
 
     def limit_clause(self, select, **kw):
         text = ''
@@ -79,14 +84,16 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
-    def visit_create_column(self, create, **kw):
+
+    def visit_create_column(self, create, **kwds):
         column = create.element
         nullable = column.nullable
 
         # All columns including synthetic PKs must be 'nullable'
         column.nullable = True
 
-        rv = super(ClickHouseDDLCompiler, self).visit_create_column(create, **kw)
+        rv = super(ClickHouseDDLCompiler, self).visit_create_column(create,
+                                                                    **kwds)
         column.nullable = nullable
 
         return rv
@@ -101,10 +108,12 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         def compile_param(expr):
             if not isinstance(expr, expression.ColumnClause):
                 if not hasattr(expr, 'self_group'):
-                    return unicode(expr)  # assuming base type (int, string, etc.)
+                    # assuming base type (int, string, etc.)
+                    return unicode(expr)
                 else:
                     expr = expr.self_group()
-            return compiler.process(expr, include_table=False, literal_binds=True)
+            return compiler.process(expr, include_table=False,
+                                    literal_binds=True)
 
         engine_params = engine.get_params()
         text = engine.name()
@@ -116,7 +125,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         compiled_params = []
         for param in engine_params:
             if isinstance(param, tuple):
-                compiled = '(' + ', '.join(compile_param(p) for p in param) + ')'
+                compiled = '(' + ', '.join(map(compile_param, param)) + ')'
             else:
                 compiled = compile_param(param)
 
@@ -144,6 +153,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
 
 
 class ClickHouseExecutionContext(default.DefaultExecutionContext):
+
     @sa_util.memoized_property
     def should_autocommit(self):
         return False  # No DML supported, never autocommit
@@ -155,6 +165,7 @@ class ClickHouseExecutionContext(default.DefaultExecutionContext):
 
 
 class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
+
     def visit_string(self, type_, **kw):
         if type_.length is None:
             return 'String'
@@ -256,8 +267,9 @@ class ClickHouseDialect(default.DefaultDialect):
         return False
 
     @reflection.cache
-    def get_columns(self, connection, table_name, schema=None, **kw):
-        rows = self._execute(connection, 'DESCRIBE TABLE {}'.format(table_name))
+    def get_columns(self, connection, table_name, schema=None, **kwds):
+        query = 'DESCRIBE TABLE {}'.format(table_name)
+        rows = self._execute(connection, query)
 
         columns = []
         for (name, type_, default_type, default_expression) in rows:
@@ -273,6 +285,7 @@ class ClickHouseDialect(default.DefaultDialect):
                 'nullable': True,
                 'default': None,
             })
+
         return columns
 
     @reflection.cache

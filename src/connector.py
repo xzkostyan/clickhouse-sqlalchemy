@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 from uuid import uuid1
 
 from .escaper import Escaper

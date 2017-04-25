@@ -1,3 +1,6 @@
+from __future__ import absolute_import, division, print_function
+
+import six
 from datetime import date
 from decimal import Decimal
 
@@ -39,7 +42,9 @@ class Escaper(object):
     def escape_item(self, item):
         if item is None:
             return 'NULL'
-        elif isinstance(item, (int, float, long)):
+        elif isinstance(item, six.integer_types):
+            return self.escape_number(item)
+        elif isinstance(item, float):
             return self.escape_number(item)
         elif isinstance(item, date):
             return self.escape_date(item)

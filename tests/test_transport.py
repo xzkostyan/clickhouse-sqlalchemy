@@ -5,8 +5,9 @@ from sqlalchemy import Column, func
 
 from src.schema import Table
 from src import types
-from session import session
-from testcase import BaseTestCase
+
+from .session import session
+from .testcase import BaseTestCase
 
 
 class TransportCase(BaseTestCase):

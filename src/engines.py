@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 from sqlalchemy import util
 from sqlalchemy.sql import ClauseElement
 from sqlalchemy.sql.base import SchemaEventTarget
@@ -31,7 +33,9 @@ class KeysExpressionOrColumn(ColumnCollectionMixin, SchemaItem):
     def __init__(self, *expressions, **kwargs):
         columns = []
         self.expressions = []
-        for expr, column, strname, add_element in self._extract_col_expression_collection(expressions):
+        col_expressions = self._extract_col_expression_collection(expressions)
+
+        for expr, column, strname, add_element in col_expressions:
             if add_element is not None:
                 columns.append(add_element)
             self.expressions.append(expr)
@@ -50,7 +54,8 @@ class KeysExpressionOrColumn(ColumnCollectionMixin, SchemaItem):
 
 
 class MergeTree(Engine):
-    def __init__(self, date_col, key_expressions, sampling=None, index_granularity=None):
+    def __init__(self, date_col, key_expressions, sampling=None,
+                 index_granularity=None):
         self.date_col = TableCol(date_col)
         self.key_cols = KeysExpressionOrColumn(*key_expressions)
 
@@ -82,9 +87,11 @@ class MergeTree(Engine):
 
 
 class CollapsingMergeTree(MergeTree):
-    def __init__(self, date_col, key_expressions, sign_col, sampling=None, index_granularity=None):
-        super(CollapsingMergeTree, self).__init__(date_col, key_expressions, sampling=sampling,
-                                                  index_granularity=index_granularity)
+    def __init__(self, date_col, key_expressions, sign_col, sampling=None,
+                 index_granularity=None):
+        super(CollapsingMergeTree, self).__init__(
+            date_col, key_expressions, sampling=sampling,
+            index_granularity=index_granularity)
         self.sign_col = TableCol(sign_col)
 
     def get_params(self):
@@ -99,9 +106,11 @@ class CollapsingMergeTree(MergeTree):
 
 
 class SummingMergeTree(MergeTree):
-    def __init__(self, date_col, key_expressions, summing_cols=None, sampling=None, index_granularity=None):
-        super(SummingMergeTree, self).__init__(date_col, key_expressions, sampling=sampling,
-                                               index_granularity=index_granularity)
+    def __init__(self, date_col, key_expressions, summing_cols=None, sampling=None,
+                 index_granularity=None):
+        super(SummingMergeTree, self).__init__(
+            date_col, key_expressions, sampling=sampling,
+            index_granularity=index_granularity)
         self.summing_cols = KeysExpressionOrColumn(*summing_cols) if summing_cols is not None else None
 
     def _set_parent(self, table):
@@ -118,7 +127,8 @@ class SummingMergeTree(MergeTree):
 
 
 class Buffer(Engine):
-    def __init__(self, database, table, num_layers=16, min_time=10, max_time=100, min_rows=10000, max_rows=1000000,
+    def __init__(self, database, table, num_layers=16, min_time=10,
+                 max_time=100, min_rows=10000, max_rows=1000000,
                  min_bytes=10000000, max_bytes=100000000):
         self.database = database
         self.table = table
