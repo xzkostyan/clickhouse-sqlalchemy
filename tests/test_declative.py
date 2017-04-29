@@ -44,6 +44,7 @@ class DeclarativeTestCase(BaseTestCase):
             'CREATE TABLE testtable (x Int32, y String) ENGINE = Memory'
         )
 
+
 class EnginesDeclarativeTestCase(DeclarativeTestCase):
     def test_text_engine_columns(self):
         base = get_declarative_base()
@@ -59,7 +60,8 @@ class EnginesDeclarativeTestCase(DeclarativeTestCase):
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
-            'CREATE TABLE test_table (date Date, x Int32, y String) ENGINE = MergeTree(date, (date, x), 8192)'
+            'CREATE TABLE test_table (date Date, x Int32, y String) '
+            'ENGINE = MergeTree(date, (date, x), 8192)'
         )
 
     def test_func_engine_columns(self):
@@ -71,13 +73,16 @@ class EnginesDeclarativeTestCase(DeclarativeTestCase):
             y = Column(types.String)
 
             __table_args__ = (
-                engines.MergeTree('date', ('date', func.intHash32(x)), sampling=func.intHash32(x)),
+                engines.MergeTree('date', ('date', func.intHash32(x)),
+                                  sampling=func.intHash32(x)),
             )
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
             'CREATE TABLE test_table (date Date, x Int32, y String) '
-            'ENGINE = MergeTree(date, intHash32(x), (date, intHash32(x)), 8192)'
+            'ENGINE = MergeTree('
+            'date, intHash32(x), (date, intHash32(x)), 8192'
+            ')'
         )
 
     def test_index_granularity(self):

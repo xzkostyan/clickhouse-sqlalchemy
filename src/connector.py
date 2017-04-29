@@ -5,8 +5,10 @@ from .transport import RequestsTransport
 
 # PEP 249 module globals
 apilevel = '2.0'
-threadsafety = 2  # Threads may share the module and connections.
-paramstyle = 'pyformat'  # Python extended format codes, e.g. ...WHERE name=%(name)s
+# Threads may share the module and connections.
+threadsafety = 2
+# Python extended format codes, e.g. ...WHERE name=%(name)s
+paramstyle = 'pyformat'
 
 
 class Error(Exception):
@@ -46,11 +48,11 @@ class Connection(object):
 
 class Cursor(object):
     """
-    These objects represent a database cursor, which is used to manage the context of a fetch
-    operation.
+    These objects represent a database cursor, which is used to manage
+    the context of a fetch operation.
 
-    Cursors are not isolated, i.e., any changes done to the database by a cursor are immediately
-    visible by other cursors or connections.
+    Cursors are not isolated, i.e., any changes done to the database
+    by a cursor are immediately visible by other cursors or connections.
     """
     class States(object):
         (
@@ -79,7 +81,10 @@ class Cursor(object):
         columns = self._columns or []
         types = self._types or []
 
-        return [(name, type_code, None, None, None, None, True) for name, type_code in zip(columns, types)]
+        return [
+            (name, type_code, None, None, None, None, True)
+            for name, type_code in zip(columns, types)
+        ]
 
     def close(self):
         pass
@@ -93,7 +98,9 @@ class Cursor(object):
         self._reset_state()
         self._begin_query()
 
-        response_gen = self._connection.transport.execute(raw_sql, params={'query_id': self._query_id})
+        response_gen = self._connection.transport.execute(
+            raw_sql, params={'query_id': self._query_id}
+        )
 
         self._process_response(response_gen)
         self._end_query()
@@ -101,7 +108,10 @@ class Cursor(object):
     def executemany(self, operation, seq_of_parameters):
         index = operation.index('VALUES') + 7
         values_tpl = operation[index:]
-        params = ', '.join(values_tpl % self._params_escaper.escape(params) for params in seq_of_parameters)
+        params = ', '.join(
+            values_tpl % self._params_escaper.escape(params)
+            for params in seq_of_parameters
+        )
         self.execute(operation[:index] + params)
 
     def fetchone(self):
@@ -173,7 +183,9 @@ class Cursor(object):
             raise RuntimeError("No query yet")
 
         # Try to cancel query by sending query with the same query_id.
-        self._connection.transport.execute('SELECT 1', params={'query_id': self._query_id})
+        self._connection.transport.execute(
+            'SELECT 1', params={'query_id': self._query_id}
+        )
 
         self._end_query()
         self._query_id = None

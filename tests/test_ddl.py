@@ -24,7 +24,8 @@ class DDLTestCase(BaseTestCase):
         # No NOT NULL. And any PKS.
         self.assertEqual(
             self.compile(CreateTable(table)),
-            'CREATE TABLE t1 (x Int32, y String, z FixedString(10)) ENGINE = Memory'
+            'CREATE TABLE t1 (x Int32, y String, z FixedString(10)) '
+            'ENGINE = Memory'
         )
 
     def test_create_table_without_engine(self):
@@ -45,8 +46,14 @@ class DDLTestCase(BaseTestCase):
             Column('x', types.Int32, primary_key=True)
         )
 
-        self.assertEqual(self.compile(DropTable(table)), "DROP TABLE t1")
-        self.assertEqual(self.compile(DropTable(table, if_exists=True)), "DROP TABLE IF EXISTS t1")
+        self.assertEqual(
+            self.compile(DropTable(table)),
+            'DROP TABLE t1'
+        )
+        self.assertEqual(
+            self.compile(DropTable(table, if_exists=True)),
+            'DROP TABLE IF EXISTS t1'
+        )
 
 
 class EnginesTestCase(DDLTestCase):
@@ -61,5 +68,6 @@ class EnginesTestCase(DDLTestCase):
 
         self.assertEqual(
             self.compile(CreateTable(table)),
-            'CREATE TABLE t1 (date Date, x Int32, y String) ENGINE = MergeTree(date, (date, x), 8192)'
+            'CREATE TABLE t1 (date Date, x Int32, y String) '
+            'ENGINE = MergeTree(date, (date, x), 8192)'
         )

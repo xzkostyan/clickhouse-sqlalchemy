@@ -27,7 +27,10 @@ class TransportCase(BaseTestCase):
 
     @mock.activate
     def test_parse_int_types(self):
-        types_ = ['Int8', 'UInt8', 'Int16', 'UInt16', 'Int32', 'UInt32', 'Int64', 'UInt64']
+        types_ = [
+            'Int8', 'UInt8', 'Int16', 'UInt16', 'Int32', 'UInt32', 'Int64',
+            'UInt64'
+        ]
         columns = [chr(i + ord('a')) for i in range(len(types_))]
 
         mock.add(

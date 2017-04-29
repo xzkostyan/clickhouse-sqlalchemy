@@ -22,7 +22,8 @@ converters = {
 
 
 class RequestsTransport(object):
-    def __init__(self, db_url, db_name, username, password, timeout=None, **kwargs):
+    def __init__(self, db_url, db_name, username, password, timeout=None,
+                 **kwargs):
         self.db_url = db_url
         self.db_name = db_name
         self.auth = (username, password)
@@ -31,7 +32,8 @@ class RequestsTransport(object):
 
     def execute(self, query, params=None):
         """
-        Query is returning rows and these rows should be parsed or there is nothing to return.
+        Query is returning rows and these rows should be parsed or
+        there is nothing to return.
         """
         r = self._send(query, params=params, stream=True)
         lines = r.iter_lines()
@@ -43,14 +45,18 @@ class RequestsTransport(object):
         yield types
 
         for line in lines:
-            yield [(converter(x) if converter else x) for x, converter in zip(parse_tsv(line), convs)]
+            yield [
+                (converter(x) if converter else x)
+                for x, converter in zip(parse_tsv(line), convs)
+            ]
 
     def raw(self, query, params=None, stream=False):
         """
         Performs raw query to database. Returns its output
         :param query: Query to execute
         :param params: Additional params should be passed during query.
-        :param stream: If flag is true, Http response from ClickHouse will be streamed.
+        :param stream: If flag is true, Http response from ClickHouse will be
+            streamed.
         :return: Query execution result
         """
         return self._send(query, params=params, stream=stream).text
@@ -61,7 +67,10 @@ class RequestsTransport(object):
         params['database'] = self.db_name
 
         # TODO: retries, prepared requests
-        r = requests.post(self.db_url, auth=self.auth, params=params, data=data, stream=stream, timeout=self.timeout)
+        r = requests.post(
+            self.db_url, auth=self.auth, params=params, data=data,
+            stream=stream, timeout=self.timeout
+        )
         if r.status_code != 200:
             raise DatabaseException(r.text)
         return r

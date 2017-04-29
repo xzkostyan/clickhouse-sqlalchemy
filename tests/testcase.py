@@ -23,7 +23,11 @@ class BaseTestCase(TestCase):
         if literal_binds:
             compile_kwargs['literal_binds'] = True
 
-        return clause.compile(dialect=session.bind.dialect, compile_kwargs=compile_kwargs)
+        return clause.compile(
+            dialect=session.bind.dialect, compile_kwargs=compile_kwargs
+        )
 
     def compile(self, clause, **kwargs):
-        return self.strip_spaces.sub('', unicode(self._compile(clause, **kwargs)))
+        return self.strip_spaces.sub(
+            '', unicode(self._compile(clause, **kwargs))
+        )

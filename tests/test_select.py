@@ -19,8 +19,9 @@ class SelectTestCase(BaseTestCase):
     def test_select(self):
         table = self.create_table()
 
+        query = session.query(table.c.x).filter(table.c.x.in_([1, 2]))
         self.assertEqual(
-            self.compile(session.query(table.c.x).filter(table.c.x.in_([1, 2]))),
+            self.compile(query),
             'SELECT x AS t1_x FROM t1 WHERE x IN (%(x_1)s, %(x_2)s)'
         )
 
@@ -40,34 +41,45 @@ class SelectTestCase(BaseTestCase):
     def test_limit(self):
         table = self.create_table()
 
+        query = session.query(table.c.x).limit(10)
         self.assertEqual(
-            self.compile(session.query(table.c.x).limit(10), literal_binds=True),
+            self.compile(query, literal_binds=True),
             'SELECT x AS t1_x FROM t1  LIMIT 10'
         )
 
+        query = session.query(table.c.x).limit(10).offset(5)
         self.assertEqual(
-            self.compile(session.query(table.c.x).limit(10).offset(5), literal_binds=True),
+            self.compile(query, literal_binds=True),
             'SELECT x AS t1_x FROM t1  LIMIT 5, 10'
         )
 
+        query = session.query(table.c.x).offset(5).limit(10)
         self.assertEqual(
-            self.compile(session.query(table.c.x).offset(5).limit(10), literal_binds=True),
+            self.compile(query, literal_binds=True),
             'SELECT x AS t1_x FROM t1  LIMIT 5, 10'
         )
 
         with self.assertRaises(exc.CompileError) as ex:
-            self.compile(session.query(table.c.x).offset(5), literal_binds=True)
+            query = session.query(table.c.x).offset(5)
+            self.compile(query, literal_binds=True)
 
-        self.assertEqual(unicode(ex.exception), 'OFFSET without LIMIT is not supported')
+        self.assertEqual(
+            unicode(ex.exception),
+            'OFFSET without LIMIT is not supported'
+        )
 
     def test_case(self):
         with self.assertRaises(exc.CompileError) as ex:
             self.compile(case([(literal(1), 0)]))
 
-        self.assertEqual(unicode(ex.exception), 'ELSE clause is required in CASE')
-
         self.assertEqual(
-            self.compile(case([(literal(1), 0)], else_=1), literal_binds=True),
+            unicode(ex.exception),
+            'ELSE clause is required in CASE'
+        )
+
+        expression = case([(literal(1), 0)], else_=1)
+        self.assertEqual(
+            self.compile(expression, literal_binds=True),
             'CASE WHEN 1 THEN 0 ELSE 1 END'
         )
 
@@ -85,9 +97,13 @@ class SelectEscapingTestCase(BaseTestCase):
 
 class FormatSectionTestCase(BaseTestCase):
     def _compile(self, clause, bind=session.bind, **kwargs):
-        statement = super(FormatSectionTestCase, self)._compile(clause, bind=bind, **kwargs)
+        statement = super(FormatSectionTestCase, self)._compile(
+            clause, bind=bind, **kwargs
+        )
 
-        context = ClickHouseExecutionContext._init_compiled(bind.dialect, bind, bind, statement, [])
+        context = ClickHouseExecutionContext._init_compiled(
+            bind.dialect, bind, bind, statement, []
+        )
         context.pre_exec()
 
         return context.statement
@@ -96,7 +112,7 @@ class FormatSectionTestCase(BaseTestCase):
         metadata = self.metadata()
 
         bind = session.bind
-        bind.cursor = lambda : None
+        bind.cursor = lambda: None
 
         table = Table(
             't1', metadata,
@@ -104,13 +120,16 @@ class FormatSectionTestCase(BaseTestCase):
         )
 
         statement = self.compile(session.query(table.c.x), bind=bind)
-        self.assertEqual(statement, 'SELECT x AS t1_x FROM t1 FORMAT TabSeparatedWithNamesAndTypes')
+        self.assertEqual(
+            statement,
+            'SELECT x AS t1_x FROM t1 FORMAT TabSeparatedWithNamesAndTypes'
+        )
 
     def test_insert_from_select(self):
         metadata = self.metadata()
 
         bind = session.bind
-        bind.cursor = lambda : None
+        bind.cursor = lambda: None
 
         t1 = Table(
             't1', metadata,

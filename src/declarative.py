@@ -16,7 +16,10 @@ class ChickHouseDeclarativeMeta(DeclarativeMeta):
     def __new__(cls, name, bases, d):
         tablename = d.get('__tablename__')
 
-        has_pks = any(v.primary_key for k, v in d.iteritems() if isinstance(v, sqlalchemy.Column))
+        has_pks = any(
+            v.primary_key for k, v in d.iteritems()
+            if isinstance(v, sqlalchemy.Column)
+        )
 
         # generate a table name automatically if it's missing and the
         # class dictionary declares a primary key.  We cannot always
@@ -38,4 +41,6 @@ class ChickHouseDeclarativeMeta(DeclarativeMeta):
 
 
 def get_declarative_base(metadata=None):
-    return declarative_base(metadata=metadata, metaclass=ChickHouseDeclarativeMeta)
+    return declarative_base(
+        metadata=metadata, metaclass=ChickHouseDeclarativeMeta
+    )
