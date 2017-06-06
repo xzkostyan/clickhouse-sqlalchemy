@@ -48,7 +48,7 @@ class ClickHouseIdentifierPreparer(compiler.IdentifierPreparer):
 class ClickHouseCompiler(compiler.SQLCompiler):
     def visit_count_func(self, fn, **kw):
         # count accepts zero arguments.
-        return 'count()'
+        return 'count%s' % self.process(fn.clause_expr, **kw)
 
     def visit_case(self, clause, **kwargs):
         text = 'CASE '
