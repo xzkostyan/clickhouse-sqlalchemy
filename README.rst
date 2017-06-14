@@ -1,8 +1,7 @@
 ClickHouse SQLAlchemy
 =====================
 
-ClickHouse dialect for SQLAlchemy with basic types support that uses HTTP interface to
-`ClickHouse database <https://clickhouse.yandex/>`_.
+ClickHouse dialect for SQLAlchemy to `ClickHouse database <https://clickhouse.yandex/>`_.
 
 
 .. image:: https://img.shields.io/travis/xzkostyan/clickhouse-sqlalchemy.svg
@@ -17,6 +16,12 @@ The package can be installed using ``pip``:
 
        pip install clickhouse-sqlalchemy
 
+Interfaces support
+------------------
+
+- **http** via requests
+- **native** (TCP) via `clickhouse-driver <https://github.com/mymarilyn/clickhouse-driver>`_.
+
 
 Connection Parameters
 =====================
@@ -25,18 +30,25 @@ ClickHouse SQLAlchemy uses the following syntax for the connection string:
 
     .. code-block:: python
 
-     'clickhouse://<user>:<password>@<host>:<port>/<database>[?key=value..]'
+     'clickhouse+<driver>://<user>:<password>@<host>:<port>/<database>[?key=value..]'
 
 Where:
 
-- *port* is port ClickHouse server is bound to. Default is ``8123``.
+- *driver* is driver to use. Possible choices: ``http``, ``native``. ``http`` is default.
 - *database* is database connect to. Default is ``default``.
 
-There are several options can be specified in query string:
 
+Drivers options
+===============
+
+There are several options can be specified in query string.
+
+HTTP
+----
+
+- *port* is port ClickHouse server is bound to. Default is ``8123``.
 - *timeout* in seconds. There is no timeout by default.
 - *protocol* to use. Possible choices: ``http``, ``https``. ``http`` is default.
-
 
 Connection string to database `test` in default ClickHouse installation:
 
@@ -52,6 +64,23 @@ When you are using `nginx` as proxy server for ClickHouse server connection stri
          'clickhouse://user:password@example.com:8124/test?protocol=https'
 
 Where ``8124`` is proxy port.
+
+
+Native
+------
+
+Please note that native connection **is not encrypted**. All data including
+user/password is transferred in plain text. You should use this connection over
+SSH or VPN (for example) while communicating over untrusted network.
+
+Connection string to database `test` in default ClickHouse installation:
+
+    .. code-block:: python
+
+         'clickhouse+native://default:@localhost/test'
+
+All connection string parameters are proxied to `clickhouse-driver`.
+See it's `parameters <https://github.com/mymarilyn/clickhouse-driver#connection-parameters>`_.
 
 
 Features

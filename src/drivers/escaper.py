@@ -23,7 +23,7 @@ class Escaper(object):
         if isinstance(parameters, dict):
             return {k: self.escape_item(v) for k, v in parameters.items()}
         elif isinstance(parameters, (list, tuple)):
-            return tuple(self.escape_item(x) for x in parameters)
+            return [self.escape_item(x) for x in parameters]
         else:
             raise Exception("Unsupported param format: {}".format(parameters))
 
@@ -47,5 +47,7 @@ class Escaper(object):
             return self.escape_decimal(item)
         elif isinstance(item, basestring):
             return self.escape_string(item)
+        elif isinstance(item, (list, tuple)):
+            return [self.escape_item(x) for x in item]
         else:
             raise Exception("Unsupported object {}".format(item))

@@ -1,6 +1,5 @@
 from sqlalchemy import Column, func, literal, exc, case
 
-from src.base import ClickHouseExecutionContext
 from src.schema import Table
 from src import types
 from session import session
@@ -96,12 +95,14 @@ class SelectEscapingTestCase(BaseTestCase):
 
 
 class FormatSectionTestCase(BaseTestCase):
+    execution_ctx_cls = session.bind.dialect.execution_ctx_cls
+
     def _compile(self, clause, bind=session.bind, **kwargs):
         statement = super(FormatSectionTestCase, self)._compile(
             clause, bind=bind, **kwargs
         )
 
-        context = ClickHouseExecutionContext._init_compiled(
+        context = self.execution_ctx_cls._init_compiled(
             bind.dialect, bind, bind, statement, []
         )
         context.pre_exec()

@@ -1,7 +1,8 @@
-from uuid import uuid1
+from clickhouse_driver.client import Client
+from clickhouse_driver.errors import Error as DriverError
 
-from .escaper import Escaper
-from .transport import RequestsTransport
+from ...exceptions import DatabaseException
+from ..escaper import Escaper
 
 # PEP 249 module globals
 apilevel = '2.0'
@@ -27,7 +28,7 @@ def connect(*args, **kwargs):
 
 
 class Connection(object):
-    transport_cls = RequestsTransport
+    transport_cls = Client
 
     def __init__(self, *args, **kwargs):
         self.transport = self.transport_cls(*args, **kwargs)
@@ -87,32 +88,39 @@ class Cursor(object):
         ]
 
     def close(self):
-        pass
+        self._connection.transport.disconnect()
 
     def execute(self, operation, parameters=None):
-        raw_sql = operation
-
         if parameters is not None:
-            raw_sql = raw_sql % self._params_escaper.escape(parameters)
+            operation = operation % self._params_escaper.escape(parameters)
 
         self._reset_state()
         self._begin_query()
 
-        response_gen = self._connection.transport.execute(
-            raw_sql, params={'query_id': self._query_id}
-        )
+        transport = self._connection.transport
+        try:
+            response = transport.execute(operation, with_column_types=True)
 
-        self._process_response(response_gen)
+        except DriverError as orig:
+            raise DatabaseException(orig)
+
+        self._process_response(response)
         self._end_query()
 
     def executemany(self, operation, seq_of_parameters):
-        index = operation.index('VALUES') + 7
-        values_tpl = operation[index:]
-        params = ', '.join(
-            values_tpl % self._params_escaper.escape(params)
-            for params in seq_of_parameters
-        )
-        self.execute(operation[:index] + params)
+        self._reset_state()
+        self._begin_query()
+
+        transport = self._connection.transport
+
+        try:
+            response = transport.execute(operation, params=seq_of_parameters)
+
+        except DriverError as orig:
+            raise DatabaseException(orig)
+
+        self._process_response(response)
+        self._end_query()
 
     def fetchone(self):
         if self._state == self._states.NONE:
@@ -171,40 +179,24 @@ class Cursor(object):
     def __iter__(self):
         return self
 
-    # Private and non-standard methods.
-    def cancel(self):
-        """
-        Cancels query. Not in PEP 249 standard.
-        """
-        if self._state == self._states.NONE:
-            raise RuntimeError("No query yet")
-
-        if self._query_id is None:
-            raise RuntimeError("No query yet")
-
-        # Try to cancel query by sending query with the same query_id.
-        self._connection.transport.execute(
-            'SELECT 1', params={'query_id': self._query_id}
-        )
-
-        self._end_query()
-        self._query_id = None
-        self._rows = None
-
     def _process_response(self, response):
-        response = iter(response)
+        if not response:
+            self._columns = self._types = self._rows = []
+            return
 
-        self._columns = next(response, None)
-        self._types = next(response, None)
+        rows, columns_with_types = response
 
-        # Reverse list for further pop()
-        self._rows = list(response)[::-1]
+        if columns_with_types:
+            self._columns, self._types = zip(*columns_with_types)
+        else:
+            self._columns = self._types = []
+
+        self._rows = rows
 
     def _reset_state(self):
         """
         Resets query state and get ready for another query.
         """
-        self._query_id = None
         self._state = self._states.NONE
 
         self._columns = None
@@ -213,7 +205,6 @@ class Cursor(object):
 
     def _begin_query(self):
         self._state = self._states.RUNNING
-        self._query_id = uuid1()
 
     def _end_query(self):
         self._state = self._states.FINISHED

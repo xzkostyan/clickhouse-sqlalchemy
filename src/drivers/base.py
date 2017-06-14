@@ -1,16 +1,13 @@
 import re
 
 from sqlalchemy import types as sqltypes
-from sqlalchemy import util as sa_util, exc
+from sqlalchemy import exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import compiler, expression
 from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
 
-from . import types, connector
+from .. import types
 
-
-# Export connector version
-VERSION = (0, 0, 1, None)
 
 # Column spec
 colspecs = {}
@@ -32,9 +29,8 @@ ischema_names = {
     'Float32': FLOAT,
     'String': VARCHAR,
     'FixedString': VARCHAR,
-    'Enum': VARCHAR,
-    'Enum8': VARCHAR,
-    'Enum16': VARCHAR,
+    'Enum8': types.Enum8,
+    'Enum16': types.Enum16,
     'Array': types.Array
 }
 
@@ -171,17 +167,6 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         return text + self.preparer.format_table(drop.element)
 
 
-class ClickHouseExecutionContext(default.DefaultExecutionContext):
-    @sa_util.memoized_property
-    def should_autocommit(self):
-        return False  # No DML supported, never autocommit
-
-    def pre_exec(self):
-        # TODO: refactor this mess
-        if not self.isinsert and not self.isddl:
-            self.statement += ' FORMAT TabSeparatedWithNamesAndTypes'
-
-
 class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_string(self, type_, **kw):
         if type_.length is None:
@@ -189,8 +174,8 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         else:
             return 'FixedString(%s)' % type_.length
 
-    def visit_array(self, type, **kw):
-        return "Array(%s)" % type
+    def visit_array(self, type_, **kw):
+        return "Array(%s)" % self.process(type_.item_type, **kw)
 
     def visit_int8(self, type_, **kw):
         return 'Int8'
@@ -225,8 +210,27 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_float64(self, type_, **kw):
         return 'Float64'
 
+    def _render_enum(self, db_type, type_, **kw):
+        choices = (
+            "'%s' = %d" %
+            (x.name.replace("'", "\\'"), x.value) for x in type_.enum_type
+        )
+        return "%s(%s)" % (db_type, ', '.join(choices))
 
-class ClickHouseDialect(default.DefaultDialect):
+    def visit_enum8(self, type_, **kw):
+        return self._render_enum('Enum8', type_, **kw)
+
+    def visit_enum16(self, type_, **kw):
+        return self._render_enum('Enum16', type_, **kw)
+
+
+class ClickHouseExecutionContextBase(default.DefaultExecutionContext):
+    @sa_util.memoized_property
+    def should_autocommit(self):
+        return False  # No DML supported, never autocommit
+
+
+class ClickHouseDialectBase(default.DefaultDialect):
     name = 'clickhouse'
     supports_cast = True
     supports_unicode_statements = True
@@ -237,7 +241,8 @@ class ClickHouseDialect(default.DefaultDialect):
     supports_native_boolean = False
     supports_alter = True
     supports_sequences = False
-    supports_native_enum = False
+    supports_native_enum = True  # Do not render check constraints on enums.
+    supports_multivalues_insert = True
 
     max_identifier_length = 127
     default_paramstyle = 'pyformat'
@@ -252,27 +257,9 @@ class ClickHouseDialect(default.DefaultDialect):
     type_compiler = ClickHouseTypeCompiler
     statement_compiler = ClickHouseCompiler
     ddl_compiler = ClickHouseDDLCompiler
-    execution_ctx_cls = ClickHouseExecutionContext
-
-    @classmethod
-    def dbapi(cls):
-        return connector
-
-    def create_connect_args(self, url):
-        kwargs = {}
-        protocol = url.query.pop('protocol', 'http')
-        port = url.port or 8123
-        db_name = url.database or 'default'
-
-        kwargs.update(url.query)
-
-        db_url = '%s://%s:%d/' % (protocol, url.host, port)
-
-        return (db_url, db_name, url.username, url.password), kwargs
 
     def _execute(self, connection, sql):
-        sql += ' FORMAT TabSeparatedWithNamesAndTypes'
-        return connection.execute(sql)
+        raise NotImplementedError
 
     @reflection.cache
     def get_view_names(self, connection, schema=None, **kw):
@@ -291,7 +278,7 @@ class ClickHouseDialect(default.DefaultDialect):
         rows = self._execute(connection, query)
 
         columns = []
-        for (name, type_, default_type, default_expression) in rows:
+        for name, type_, default_type, default_expression in rows:
             # Get only type without extra modifiers.
             type_ = re.search(r'^\w+', type_).group(0)
             try:
@@ -339,6 +326,3 @@ class ClickHouseDialect(default.DefaultDialect):
 
     def _check_unicode_description(self, connection):
         return True
-
-
-dialect = ClickHouseDialect

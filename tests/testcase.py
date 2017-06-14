@@ -19,13 +19,15 @@ class BaseTestCase(TestCase):
             context.statement.use_labels = True
             clause = context.statement
 
+        kw = {}
         compile_kwargs = {}
         if literal_binds:
             compile_kwargs['literal_binds'] = True
 
-        return clause.compile(
-            dialect=session.bind.dialect, compile_kwargs=compile_kwargs
-        )
+        if compile_kwargs:
+            kw['compile_kwargs'] = compile_kwargs
+
+        return clause.compile(dialect=session.bind.dialect, **kw)
 
     def compile(self, clause, **kwargs):
         return self.strip_spaces.sub(

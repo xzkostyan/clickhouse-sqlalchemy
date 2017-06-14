@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
@@ -12,7 +12,7 @@ setup(
     name='clickhouse-sqlalchemy',
     version='0.0.1',
 
-    description='Simple ClickHouse SQLAlchemy Dialect using HTTP interface',
+    description='Simple ClickHouse SQLAlchemy Dialect',
     long_description=long_description,
 
     url='https://github.com/xzkostyan/clickhouse-sqlalchemy',
@@ -54,7 +54,9 @@ setup(
     keywords='ClickHouse db database cloud analytics',
 
     packages=[
-        'clickhouse_sqlalchemy'
+        p.replace('src', 'clickhouse_sqlalchemy')
+        for p in find_packages(exclude=['tests'])
+        if p.startswith('src')
     ],
     package_dir={
         'clickhouse_sqlalchemy': 'src',
@@ -62,12 +64,15 @@ setup(
     install_requires=[
         'sqlalchemy',
         'requests',
+        'clickhouse_driver>=0.0.4'
     ],
 
     # Registering `clickhouse` as dialect.
     entry_points={
         'sqlalchemy.dialects': [
-            'clickhouse=clickhouse_sqlalchemy.base',
+            'clickhouse=clickhouse_sqlalchemy.drivers.http.base',
+            'clickhouse.http=clickhouse_sqlalchemy.drivers.http.base',
+            'clickhouse.native=clickhouse_sqlalchemy.drivers.native.base'
         ]
     },
 

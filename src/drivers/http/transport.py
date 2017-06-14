@@ -2,7 +2,8 @@ from datetime import datetime
 
 import requests
 
-from .exceptions import DatabaseException
+from ...exceptions import DatabaseException
+from .exceptions import HTTPException
 from .utils import parse_tsv
 
 
@@ -72,5 +73,6 @@ class RequestsTransport(object):
             stream=stream, timeout=self.timeout
         )
         if r.status_code != 200:
-            raise DatabaseException(r.text)
+            orig = HTTPException(r.text)
+            raise DatabaseException(orig)
         return r
