@@ -1,6 +1,7 @@
 import re
-
 from unittest import TestCase
+
+from six import text_type
 from sqlalchemy import MetaData
 from sqlalchemy.orm import Query
 
@@ -31,5 +32,5 @@ class BaseTestCase(TestCase):
 
     def compile(self, clause, **kwargs):
         return self.strip_spaces.sub(
-            '', unicode(self._compile(clause, **kwargs))
+            '', text_type(self._compile(clause, **kwargs))
         )

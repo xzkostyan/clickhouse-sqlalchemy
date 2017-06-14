@@ -1,16 +1,16 @@
+from six import text_type
 from sqlalchemy import Column, exc
-
 from sqlalchemy.sql.ddl import CreateTable
 
-from src.schema import Table
 from src import types, engines
 from src.ddl import DropTable
-from testcase import BaseTestCase
+from src.schema import Table
+from tests.testcase import BaseTestCase
 
 
 class DDLTestCase(BaseTestCase):
     def compile(self, clause, **kwargs):
-        return self.strip_spaces.sub('', unicode(self._compile(clause)))
+        return self.strip_spaces.sub('', text_type(self._compile(clause)))
 
     def test_create_table(self):
         table = Table(
@@ -38,7 +38,7 @@ class DDLTestCase(BaseTestCase):
         with self.assertRaises(exc.CompileError) as ex:
             self.compile(CreateTable(no_engine_table))
 
-        self.assertEqual(unicode(ex.exception), "No engine for table 't1'")
+        self.assertEqual(text_type(ex.exception), "No engine for table 't1'")
 
     def test_drop_table(self):
         table = Table(

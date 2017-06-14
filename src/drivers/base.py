@@ -1,5 +1,6 @@
 import re
 
+import six
 from sqlalchemy import types as sqltypes
 from sqlalchemy import exc, util as sa_util
 from sqlalchemy.engine import default, reflection
@@ -119,7 +120,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             if not isinstance(expr, expression.ColumnClause):
                 if not hasattr(expr, 'self_group'):
                     # assuming base type (int, string, etc.)
-                    return unicode(expr)
+                    return six.text_type(expr)
                 else:
                     expr = expr.self_group()
             return compiler.process(

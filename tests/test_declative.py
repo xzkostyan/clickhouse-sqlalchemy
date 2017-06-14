@@ -1,14 +1,15 @@
+from six import text_type
 from sqlalchemy import Column, func
 from sqlalchemy.sql.ddl import CreateTable
 
 from src.declarative import get_declarative_base
 from src import types, engines
-from testcase import BaseTestCase
+from tests.testcase import BaseTestCase
 
 
 class DeclarativeTestCase(BaseTestCase):
     def compile(self, clause, **kwargs):
-        return self.strip_spaces.sub('', unicode(self._compile(clause)))
+        return self.strip_spaces.sub('', text_type(self._compile(clause)))
 
     def test_create_table(self):
         base = get_declarative_base()

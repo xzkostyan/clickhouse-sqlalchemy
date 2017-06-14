@@ -1,8 +1,9 @@
+from six import text_type
 from sqlalchemy import Column, func, literal, exc, case
 
-from src.schema import Table
 from src import types
-from session import session
+from src.schema import Table
+from tests.session import session
 from tests.testcase import BaseTestCase
 
 
@@ -63,7 +64,7 @@ class SelectTestCase(BaseTestCase):
             self.compile(query, literal_binds=True)
 
         self.assertEqual(
-            unicode(ex.exception),
+            text_type(ex.exception),
             'OFFSET without LIMIT is not supported'
         )
 
@@ -72,7 +73,7 @@ class SelectTestCase(BaseTestCase):
             self.compile(case([(literal(1), 0)]))
 
         self.assertEqual(
-            unicode(ex.exception),
+            text_type(ex.exception),
             'ELSE clause is required in CASE'
         )
 
@@ -85,7 +86,7 @@ class SelectTestCase(BaseTestCase):
 
 class SelectEscapingTestCase(BaseTestCase):
     def compile(self, clause, **kwargs):
-        return unicode(self._compile(clause, **kwargs))
+        return text_type(self._compile(clause, **kwargs))
 
     def test_select_escaping(self):
         self.assertEqual(

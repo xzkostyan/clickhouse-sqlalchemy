@@ -3,10 +3,10 @@ from datetime import date
 from responses import mock
 from sqlalchemy import Column, func
 
-from src.schema import Table
 from src import types
-from session import session
-from testcase import BaseTestCase
+from src.schema import Table
+from tests.session import session
+from tests.testcase import BaseTestCase
 
 
 class TransportCase(BaseTestCase):

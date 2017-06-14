@@ -17,7 +17,7 @@ class ChickHouseDeclarativeMeta(DeclarativeMeta):
         tablename = d.get('__tablename__')
 
         has_pks = any(
-            v.primary_key for k, v in d.iteritems()
+            v.primary_key for k, v in d.items()
             if isinstance(v, sqlalchemy.Column)
         )
 

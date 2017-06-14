@@ -1,8 +1,9 @@
 import enum
+import six
 from sqlalchemy import sql
 
-from tests.testcase import BaseTestCase
 from src import types
+from tests.testcase import BaseTestCase
 
 
 class VisitTestCase(BaseTestCase):
@@ -22,6 +23,7 @@ class VisitTestCase(BaseTestCase):
 
     def test_enum(self):
         class MyEnum(enum.Enum):
+            __order__ = 'foo bar'
             foo = 100
             bar = 500
 
@@ -30,9 +32,15 @@ class VisitTestCase(BaseTestCase):
             "Enum16('foo' = 100, 'bar' = 500)"
         )
 
-        MyEnum = enum.Enum('MyEnum', {" ' t = ": -1, "test": 2})
+        if six.PY3:
+            data = [" ' t = ", "test"]
+        else:
+            from collections import OrderedDict
+            data = OrderedDict([(" ' t = ", 1), ("test", 2)])
+
+        MyEnum = enum.Enum('MyEnum', data)
 
         self.assertEqual(
             self.compile(types.Enum16(MyEnum)),
-            "Enum16(' \\' t = ' = -1, 'test' = 2)"
+            "Enum16(' \\' t = ' = 1, 'test' = 2)"
         )

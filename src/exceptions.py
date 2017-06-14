@@ -11,7 +11,7 @@ class DatabaseException(Exception):
         text = 'Orig exception: {}'.format(self.orig)
 
         if six.PY3:
-            return str(text)
+            return six.text_type(text)
 
         else:
-            return unicode(text).encode('utf-8')
+            return six.text_type(text).encode('utf-8')

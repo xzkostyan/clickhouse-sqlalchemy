@@ -4,7 +4,7 @@ ClickHouse SQLAlchemy
 ClickHouse dialect for SQLAlchemy to `ClickHouse database <https://clickhouse.yandex/>`_.
 
 
-.. image:: https://img.shields.io/travis/xzkostyan/clickhouse-sqlalchemy.svg
+.. image:: https://img.shields.io/travis/xzkostyan/clickhouse-sqlalchemy.svg?branch=master
    :target: https://travis-ci.org/xzkostyan/clickhouse-sqlalchemy
 
 Installation

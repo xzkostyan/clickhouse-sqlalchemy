@@ -41,7 +41,11 @@ setup(
 
         'Programming Language :: SQL',
         'Programming Language :: Python :: 2.7',
-
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
 
         'Topic :: Database',
         'Topic :: Software Development',
@@ -62,6 +66,7 @@ setup(
         'clickhouse_sqlalchemy': 'src',
     },
     install_requires=[
+        'six',
         'sqlalchemy',
         'requests',
         'clickhouse_driver>=0.0.4'
@@ -80,8 +85,9 @@ setup(
     tests_require=[
         'nose',
         'SQLAlchemy>=1.0',
-        'mock==1.0.1',
+        'mock',
         'requests',
-        'responses'
+        'responses',
+        'enum34'
     ],
 )
