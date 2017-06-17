@@ -20,7 +20,7 @@ Interfaces support
 ------------------
 
 - **http** via requests
-- **native** (TCP) via `clickhouse-driver <https://github.com/mymarilyn/clickhouse-driver>`_.
+- **native** (TCP) via `clickhouse-driver <https://github.com/mymarilyn/clickhouse-driver>`_
 
 
 Connection Parameters
@@ -86,8 +86,8 @@ See it's `parameters <https://github.com/mymarilyn/clickhouse-driver#connection-
 Features
 ========
 
-Native SQLAlchemy declarative support
--------------------------------------
+SQLAlchemy declarative support
+------------------------------
 
 Both declarative and constructor-style tables support:
 
@@ -158,7 +158,7 @@ Simple batch INSERT:
         session.execute(table.insert(), rates)
 
 
-Native SQLAlchemy query method chaining
+Common SQLAlchemy query method chaining
 ---------------------------------------
 
 ``order_by``, ``filter``, ``limit``, ``offset``, etc. are supported:
@@ -221,6 +221,26 @@ UNION ALL example:
         )
 
         union_all(select_rate, select_another_rate).execute().fetchone()
+
+
+External data for query processing
+----------------------------------
+
+Currently can be used with native interface.
+
+    .. code-block:: python
+
+        ext = Table(
+            'ext', metadata, Column('x', types.Int32),
+            clickhouse_data=[(101, ), (103, ), (105, )], extend_existing=True
+        )
+
+        rv = session.query(Rate) \
+            .filter(Rate.value.in_(session.query(ext.c.x))) \
+            .execution_options(external_tables=[ext]) \
+            .all()
+
+        print(rv)
 
 
 Running tests

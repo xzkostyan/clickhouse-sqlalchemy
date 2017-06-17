@@ -89,7 +89,7 @@ class Cursor(object):
     def close(self):
         pass
 
-    def execute(self, operation, parameters=None):
+    def execute(self, operation, parameters=None, context=None):
         raw_sql = operation
 
         if parameters is not None:
@@ -105,7 +105,7 @@ class Cursor(object):
         self._process_response(response_gen)
         self._end_query()
 
-    def executemany(self, operation, seq_of_parameters):
+    def executemany(self, operation, seq_of_parameters, context=None):
         index = operation.index('VALUES') + 7
         values_tpl = operation[index:]
         params = ', '.join(

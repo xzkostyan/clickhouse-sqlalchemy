@@ -90,7 +90,29 @@ class Cursor(object):
     def close(self):
         self._connection.transport.disconnect()
 
-    def execute(self, operation, parameters=None):
+    def make_external_tables(self, dialect, execution_options):
+        external_tables = execution_options.get('external_tables')
+        if external_tables is None:
+            return
+
+        tables = []
+        type_compiler = dialect.type_compiler
+
+        for table in external_tables:
+            structure = []
+            for c in table.columns:
+                type_ = type_compiler.process(c.type, type_expression=c)
+                structure.append((c.name, type_))
+
+            tables.append({
+                'name': table.name,
+                'structure': structure,
+                'data': table.dialect_options['clickhouse']['data']
+            })
+
+        return tables
+
+    def execute(self, operation, parameters=None, context=None):
         if parameters is not None:
             operation = operation % self._params_escaper.escape(parameters)
 
@@ -99,7 +121,13 @@ class Cursor(object):
 
         transport = self._connection.transport
         try:
-            response = transport.execute(operation, with_column_types=True)
+            external_tables = self.make_external_tables(
+                context.dialect, context.execution_options
+            )
+            response = transport.execute(
+                operation, with_column_types=True,
+                external_tables=external_tables
+            )
 
         except DriverError as orig:
             raise DatabaseException(orig)
@@ -107,14 +135,20 @@ class Cursor(object):
         self._process_response(response)
         self._end_query()
 
-    def executemany(self, operation, seq_of_parameters):
+    def executemany(self, operation, seq_of_parameters, context=None):
         self._reset_state()
         self._begin_query()
 
         transport = self._connection.transport
 
         try:
-            response = transport.execute(operation, params=seq_of_parameters)
+            external_tables = self.make_external_tables(
+                context.dialect, context.execution_options
+            )
+            response = transport.execute(
+                operation, params=seq_of_parameters,
+                external_tables=external_tables
+            )
 
         except DriverError as orig:
             raise DatabaseException(orig)

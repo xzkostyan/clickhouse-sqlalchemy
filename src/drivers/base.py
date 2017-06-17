@@ -1,8 +1,7 @@
 import re
 
 import six
-from sqlalchemy import types as sqltypes
-from sqlalchemy import exc, util as sa_util
+from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import compiler, expression
 from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
@@ -243,7 +242,7 @@ class ClickHouseExecutionContextBase(default.DefaultExecutionContext):
         return False  # No DML supported, never autocommit
 
 
-class ClickHouseDialectBase(default.DefaultDialect):
+class ClickHouseDialect(default.DefaultDialect):
     name = 'clickhouse'
     supports_cast = True
     supports_unicode_statements = True
@@ -270,6 +269,12 @@ class ClickHouseDialectBase(default.DefaultDialect):
     type_compiler = ClickHouseTypeCompiler
     statement_compiler = ClickHouseCompiler
     ddl_compiler = ClickHouseDDLCompiler
+
+    construct_arguments = [
+        (schema.Table, {
+            "data": []
+        })
+    ]
 
     def _execute(self, connection, sql):
         raise NotImplementedError
@@ -333,6 +338,12 @@ class ClickHouseDialectBase(default.DefaultDialect):
     def do_rollback(self, dbapi_connection):
         # No support for transactions.
         pass
+
+    def do_executemany(self, cursor, statement, parameters, context=None):
+        cursor.executemany(statement, parameters, context=context)
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+        cursor.execute(statement, parameters, context=context)
 
     def _check_unicode_returns(self, connection, additional_tests=None):
         return True

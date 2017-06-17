@@ -1,4 +1,4 @@
-from ..base import ClickHouseDialectBase, ClickHouseExecutionContextBase
+from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
 from . import connector
 
 
@@ -13,7 +13,7 @@ class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
             self.executemany = True
 
 
-class ClickHouseHttpDialect(ClickHouseDialectBase):
+class ClickHouseDialect_native(ClickHouseDialect):
     driver = 'native'
     execution_ctx_cls = ClickHouseExecutionContext
 
@@ -34,4 +34,4 @@ class ClickHouseHttpDialect(ClickHouseDialectBase):
         return connection.execute(sql)
 
 
-dialect = ClickHouseHttpDialect
+dialect = ClickHouseDialect_native

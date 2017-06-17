@@ -8,6 +8,16 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 
+dialects = [
+    'clickhouse{}=clickhouse_sqlalchemy.drivers.{}'.format(driver, d_path)
+
+    for driver, d_path in [
+        ('', 'http.base:ClickHouseDialect_http'),
+        ('.http', 'http.base:ClickHouseDialect_http'),
+        ('.native', 'native.base:ClickHouseDialect_native')
+    ]
+]
+
 setup(
     name='clickhouse-sqlalchemy',
     version='0.0.2',
@@ -74,11 +84,7 @@ setup(
 
     # Registering `clickhouse` as dialect.
     entry_points={
-        'sqlalchemy.dialects': [
-            'clickhouse=clickhouse_sqlalchemy.drivers.http.base',
-            'clickhouse.http=clickhouse_sqlalchemy.drivers.http.base',
-            'clickhouse.native=clickhouse_sqlalchemy.drivers.native.base'
-        ]
+        'sqlalchemy.dialects': dialects
     },
 
     test_suite='nose.collector',

@@ -1,5 +1,5 @@
 
-from ..base import ClickHouseDialectBase, ClickHouseExecutionContextBase
+from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
 from . import connector
 
 
@@ -14,7 +14,7 @@ class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
             self.statement += ' FORMAT TabSeparatedWithNamesAndTypes'
 
 
-class ClickHouseHttpDialect(ClickHouseDialectBase):
+class ClickHouseDialect_http(ClickHouseDialect):
     driver = 'http'
     execution_ctx_cls = ClickHouseExecutionContext
 
@@ -39,4 +39,4 @@ class ClickHouseHttpDialect(ClickHouseDialectBase):
         return connection.execute(sql)
 
 
-dialect = ClickHouseHttpDialect
+dialect = ClickHouseDialect_http
