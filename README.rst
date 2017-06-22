@@ -93,9 +93,10 @@ Both declarative and constructor-style tables support:
 
     .. code-block:: python
 
-        from sqlalchemy import create_engine, Column, Table, MetaData, literal
+        from sqlalchemy import create_engine, Column, MetaData, literal
 
         from clickhouse_sqlalchemy import types, engines
+        from clickhouse_sqlalchemy.schema import Table
         from clickhouse_sqlalchemy.session import make_session
         from clickhouse_sqlalchemy.declarative import get_declarative_base
 
