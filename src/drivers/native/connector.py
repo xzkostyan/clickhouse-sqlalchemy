@@ -129,7 +129,7 @@ class Cursor(object):
         if not self._rows:
             return None
 
-        return self._rows.pop()
+        return self._rows.pop(0)
 
     def fetchmany(self, size=None):
         if size is None:
