@@ -3,7 +3,7 @@ import re
 import six
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
-from sqlalchemy.sql import compiler, expression
+from sqlalchemy.sql import compiler, expression, type_api
 from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
 
 from .. import types
@@ -187,7 +187,8 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
             return 'FixedString(%s)' % type_.length
 
     def visit_array(self, type_, **kw):
-        return "Array(%s)" % self.process(type_.item_type, **kw)
+        item_type = type_api.to_instance(type_.item_type)
+        return "Array(%s)" % self.process(item_type, **kw)
 
     def visit_int8(self, type_, **kw):
         return 'Int8'

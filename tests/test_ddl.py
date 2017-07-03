@@ -28,6 +28,49 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    def test_create_table_nested_types(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            Column('y', types.Array(types.String)),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 '
+            '(x Int32, y Array(String)) '
+            'ENGINE = Memory'
+        )
+
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            Column('y', types.Array(types.Array(types.String))),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 '
+            '(x Int32, y Array(Array(String))) '
+            'ENGINE = Memory'
+        )
+
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            Column('y', types.Array(types.Array(types.String))),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 '
+            '(x Int32, y Array(Array(String))) '
+            'ENGINE = Memory'
+        )
+
     def test_create_table_without_engine(self):
         no_engine_table = Table(
             't1', self.metadata(),
