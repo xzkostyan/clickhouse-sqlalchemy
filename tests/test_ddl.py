@@ -9,9 +9,6 @@ from tests.testcase import BaseTestCase
 
 
 class DDLTestCase(BaseTestCase):
-    def compile(self, clause, **kwargs):
-        return self.strip_spaces.sub('', text_type(self._compile(clause)))
-
     def test_create_table(self):
         table = Table(
             't1', self.metadata(),
