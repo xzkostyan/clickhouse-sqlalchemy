@@ -190,6 +190,10 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         item_type = type_api.to_instance(type_.item_type)
         return "Array(%s)" % self.process(item_type, **kw)
 
+    def visit_nullable(self, type_, **kw):
+        nested_type = type_api.to_instance(type_.nested_type)
+        return "Nullable(%s)" % self.process(nested_type, **kw)
+
     def visit_int8(self, type_, **kw):
         return 'Int8'
 

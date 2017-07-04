@@ -71,6 +71,54 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    def test_create_table_nullable(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            Column('y', types.Nullable(types.String)),
+            Column('z', types.Nullable(types.String(10))),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 '
+            '(x Int32, y Nullable(String), z Nullable(FixedString(10))) '
+            'ENGINE = Memory'
+        )
+
+    def test_create_table_nested_nullable(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            Column('y', types.Array(types.Nullable(types.String))),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 '
+            '(x Int32, y Array(Nullable(String))) '
+            'ENGINE = Memory'
+        )
+
+    def test_create_table_nullable_nested_nullable(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            Column('y', types.Nullable(
+                types.Array(types.Nullable(types.String)))
+            ),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 '
+            '(x Int32, y Nullable(Array(Nullable(String)))) '
+            'ENGINE = Memory'
+        )
+
     def test_create_table_without_engine(self):
         no_engine_table = Table(
             't1', self.metadata(),

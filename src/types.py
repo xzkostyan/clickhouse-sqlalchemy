@@ -21,6 +21,14 @@ class Array(types.TypeEngine):
         super(Array, self).__init__()
 
 
+class Nullable(types.TypeEngine):
+    __visit_name__ = 'nullable'
+
+    def __init__(self, nested_type):
+        self.nested_type = nested_type
+        super(Nullable, self).__init__()
+
+
 class Int8(Int):
     __visit_name__ = 'int8'
 
