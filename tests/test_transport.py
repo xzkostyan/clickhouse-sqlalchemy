@@ -90,3 +90,24 @@ class TransportCase(BaseTestCase):
 
         rv = session.query(*table.c).first()
         self.assertEqual(rv, (date(2012, 10, 25), ))
+
+    @mock.activate
+    def test_parse_nullable_type(self):
+        mock.add(
+            mock.POST, 'http://localhost:8123', status=200,
+            body=(
+                'a\n' +
+                'String\n' +
+                '\\N\n' +
+                '\\\\N\n' +
+                '\n'
+            )
+        )
+
+        table = Table(
+            't1', self.metadata(),
+            Column('a', types.String)
+        )
+
+        rv = session.query(*table.c).all()
+        self.assertEqual(rv, [(None, ), ('\\N', ), ('', )])
