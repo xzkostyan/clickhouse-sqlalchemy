@@ -30,12 +30,12 @@ class SelectTestCase(BaseTestCase):
 
         self.assertEqual(
             self.compile(session.query(func.count(table.c.x))),
-            'SELECT count() AS count_1 FROM t1'
+            'SELECT count(x) AS count_1 FROM t1'
         )
 
         self.assertEqual(
             self.compile(session.query(func.count()).select_from(table)),
-            'SELECT count() AS count_1 FROM t1'
+            'SELECT count(*) AS count_1 FROM t1'
         )
 
     def test_limit(self):
