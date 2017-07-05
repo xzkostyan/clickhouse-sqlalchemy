@@ -93,6 +93,18 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         return text
 
+    def visit_extract(self, extract, **kw):
+        field = self.extract_map.get(extract.field, extract.field)
+        column = self.process(extract.expr, **kw)
+        if field == 'year':
+            return 'toYear(%s)' % column
+        elif field == 'month':
+            return 'toMonth(%s)' % column
+        elif field == 'day':
+            return 'toDayOfMonth(%s)' % column
+        else:
+            return column
+
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def visit_create_column(self, create, **kw):
