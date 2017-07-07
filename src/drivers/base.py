@@ -104,6 +104,64 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         else:
             return column
 
+    def _compose_select_body(
+            self, text, select, inner_columns, froms, byfrom, kwargs):
+        text += ', '.join(inner_columns)
+
+        if froms:
+            text += " \nFROM "
+
+            if select._hints:
+                text += ', '.join(
+                    [f._compiler_dispatch(self, asfrom=True,
+                                          fromhints=byfrom, **kwargs)
+                     for f in froms])
+            else:
+                text += ', '.join(
+                    [f._compiler_dispatch(self, asfrom=True, **kwargs)
+                     for f in froms])
+        else:
+            text += self.default_from()
+
+        if select._whereclause is not None:
+            t = select._whereclause._compiler_dispatch(self, **kwargs)
+            if t:
+                text += " \nWHERE " + t
+
+        if select._group_by_clause.clauses:
+            text += self.group_by_clause(select, **kwargs)
+
+        if select._having is not None:
+            t = select._having._compiler_dispatch(self, **kwargs)
+            if t:
+                text += " \nHAVING " + t
+
+        if select._order_by_clause.clauses:
+            text += self.order_by_clause(select, **kwargs)
+
+        if (select._limit_clause is not None or
+                select._offset_clause is not None):
+            text += self.limit_clause(select, **kwargs)
+
+        if select._for_update_arg is not None:
+            text += self.for_update_clause(select, **kwargs)
+
+        return text
+
+    def group_by_clause(self, select, **kw):
+        text = ""
+
+        group_by = select._group_by_clause._compiler_dispatch(
+            self, **kw)
+
+        if group_by:
+            text = " GROUP BY " + group_by
+
+            if getattr(select, '_with_totals', False):
+                text += " WITH TOTALS"
+
+        return text
+
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def visit_create_column(self, create, **kw):
