@@ -1,6 +1,6 @@
 from sqlalchemy.orm import sessionmaker
 
-from .orm.query import Query
+from .query import Query
 
 
 def make_session(engine):

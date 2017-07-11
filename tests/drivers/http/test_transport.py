@@ -3,8 +3,7 @@ from datetime import date
 from responses import mock
 from sqlalchemy import Column, func
 
-from src import types
-from src.schema import Table
+from src import types, Table
 from tests.session import session
 from tests.testcase import BaseTestCase
 

@@ -1,8 +1,7 @@
 from sqlalchemy import Column, func
 
+from src import types, Table
 from tests.session import session
-from src import types
-from src.schema import Table
 from tests.testcase import BaseTestCase
 
 
@@ -29,4 +28,12 @@ class CountTestCase(BaseTestCase):
         self.assertEqual(
             self.compile(session.query(func.count(func.distinct(table.c.x)))),
             'SELECT count(distinct(x)) AS count_1 FROM t1'
+        )
+
+    def test_count_no_column_specified(self):
+        table = self.create_table()
+
+        self.assertEqual(
+            self.compile(session.query(func.count()).select_from(table)),
+            'SELECT count(*) AS count_1 FROM t1'
         )

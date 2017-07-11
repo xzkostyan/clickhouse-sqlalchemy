@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.dialects import registry
 
-from src.session import make_session
+from src import make_session
 
 
 registry.register("clickhouse", "src.drivers.http.base", "dialect")

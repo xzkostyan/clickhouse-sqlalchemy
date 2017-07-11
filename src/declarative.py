@@ -3,7 +3,7 @@ import re
 import sqlalchemy
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 
-from .schema import Table
+from .sql.schema import Table
 
 
 class ChickHouseDeclarativeMeta(DeclarativeMeta):
