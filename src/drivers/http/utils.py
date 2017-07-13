@@ -6,6 +6,7 @@ def unescape(value):
 
 
 def parse_tsv(line):
-    if line[-1] == '\n':
+    if line and line[-1] == b'\n':
         line = line[:-1]
+
     return [unescape(value) for value in line.split(b'\t')]
