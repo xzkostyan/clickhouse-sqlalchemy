@@ -119,6 +119,8 @@ class Cursor(object):
         self._reset_state()
         self._begin_query()
 
+        settings = context.execution_options.get('settings')
+
         transport = self._connection.transport
         try:
             external_tables = self.make_external_tables(
@@ -126,7 +128,7 @@ class Cursor(object):
             )
             response = transport.execute(
                 operation, with_column_types=True,
-                external_tables=external_tables
+                external_tables=external_tables, settings=settings
             )
 
         except DriverError as orig:
@@ -139,15 +141,16 @@ class Cursor(object):
         self._reset_state()
         self._begin_query()
 
-        transport = self._connection.transport
+        settings = context.execution_options.get('settings')
 
+        transport = self._connection.transport
         try:
             external_tables = self.make_external_tables(
                 context.dialect, context.execution_options
             )
             response = transport.execute(
                 operation, params=seq_of_parameters,
-                external_tables=external_tables
+                external_tables=external_tables, settings=settings
             )
 
         except DriverError as orig:

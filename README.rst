@@ -240,6 +240,20 @@ Currently can be used with native interface.
         print(rv)
 
 
+Overriding default query settings
+---------------------------------
+
+Set lower priority to query and limit max number threads to execute the request.
+
+    .. code-block:: python
+
+        rv = session.query(func.sum(Rate.value)) \
+            .execution_options(settings={'max_threads': 2, 'priority': 10}) \
+            .scalar()
+
+        print(rv)
+
+
 Running tests
 =============
 
