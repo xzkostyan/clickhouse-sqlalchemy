@@ -239,6 +239,12 @@ Currently can be used with native interface.
 
         print(rv)
 
+Supported ClickHouse-specific SQL
+---------------------------------
+
+- ``SELECT`` query:
+    - ``WITH TOTALS``
+
 
 Overriding default query settings
 ---------------------------------

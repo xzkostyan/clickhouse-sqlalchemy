@@ -20,7 +20,7 @@ dialects = [
 
 setup(
     name='clickhouse-sqlalchemy',
-    version='0.0.2',
+    version='0.0.3',
 
     description='Simple ClickHouse SQLAlchemy Dialect',
     long_description=long_description,
@@ -79,7 +79,7 @@ setup(
         'six',
         'sqlalchemy',
         'requests',
-        'clickhouse_driver>=0.0.4'
+        'clickhouse_driver>=0.0.5'
     ],
 
     # Registering `clickhouse` as dialect.
