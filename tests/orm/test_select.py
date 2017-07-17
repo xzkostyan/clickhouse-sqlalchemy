@@ -43,3 +43,17 @@ class SelectTestCase(BaseTestCase):
             session.query(table.c.x).with_totals()
 
         self.assertIn('with_totals', text_type(ex.exception))
+
+    def test_sample(self):
+        table = self.create_table()
+
+        query = session.query(table.c.x).sample(0.1).group_by(table.c.x)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT x AS t1_x FROM t1 SAMPLE %(param_1)s GROUP BY x'
+        )
+
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT x AS t1_x FROM t1 SAMPLE 0.1 GROUP BY x'
+        )

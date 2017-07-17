@@ -123,6 +123,11 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         else:
             text += self.default_from()
 
+        sample_clause = getattr(select, '_sample_clause', None)
+
+        if sample_clause is not None:
+            text += self.sample_clause(select, **kwargs)
+
         if select._whereclause is not None:
             t = select._whereclause._compiler_dispatch(self, **kwargs)
             if t:
@@ -147,6 +152,9 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             text += self.for_update_clause(select, **kwargs)
 
         return text
+
+    def sample_clause(self, select, **kw):
+        return " \nSAMPLE " + self.process(select._sample_clause, **kw)
 
     def group_by_clause(self, select, **kw):
         text = ""

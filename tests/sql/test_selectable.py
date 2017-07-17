@@ -27,3 +27,17 @@ class SelectTestCase(BaseTestCase):
             self.compile(query),
             'SELECT x FROM t1 GROUP BY x WITH TOTALS'
         )
+
+    def test_sample(self):
+        table = self.create_table()
+
+        query = select([table.c.x]).sample(0.1).group_by(table.c.x)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT x FROM t1 SAMPLE %(param_1)s GROUP BY x'
+        )
+
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT x FROM t1 SAMPLE 0.1 GROUP BY x'
+        )
