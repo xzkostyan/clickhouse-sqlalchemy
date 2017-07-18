@@ -1,7 +1,7 @@
 from sqlalchemy import exc
 from sqlalchemy.orm.query import Query as BaseQuery
 
-from ..clauses import sample_clause
+from ..ext.clauses import sample_clause
 
 
 class Query(BaseQuery):

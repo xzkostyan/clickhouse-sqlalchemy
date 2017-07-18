@@ -1,6 +1,6 @@
 from sqlalchemy.sql.selectable import Select as StandardSelect
 
-from ..clauses import sample_clause
+from ..ext.clauses import sample_clause
 
 
 __all__ = ('Select', 'select')
