@@ -140,7 +140,7 @@ class Buffer(Engine):
                  min_time=10, max_time=100, min_rows=10000, max_rows=1000000,
                  min_bytes=10000000, max_bytes=100000000):
         self.database = database
-        self.table = table
+        self.table_name = table
         self.num_layers = num_layers
         self.min_time = min_time
         self.max_time = max_time
@@ -153,7 +153,7 @@ class Buffer(Engine):
     def get_params(self):
         return [
             self.database,
-            self.table.name,
+            self.table_name,
             self.num_layers,
             self.min_time,
             self.max_time,

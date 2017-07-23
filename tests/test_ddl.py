@@ -4,6 +4,7 @@ from sqlalchemy.sql.ddl import CreateTable
 from src import types, engines, Table
 from src.sql.ddl import DropTable
 from tests.testcase import BaseTestCase
+from tests.session import mocked_engine
 
 
 class DDLTestCase(BaseTestCase):
@@ -114,7 +115,7 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
-    def test_drop_table(self):
+    def test_drop_table_clause(self):
         table = Table(
             't1', self.metadata(),
             Column('x', types.Int32, primary_key=True)
@@ -128,3 +129,13 @@ class DDLTestCase(BaseTestCase):
             self.compile(DropTable(table, if_exists=True)),
             'DROP TABLE IF EXISTS t1'
         )
+
+    def test_table_drop(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32, primary_key=True)
+        )
+
+        with mocked_engine() as engine:
+            table.drop(if_exists=True)
+            engine.assert_sql(['DROP TABLE IF EXISTS t1'])

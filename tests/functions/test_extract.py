@@ -34,3 +34,9 @@ class ExtractTestCase(BaseTestCase):
             self.compile(extract('day', get_date_column('x'))),
             'toDayOfMonth(x)'
         )
+
+    def test_extract_unknown(self):
+        self.assertEqual(
+            self.compile(extract('test', get_date_column('x'))),
+            'x'
+        )

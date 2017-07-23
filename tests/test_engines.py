@@ -61,7 +61,7 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             ')'
         )
 
-    def test_index_granularity(self):
+    def test_merge_tree_index_granularity(self):
         base = get_declarative_base()
 
         class TestTable(base):
@@ -90,3 +90,61 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             self.compile(CreateTable(no_engine_table))
 
         self.assertEqual(text_type(ex.exception), "No engine for table 't1'")
+
+    def test_collapsing_merge_tree(self):
+        base = get_declarative_base()
+
+        class TestTable(base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+            sign = Column(types.Int8)
+
+            __table_args__ = (
+                engines.CollapsingMergeTree(date, (date, x), sign),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table '
+            '(date Date, x Int32, y String, sign Int8) '
+            'ENGINE = CollapsingMergeTree(date, (date, x), 8192, sign)'
+        )
+
+    def test_summing_merge_tree(self):
+        base = get_declarative_base()
+
+        class TestTable(base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.Int32)
+
+            __table_args__ = (
+                engines.SummingMergeTree(date, (date, x), (y, )),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table (date Date, x Int32, y Int32) '
+            'ENGINE = SummingMergeTree(date, (date, x), 8192, (y))'
+        )
+
+    def test_buffer(self):
+        base = get_declarative_base()
+
+        class TestTable(base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+
+            __table_args__ = (
+                engines.Buffer('db', 'table'),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            "CREATE TABLE test_table (date Date, x Int32, y String) "
+            "ENGINE = Buffer("
+            "db, table, 16, 10, 100, 10000, 1000000, 10000000, 100000000"
+            ")"
+        )

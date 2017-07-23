@@ -1,6 +1,10 @@
+from decimal import Decimal
+from datetime import date
+
 from six import text_type
 from sqlalchemy import literal
 
+from src.drivers.escaper import Escaper
 from tests.session import session
 from tests.testcase import BaseTestCase
 
@@ -14,4 +18,22 @@ class EscapingTestCase(BaseTestCase):
             self.compile(session.query(literal('\t')), literal_binds=True),
             "SELECT '\t' AS param_1"
         )
-    # TODO: test escaping \t, etc.
+
+    def test_escaper(self):
+        e = Escaper()
+        self.assertEqual(e.escape([None]), ['NULL'])
+        self.assertEqual(e.escape([[123]]), [[123]])
+        self.assertEqual(e.escape({'x': 'str'}), {'x': "'str'"})
+        self.assertEqual(e.escape([Decimal('10')]), [10.0])
+        self.assertEqual(e.escape([10.0]), [10.0])
+        self.assertEqual(e.escape([date(2017, 1, 2)]), ["'2017-01-02'"])
+
+        with self.assertRaises(Exception) as ex:
+            e.escape([object()])
+
+        self.assertIn('Unsupported object', text_type(ex.exception))
+
+        with self.assertRaises(Exception) as ex:
+            e.escape('str')
+
+        self.assertIn('Unsupported param format', text_type(ex.exception))

@@ -10,9 +10,10 @@ from tests.session import session
 
 class BaseTestCase(TestCase):
     strip_spaces = re.compile(r'[\n\t]')
+    session = session
 
     def metadata(self):
-        return MetaData(bind=session.bind)
+        return MetaData(bind=self.session.bind)
 
     def _compile(self, clause, bind=session.bind, literal_binds=False):
         if isinstance(clause, Query):

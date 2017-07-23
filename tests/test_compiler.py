@@ -41,6 +41,6 @@ class VisitTestCase(BaseTestCase):
         MyEnum = enum.Enum('MyEnum', data)
 
         self.assertEqual(
-            self.compile(types.Enum16(MyEnum)),
-            "Enum16(' \\' t = ' = 1, 'test' = 2)"
+            self.compile(types.Enum8(MyEnum)),
+            "Enum8(' \\' t = ' = 1, 'test' = 2)"
         )
