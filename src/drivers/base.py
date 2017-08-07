@@ -170,6 +170,21 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         return text
 
+    def visit_join(self, join, asfrom=False, **kwargs):
+        """ full here is all if True or any if False """
+        prefix = "ALL" if join.full else "ANY"
+        if not join.isouter:
+            join_type = "INNER JOIN"
+        else:
+            join_type = "LEFT JOIN"
+        return ' '.join(
+            (self.process(join.left, asfrom=True, **kwargs),
+             prefix,
+             join_type,
+             self.process(join.right, asfrom=True, **kwargs),
+             "USING", join.onclause.left.name
+             ))
+
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def visit_create_column(self, create, **kw):
@@ -305,6 +320,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_enum16(self, type_, **kw):
         return self._render_enum('Enum16', type_, **kw)
+
+    def visit_DATETIME(self, type_, **kw):
+        return 'DateTime'
 
 
 class ClickHouseExecutionContextBase(default.DefaultExecutionContext):
