@@ -18,7 +18,8 @@ converters = {
     'UInt64': int,
     'Float32': float,
     'Float64': float,
-    'Date': lambda x: datetime.strptime(x, '%Y-%m-%d').date()
+    'Date': lambda x: datetime.strptime(x, '%Y-%m-%d').date(),
+    'DateTime': lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'),
 }
 
 
