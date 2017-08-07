@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 import six
@@ -38,14 +38,24 @@ class Escaper(object):
     def escape_date(self, item):
         return self.escape_string(item.strftime('%Y-%m-%d'))
 
+    def escape_datetime(self, item):
+        return self.escape_string(item.strftime('%Y-%m-%d %H:%M:%S'))
+
     def escape_decimal(self, item):
         return float(item)
+
+    def escape_bool(self, item):
+        return '1' if item else '0'
 
     def escape_item(self, item):
         if item is None:
             return 'NULL'
+        elif isinstance(item, bool):
+            return self.escape_bool(item)
         elif isinstance(item, self.number_types):
             return self.escape_number(item)
+        elif isinstance(item, datetime):
+            return self.escape_datetime(item)
         elif isinstance(item, date):
             return self.escape_date(item)
         elif isinstance(item, Decimal):
