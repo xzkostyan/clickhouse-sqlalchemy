@@ -4,6 +4,8 @@ from sqlalchemy.sql.base import SchemaEventTarget
 from sqlalchemy.sql.schema import ColumnCollectionMixin, SchemaItem
 from sqlalchemy.sql.visitors import Visitable
 
+from .drivers.escaper import Escaper
+
 
 class Engine(SchemaEventTarget, Visitable):
     __visit_name__ = 'engine'
@@ -167,3 +169,13 @@ class Buffer(Engine):
 class Memory(Engine):
     def get_params(self):
         return []
+
+
+class Merge(Engine):
+
+    def __init__(self, db, regexp):
+        self.db = db
+        self.regexp = regexp
+
+    def get_params(self):
+        return [self.db, Escaper().escape_string(self.regexp)]
