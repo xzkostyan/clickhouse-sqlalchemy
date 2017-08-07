@@ -20,6 +20,9 @@ class Escaper(object):
         "'": "\\'"
     }
 
+    def __init__(self, tz=None):
+        self.tz = tz
+
     def escape_string(self, value):
         value = ''.join(self.escape_chars.get(c, c) for c in value)
         return "'" + value + "'"
@@ -39,6 +42,8 @@ class Escaper(object):
         return self.escape_string(item.strftime('%Y-%m-%d'))
 
     def escape_datetime(self, item):
+        if item.utcoffset() is not None and self.tz:
+            item = item.astimezone(self.tz)
         return self.escape_string(item.strftime('%Y-%m-%d %H:%M:%S'))
 
     def escape_decimal(self, item):

@@ -24,11 +24,14 @@ converters = {
 
 class RequestsTransport(object):
     def __init__(self, db_url, db_name, username, password, timeout=None,
-                 **kwargs):
+                 tz=None, **kwargs):
         self.db_url = db_url
         self.db_name = db_name
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
+        if tz:
+            import pytz  # TODO: maybe no additioanal requirements?
+            self.tz = pytz.timezone(tz)
         super(RequestsTransport, self).__init__()
 
     def execute(self, query, params=None):

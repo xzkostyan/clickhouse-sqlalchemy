@@ -63,12 +63,11 @@ class Cursor(object):
 
     _states = States()
 
-    _params_escaper = Escaper()
-
     def __init__(self, connection):
         self._connection = connection
         self._reset_state()
         self._arraysize = 1
+        self._params_escaper = Escaper(tz=getattr(connection.transport, 'tz', None))
         super(Cursor, self).__init__()
 
     @property
