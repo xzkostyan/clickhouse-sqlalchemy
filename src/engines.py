@@ -6,6 +6,7 @@ from sqlalchemy.sql.visitors import Visitable
 
 from .drivers.escaper import Escaper
 
+escaper = Escaper()
 
 class Engine(SchemaEventTarget, Visitable):
     __visit_name__ = 'engine'
@@ -54,7 +55,7 @@ class KeysExpressionOrColumn(ColumnCollectionMixin, SchemaItem):
 
 class MergeTree(Engine):
     def __init__(self, date_col, key_expressions, sampling=None,
-                 index_granularity=None):
+                 index_granularity=None, replica_name=None, replica_table_path=None):
         self.date_col = TableCol(date_col)
         self.key_cols = KeysExpressionOrColumn(*key_expressions)
 
@@ -65,6 +66,11 @@ class MergeTree(Engine):
             self.sampling = KeysExpressionOrColumn(sampling)
         if index_granularity is not None:
             self.index_granularity = index_granularity
+
+        self.replica_name = replica_name
+        self.replica_table_path = replica_table_path
+        if replica_table_path and not replica_name or (not replica_table_path and replica_name):
+            raise Exception("Need both or no one [replica_path, replica_name]")
 
         super(MergeTree, self).__init__()
 
@@ -78,9 +84,11 @@ class MergeTree(Engine):
             self.sampling._set_parent(table)
 
     def get_params(self):
-        params = [
-            self.date_col.get_column()
-        ]
+        params = []
+        if self.replica_name:
+            params.extend(map(escaper.escape_string, [self.replica_table_path, self.replica_name]))
+
+        params.append(self.date_col.get_column())
 
         if self.sampling:
             params.append(self.sampling.get_expressions_or_columns()[0])
@@ -88,6 +96,9 @@ class MergeTree(Engine):
         params.append(tuple(self.key_cols.get_expressions_or_columns()))
         params.append(self.index_granularity)
         return params
+
+    def name(self):
+        return ("Replicated" if self.replica_name else "") + self.__class__.__name__
 
 
 class CollapsingMergeTree(MergeTree):
@@ -178,4 +189,4 @@ class Merge(Engine):
         self.regexp = regexp
 
     def get_params(self):
-        return [self.db, Escaper().escape_string(self.regexp)]
+        return [self.db, escaper.escape_string(self.regexp)]
