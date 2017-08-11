@@ -18,8 +18,10 @@ converters = {
     'UInt64': int,
     'Float32': float,
     'Float64': float,
-    'Date': lambda x: datetime.strptime(x, '%Y-%m-%d').date(),
-    'DateTime': lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'),
+    'Date': lambda x: datetime.strptime(
+        x.replace("0000-00-00", "1970-01-01"), '%Y-%m-%d').date(),
+    'DateTime': lambda x: datetime.strptime(
+        x.replace("0000-00-00", "1970-01-01"), '%Y-%m-%d %H:%M:%S'),
 }
 
 
@@ -50,6 +52,8 @@ class RequestsTransport(object):
         yield types
 
         for line in lines:
+            if line == "":  # TODO: separator for total row
+                continue    # total is latest row, maybe somehow standalone?
             yield [
                 (converter(x) if converter else x)
                 for x, converter in zip(parse_tsv(line), convs)
@@ -72,6 +76,7 @@ class RequestsTransport(object):
         params['database'] = self.db_name
 
         # TODO: retries, prepared requests
+
         r = requests.post(
             self.db_url, auth=self.auth, params=params, data=data,
             stream=stream, timeout=self.timeout
