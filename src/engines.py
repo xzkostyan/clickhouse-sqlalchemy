@@ -1,4 +1,4 @@
-from sqlalchemy import util
+from sqlalchemy import util, literal
 from sqlalchemy.sql import ClauseElement
 from sqlalchemy.sql.base import SchemaEventTarget
 from sqlalchemy.sql.schema import ColumnCollectionMixin, SchemaItem
@@ -88,6 +88,25 @@ class MergeTree(Engine):
         return params
 
 
+class AggregatingMergeTree(MergeTree):
+    pass
+
+
+class GraphiteMergeTree(MergeTree):
+    def __init__(self, date_col, key_expressions, config_name, sampling=None,
+                 index_granularity=None):
+        super(GraphiteMergeTree, self).__init__(
+            date_col, key_expressions, sampling=sampling,
+            index_granularity=index_granularity
+        )
+        self.config_name = config_name
+
+    def get_params(self):
+        params = super(GraphiteMergeTree, self).get_params()
+        params.append(literal(self.config_name))
+        return params
+
+
 class CollapsingMergeTree(MergeTree):
     def __init__(self, date_col, key_expressions, sign_col, sampling=None,
                  index_granularity=None):
@@ -135,6 +154,122 @@ class SummingMergeTree(MergeTree):
         return params
 
 
+class ReplacingMergeTree(MergeTree):
+    def __init__(self, date_col, key_expressions, version_col=None,
+                 sampling=None, index_granularity=None):
+        super(ReplacingMergeTree, self).__init__(
+            date_col, key_expressions, sampling=sampling,
+            index_granularity=index_granularity
+        )
+
+        self.version_col = None
+        if version_col:
+            self.version_col = TableCol(version_col)
+
+    def _set_parent(self, table):
+        super(ReplacingMergeTree, self)._set_parent(table)
+
+        if self.version_col:
+            self.version_col._set_parent(table)
+
+    def get_params(self):
+        params = super(ReplacingMergeTree, self).get_params()
+        if self.version_col:
+            params.append(self.version_col.get_column())
+        return params
+
+
+class Distributed(Engine):
+    def __init__(self, logs, default, hits, sharding_key=None):
+        self.logs = logs
+        self.default = default
+        self.hits = hits
+        self.sharding_key = sharding_key
+        super(Distributed, self).__init__()
+
+    def get_params(self):
+        params = [
+            self.logs,
+            self.default,
+            self.hits
+        ]
+
+        if self.sharding_key is not None:
+            params.append(self.sharding_key)
+
+        return params
+
+
+class ReplicatedEngineMixin(object):
+    def __init__(self, table_path, replica_name):
+        self.table_path = literal(table_path)
+        self.replica_name = literal(replica_name)
+
+    def get_params(self):
+        return [
+            self.table_path,
+            self.replica_name
+        ]
+
+
+class ReplicatedMergeTree(ReplicatedEngineMixin, MergeTree):
+    def __init__(self, table_path, replica_name,
+                 date_col, key_expressions, sampling=None,
+                 index_granularity=None):
+        ReplicatedEngineMixin.__init__(self, table_path, replica_name)
+        MergeTree.__init__(
+            self, date_col, key_expressions, sampling=sampling,
+            index_granularity=index_granularity)
+
+    def get_params(self):
+        return ReplicatedEngineMixin.get_params(self) + \
+            MergeTree.get_params(self)
+
+
+class ReplicatedCollapsingMergeTree(ReplicatedEngineMixin,
+                                    CollapsingMergeTree):
+    def __init__(self, table_path, replica_name,
+                 date_col, key_expressions, sign_col, sampling=None,
+                 index_granularity=None):
+        ReplicatedEngineMixin.__init__(self, table_path, replica_name)
+        CollapsingMergeTree.__init__(
+            self, date_col, key_expressions, sign_col, sampling=sampling,
+            index_granularity=index_granularity)
+
+    def get_params(self):
+        return ReplicatedEngineMixin.get_params(self) + \
+            CollapsingMergeTree.get_params(self)
+
+
+class ReplicatedAggregatingMergeTree(ReplicatedEngineMixin,
+                                     AggregatingMergeTree):
+    def __init__(self, table_path, replica_name,
+                 date_col, key_expressions, sampling=None,
+                 index_granularity=None):
+        ReplicatedEngineMixin.__init__(self, table_path, replica_name)
+        AggregatingMergeTree.__init__(
+            self, date_col, key_expressions, sampling=sampling,
+            index_granularity=index_granularity)
+
+    def get_params(self):
+        return ReplicatedEngineMixin.get_params(self) + \
+            AggregatingMergeTree.get_params(self)
+
+
+class ReplicatedSummingMergeTree(ReplicatedEngineMixin, SummingMergeTree):
+    def __init__(self, table_path, replica_name,
+                 date_col, key_expressions, summing_cols=None,
+                 sampling=None, index_granularity=None):
+        ReplicatedEngineMixin.__init__(self, table_path, replica_name)
+        SummingMergeTree.__init__(
+            self, date_col, key_expressions, summing_cols=summing_cols,
+            sampling=sampling, index_granularity=index_granularity)
+
+    def get_params(self):
+        return ReplicatedEngineMixin.get_params(self) + \
+            SummingMergeTree.get_params(self)
+
+
 class Buffer(Engine):
     def __init__(self, database, table, num_layers=16,
                  min_time=10, max_time=100, min_rows=10000, max_rows=1000000,
@@ -164,6 +299,22 @@ class Buffer(Engine):
         ]
 
 
-class Memory(Engine):
+class _NoParamsEngine(Engine):
     def get_params(self):
         return []
+
+
+class TinyLog(_NoParamsEngine):
+    pass
+
+
+class Log(_NoParamsEngine):
+    pass
+
+
+class Memory(_NoParamsEngine):
+    pass
+
+
+class Null(_NoParamsEngine):
+    pass
