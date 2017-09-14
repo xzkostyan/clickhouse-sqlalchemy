@@ -27,7 +27,10 @@ class RequestsTransport(object):
                  **kwargs):
         self.db_url = db_url
         self.db_name = db_name
-        self.auth = (username, password)
+        if username and password:
+            self.auth = (username, password)
+        else:
+            self.auth = None
         self.timeout = float(timeout) if timeout is not None else None
         super(RequestsTransport, self).__init__()
 
