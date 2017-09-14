@@ -73,6 +73,9 @@ class Date(types.Date):
     __visit_name__ = 'date'
 
 
+class DateTime(types.DateTime):
+    __visit_name__ = 'datetime'
+
 class Enum8(types.Enum):
     __visit_name__ = 'enum8'
 
