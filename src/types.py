@@ -1,3 +1,4 @@
+from sqlalchemy.sql.type_api import to_instance
 from sqlalchemy import types
 
 
@@ -18,7 +19,20 @@ class Array(types.TypeEngine):
 
     def __init__(self, item_type):
         self.item_type = item_type
+        self.item_type_impl = to_instance(item_type)
         super(Array, self).__init__()
+
+    def literal_processor(self, dialect):
+        item_processor = self.item_type_impl.literal_processor(dialect)
+
+        def process(value):
+            processed_value = []
+            for x in value:
+                if item_processor:
+                    x = item_processor(x)
+                processed_value.append(x)
+            return '[' + ', '.join(processed_value) + ']'
+        return process
 
 
 class Nullable(types.TypeEngine):

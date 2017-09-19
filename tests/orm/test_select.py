@@ -1,7 +1,8 @@
 from six import text_type
-from sqlalchemy import Column, exc
+from sqlalchemy import Column, exc, func, literal
 
 from src import types, Table
+from src.ext.clauses import Lambda
 from tests.session import session
 from tests.testcase import BaseTestCase
 
@@ -56,4 +57,18 @@ class SelectTestCase(BaseTestCase):
         self.assertEqual(
             self.compile(query, literal_binds=True),
             'SELECT x AS t1_x FROM t1 SAMPLE 0.1 GROUP BY x'
+        )
+
+    def test_lambda_functions(self):
+        query = session.query(
+            func.arrayFilter(
+                Lambda(lambda x: x.like('%World%')),
+                literal(['Hello', 'abc World'], types.Array(types.String))
+            ).label('test')
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            "SELECT arrayFilter("
+            "x -> x LIKE '%World%', ['Hello', 'abc World']"
+            ") AS test"
         )

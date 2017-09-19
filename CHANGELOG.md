@@ -8,6 +8,7 @@
 ReplicatedCollapsingMergeTree, ReplicatedAggregatingMergeTree, ReplicatedSummingMergeTree. Distributed,
 Log, TinyLog, Null.
 - Changelog.
+- Lambda functions generation.
 
 ## [0.0.3] - 2017-07-16
 ### Added

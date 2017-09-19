@@ -3,8 +3,9 @@ import re
 import six
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
-from sqlalchemy.sql import compiler, expression, type_api
+from sqlalchemy.sql import compiler, expression, type_api, literal_column
 from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
+from sqlalchemy.util import inspect_getargspec
 
 from .. import types
 
@@ -89,6 +90,23 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         else:
             if select._offset_clause is not None:
                 raise exc.CompileError('OFFSET without LIMIT is not supported')
+
+        return text
+
+    def visit_lambda(self, lambda_, **kw):
+        func = lambda_.func
+        spec = inspect_getargspec(func)
+
+        if spec.varargs:
+            raise exc.CompileError('Lambdas with *args are not supported')
+
+        if spec.keywords:
+            raise exc.CompileError('Lambdas with **kwargs are not supported')
+
+        text = ', '.join(spec.args) + ' -> '
+
+        args = [literal_column(arg) for arg in spec.args]
+        text += self.process(func(*args), **kw)
 
         return text
 
