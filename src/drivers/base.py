@@ -4,7 +4,7 @@ import six
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import compiler, expression, type_api
-from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
+from sqlalchemy.types import DATE, INTEGER, VARCHAR, FLOAT
 
 from .. import types
 

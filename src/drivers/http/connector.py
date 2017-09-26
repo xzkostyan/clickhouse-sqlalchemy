@@ -93,7 +93,8 @@ class Cursor(object):
         raw_sql = operation
 
         if parameters is not None:
-            raw_sql = raw_sql % self._params_escaper.escape(parameters)
+            raw_sql = raw_sql % self.parameters_to_string(
+                self._params_escaper.escape(parameters))
 
         self._reset_state()
         self._begin_query()
@@ -109,10 +110,21 @@ class Cursor(object):
         index = operation.index('VALUES') + 7
         values_tpl = operation[index:]
         params = ', '.join(
-            values_tpl % self._params_escaper.escape(params)
+            values_tpl % self.parameters_to_string(
+                self._params_escaper.escape(params))
             for params in seq_of_parameters
         )
         self.execute(operation[:index] + params)
+
+    def parameters_to_string(self, parameters):
+        res = {}
+        for k, v in parameters.items():
+            if isinstance(v, (list, tuple)):
+                res[k] = '[' + ', '.join(v) + ']'
+            else:
+                res[k] = str(v)
+
+        return res
 
     def fetchone(self):
         if self._state == self._states.NONE:

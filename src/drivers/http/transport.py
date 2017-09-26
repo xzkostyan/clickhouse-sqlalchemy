@@ -18,8 +18,16 @@ converters = {
     'UInt64': int,
     'Float32': float,
     'Float64': float,
-    'Date': lambda x: datetime.strptime(x, '%Y-%m-%d').date()
+    'Date': lambda x: datetime.strptime(x, '%Y-%m-%d').date(),
+    'DateTime': lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
 }
+
+
+def strip_first_and_last(value):
+    if ((value.startswith("'") and value.endswith("'")) or
+            (value.startswith('[') and value.endswith(']'))):
+        return value[1:-1]
+    return value
 
 
 class RequestsTransport(object):
@@ -34,6 +42,16 @@ class RequestsTransport(object):
         self.timeout = float(timeout) if timeout is not None else None
         super(RequestsTransport, self).__init__()
 
+    def convert_type(self, value, db_type):
+        if db_type.lower().startswith('array'):
+            inner_type = db_type[6:-1]
+            return [self.convert_type(strip_first_and_last(item.strip()), inner_type)  # noqa
+                    for item in strip_first_and_last(value).split(',')]
+        converter = converters.get(db_type)
+        if converter:
+            return converter(value)
+        return value
+
     def execute(self, query, params=None):
         """
         Query is returning rows and these rows should be parsed or
@@ -43,15 +61,14 @@ class RequestsTransport(object):
         lines = r.iter_lines()
         names = parse_tsv(next(lines))
         types = parse_tsv(next(lines))
-        convs = [converters.get(type_) for type_ in types]
 
         yield names
         yield types
 
         for line in lines:
             yield [
-                (converter(x) if converter else x)
-                for x, converter in zip(parse_tsv(line), convs)
+                self.convert_type(column, db_type)
+                for column, db_type in zip(parse_tsv(line), types)
             ]
 
     def raw(self, query, params=None, stream=False):
