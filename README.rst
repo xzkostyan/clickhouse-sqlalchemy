@@ -247,6 +247,10 @@ Supported ClickHouse-specific SQL
 
 - ``SELECT`` query:
     - ``WITH TOTALS``
+    - ``SAMPLE``
+    - lambda functions: ``x -> expr``
+
+See `tests <https://github.com/xzkostyan/clickhouse-sqlalchemy/tree/master/tests>`_ for examples.
 
 
 Overriding default query settings
