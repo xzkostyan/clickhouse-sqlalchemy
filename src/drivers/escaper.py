@@ -1,13 +1,13 @@
 from datetime import date
 from decimal import Decimal
 
-import six
+from ..util import compat
 
 
 class Escaper(object):
 
-    number_types = six.integer_types + (float, )
-    string_types = six.string_types
+    number_types = compat.integer_types + (float, )
+    string_types = compat.string_types
 
     escape_chars = {
         "\b": "\\b",

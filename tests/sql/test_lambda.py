@@ -1,5 +1,3 @@
-from six import text_type
-
 from sqlalchemy import exc
 
 from src.ext.clauses import Lambda
@@ -11,14 +9,14 @@ class LabmdaTestCase(BaseTestCase):
         with self.assertRaises(exc.ArgumentError) as ex:
             self.compile(Lambda(1))
 
-        self.assertEqual(text_type(ex.exception), 'func must be callable')
+        self.assertEqual(str(ex.exception), 'func must be callable')
 
     def test_lambda_no_arg_kwargs(self):
         with self.assertRaises(exc.CompileError) as ex:
             self.compile(Lambda(lambda x, *args: x * 2))
 
         self.assertEqual(
-            text_type(ex.exception),
+            str(ex.exception),
             'Lambdas with *args are not supported'
         )
 
@@ -26,7 +24,7 @@ class LabmdaTestCase(BaseTestCase):
             self.compile(Lambda(lambda x, **kwargs: x * 2))
 
         self.assertEqual(
-            text_type(ex.exception),
+            str(ex.exception),
             'Lambdas with **kwargs are not supported'
         )
 

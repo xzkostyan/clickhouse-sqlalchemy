@@ -1,4 +1,3 @@
-from six import text_type
 from sqlalchemy import literal, exc, case
 
 from tests.testcase import BaseTestCase
@@ -10,7 +9,7 @@ class CaseTestCase(BaseTestCase):
             self.compile(case([(literal(1), 0)]))
 
         self.assertEqual(
-            text_type(ex.exception),
+            str(ex.exception),
             'ELSE clause is required in CASE'
         )
 

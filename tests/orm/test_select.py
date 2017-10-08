@@ -1,4 +1,3 @@
-from six import text_type
 from sqlalchemy import Column, exc, func, literal
 
 from src import types, Table
@@ -43,7 +42,7 @@ class SelectTestCase(BaseTestCase):
         with self.assertRaises(exc.InvalidRequestError) as ex:
             session.query(table.c.x).with_totals()
 
-        self.assertIn('with_totals', text_type(ex.exception))
+        self.assertIn('with_totals', str(ex.exception))
 
     def test_sample(self):
         table = self.create_table()

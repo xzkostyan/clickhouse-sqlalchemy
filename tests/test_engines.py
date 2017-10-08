@@ -1,4 +1,3 @@
-from six import text_type
 from sqlalchemy import Column, func, exc
 from sqlalchemy.sql.ddl import CreateTable
 
@@ -87,7 +86,7 @@ class EnginesDeclarativeTestCase(BaseTestCase):
         with self.assertRaises(exc.CompileError) as ex:
             self.compile(CreateTable(no_engine_table))
 
-        self.assertEqual(text_type(ex.exception), "No engine for table 't1'")
+        self.assertEqual(str(ex.exception), "No engine for table 't1'")
 
     def test_collapsing_merge_tree(self):
         class TestTable(self.base):

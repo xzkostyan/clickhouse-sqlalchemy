@@ -1,7 +1,6 @@
 from decimal import Decimal
 from datetime import date
 
-from six import text_type
 from sqlalchemy import literal
 
 from src.drivers.escaper import Escaper
@@ -11,7 +10,7 @@ from tests.testcase import BaseTestCase
 
 class EscapingTestCase(BaseTestCase):
     def compile(self, clause, **kwargs):
-        return text_type(self._compile(clause, **kwargs))
+        return str(self._compile(clause, **kwargs))
 
     def test_select_escaping(self):
         self.assertEqual(
@@ -31,9 +30,9 @@ class EscapingTestCase(BaseTestCase):
         with self.assertRaises(Exception) as ex:
             e.escape([object()])
 
-        self.assertIn('Unsupported object', text_type(ex.exception))
+        self.assertIn('Unsupported object', str(ex.exception))
 
         with self.assertRaises(Exception) as ex:
             e.escape('str')
 
-        self.assertIn('Unsupported param format', text_type(ex.exception))
+        self.assertIn('Unsupported param format', str(ex.exception))

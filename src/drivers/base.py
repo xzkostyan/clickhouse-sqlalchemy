@@ -1,6 +1,5 @@
 import re
 
-import six
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import compiler, expression, type_api, literal_column
@@ -8,6 +7,7 @@ from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
 from sqlalchemy.util import inspect_getargspec
 
 from .. import types
+from ..util import compat
 
 
 # Column spec
@@ -215,7 +215,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             if not isinstance(expr, expression.ColumnClause):
                 if not hasattr(expr, 'self_group'):
                     # assuming base type (int, string, etc.)
-                    return six.text_type(expr)
+                    return compat.text_type(expr)
                 else:
                     expr = expr.self_group()
             return compiler.process(

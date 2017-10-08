@@ -1,4 +1,3 @@
-from six import text_type
 from sqlalchemy import Column, exc
 
 from src import types, Table
@@ -47,6 +46,6 @@ class LimitTestCase(BaseTestCase):
             self.compile(query, literal_binds=True)
 
         self.assertEqual(
-            text_type(ex.exception),
+            str(ex.exception),
             'OFFSET without LIMIT is not supported'
         )

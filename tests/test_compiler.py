@@ -1,8 +1,8 @@
 import enum
-import six
 from sqlalchemy import sql
 
 from src import types
+from src.util import compat
 from tests.testcase import BaseTestCase
 
 
@@ -32,7 +32,7 @@ class VisitTestCase(BaseTestCase):
             "Enum16('foo' = 100, 'bar' = 500)"
         )
 
-        if six.PY3:
+        if compat.PY3:
             data = [" ' t = ", "test"]
         else:
             from collections import OrderedDict

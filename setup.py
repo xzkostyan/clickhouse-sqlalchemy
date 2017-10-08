@@ -76,7 +76,6 @@ setup(
         'clickhouse_sqlalchemy': 'src',
     },
     install_requires=[
-        'six',
         'sqlalchemy',
         'requests',
         'clickhouse_driver>=0.0.5'
