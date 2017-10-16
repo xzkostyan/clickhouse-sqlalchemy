@@ -1,4 +1,4 @@
-from uuid import uuid1
+from uuid import uuid4
 
 from ..escaper import Escaper
 from .transport import RequestsTransport
@@ -212,7 +212,8 @@ class Cursor(object):
 
     def _begin_query(self):
         self._state = self._states.RUNNING
-        self._query_id = uuid1()
+        # do not use uuid1 - there was troubles with python3 + run_in_executor
+        self._query_id = uuid4()
 
     def _end_query(self):
         self._state = self._states.FINISHED
