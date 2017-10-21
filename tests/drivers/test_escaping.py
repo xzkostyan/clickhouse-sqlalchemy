@@ -1,20 +1,22 @@
 from decimal import Decimal
 from datetime import date
 
-from sqlalchemy import literal
+from sqlalchemy import Column, literal
 
+from src import types, engines, Table
 from src.drivers.escaper import Escaper
 from tests.session import session
 from tests.testcase import BaseTestCase
 
 
 class EscapingTestCase(BaseTestCase):
-    def compile(self, clause, **kwargs):
+    def escaped_compile(self, clause, **kwargs):
         return str(self._compile(clause, **kwargs))
 
     def test_select_escaping(self):
+        query = session.query(literal('\t'))
         self.assertEqual(
-            self.compile(session.query(literal('\t')), literal_binds=True),
+            self.escaped_compile(query, literal_binds=True),
             "SELECT '\t' AS param_1"
         )
 
@@ -36,3 +38,22 @@ class EscapingTestCase(BaseTestCase):
             e.escape('str')
 
         self.assertIn('Unsupported param format', str(ex.exception))
+
+    def test_escape_binary_mod(self):
+        query = session.query(literal(1) % literal(2))
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT 1 %% 2 AS anon_1'
+        )
+
+        table = Table(
+            't', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            engines.Memory()
+        )
+
+        query = session.query(table.c.x % table.c.x)
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT x %% x AS anon_1 FROM t'
+        )

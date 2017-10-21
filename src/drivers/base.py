@@ -37,15 +37,19 @@ ischema_names = {
 
 
 class ClickHouseIdentifierPreparer(compiler.IdentifierPreparer):
-    def quote_identifier(self, value):
-        # Never quote identifiers.
-        return self._escape_identifier(value)
-
-    def quote(self, ident, force=None):
-        return ident
+    def _escape_identifier(self, value):
+        value = value.replace(self.escape_quote, self.escape_to_quote)
+        return value.replace('%', '%%')
 
 
 class ClickHouseCompiler(compiler.SQLCompiler):
+    def visit_mod_binary(self, binary, operator, **kw):
+        return self.process(binary.left, **kw) + " %% " + \
+            self.process(binary.right, **kw)
+
+    def post_process_text(self, text):
+        return text.replace('%', '%%')
+
     def visit_count_func(self, fn, **kw):
         # count accepts zero arguments.
         return 'count%s' % self.process(fn.clause_expr, **kw)
