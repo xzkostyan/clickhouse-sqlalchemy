@@ -69,6 +69,6 @@ class SelectTestCase(BaseTestCase):
         self.assertEqual(
             self.compile(query, literal_binds=True),
             "SELECT arrayFilter("
-            "x -> x LIKE '%World%', ['Hello', 'abc World']"
+            "x -> x LIKE '%%World%%', ['Hello', 'abc World']"
             ") AS test"
         )
