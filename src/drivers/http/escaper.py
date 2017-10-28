@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
-from ..util import compat
+from ...util import compat
 
 
 class Escaper(object):

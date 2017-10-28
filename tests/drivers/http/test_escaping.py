@@ -4,7 +4,7 @@ from datetime import date
 from sqlalchemy import Column, literal
 
 from src import types, engines, Table
-from src.drivers.escaper import Escaper
+from src.drivers.http.escaper import Escaper
 from tests.session import session
 from tests.testcase import BaseTestCase
 

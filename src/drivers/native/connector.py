@@ -2,7 +2,6 @@ from clickhouse_driver.client import Client
 from clickhouse_driver.errors import Error as DriverError
 
 from ...exceptions import DatabaseException
-from ..escaper import Escaper
 
 # PEP 249 module globals
 apilevel = '2.0'
@@ -64,8 +63,6 @@ class Cursor(object):
 
     _states = States()
 
-    _params_escaper = Escaper()
-
     def __init__(self, connection):
         self._connection = connection
         self._reset_state()
@@ -113,9 +110,6 @@ class Cursor(object):
         return tables
 
     def execute(self, operation, parameters=None, context=None):
-        if parameters is not None:
-            operation = operation % self._params_escaper.escape(parameters)
-
         self._reset_state()
         self._begin_query()
 
@@ -127,7 +121,7 @@ class Cursor(object):
                 context.dialect, context.execution_options
             )
             response = transport.execute(
-                operation, with_column_types=True,
+                operation, params=parameters, with_column_types=True,
                 external_tables=external_tables, settings=settings
             )
 

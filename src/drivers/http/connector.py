@@ -1,6 +1,6 @@
 from uuid import uuid1
 
-from ..escaper import Escaper
+from .escaper import Escaper
 from .transport import RequestsTransport
 
 # PEP 249 module globals
