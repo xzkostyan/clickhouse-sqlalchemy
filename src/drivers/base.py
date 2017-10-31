@@ -2,7 +2,9 @@ import re
 
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
-from sqlalchemy.sql import compiler, expression, type_api, literal_column
+from sqlalchemy.sql import (
+    compiler, expression, type_api, literal_column, elements
+)
 from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
 from sqlalchemy.util import inspect_getargspec
 
@@ -125,6 +127,36 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             return 'toDayOfMonth(%s)' % column
         else:
             return column
+
+    def visit_join(self, join, asfrom=False, **kwargs):
+        join_type = " "
+
+        if join.global_:
+            join_type += "GLOBAL "
+
+        if join.any:
+            join_type += "ANY "
+
+        if join.all:
+            join_type += "ALL "
+
+        if join.isouter:
+            join_type += "LEFT OUTER JOIN "
+        else:
+            join_type += "INNER JOIN "
+
+        if not isinstance(join.onclause, elements.Tuple):
+            raise exc.CompileError(
+                "Only tuple elements are supported. "
+                "Got: %s" % type(join.onclause)
+            )
+
+        return (
+            join.left._compiler_dispatch(self, asfrom=True, **kwargs) +
+            join_type +
+            join.right._compiler_dispatch(self, asfrom=True, **kwargs) +
+            " USING " + join.onclause._compiler_dispatch(self, **kwargs)
+        )
 
     def _compose_select_body(
             self, text, select, inner_columns, froms, byfrom, kwargs):

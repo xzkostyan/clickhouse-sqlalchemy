@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- `JOIN` clause support via `tuple_()`.
 
 ## [0.0.4] - 2017-10-03
 ### Added
