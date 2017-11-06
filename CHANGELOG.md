@@ -1,9 +1,17 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.5] - 2017-11-06
 ### Added
 - `JOIN` clause support via `tuple_()`.
-- Version detection in setup.py
+- Version detection in setup.py.
+
+### Changed
+- Using native driver parameters substitution via pyformat.
+
+### Fixed
+- Binary mod operation compilation issue [#8](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/8).
 
 ## [0.0.4] - 2017-10-03
 ### Added
@@ -50,7 +58,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.4...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.5...HEAD
+[0.0.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.4...0.0.5
 [0.0.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.3...0.0.4
 [0.0.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.2...0.0.3
 [0.0.2]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.1...0.0.2

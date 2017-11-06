@@ -249,6 +249,7 @@ Supported ClickHouse-specific SQL
     - ``WITH TOTALS``
     - ``SAMPLE``
     - lambda functions: ``x -> expr``
+    - ``JOIN``
 
 See `tests <https://github.com/xzkostyan/clickhouse-sqlalchemy/tree/master/tests>`_ for examples.
 
