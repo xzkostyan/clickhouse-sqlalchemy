@@ -1,11 +1,25 @@
-from setuptools import setup, find_packages
+import os
+import re
 from codecs import open
-from os import path
 
-here = path.abspath(path.dirname(__file__))
+from setuptools import setup, find_packages
 
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+here = os.path.abspath(os.path.dirname(__file__))
+
+with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
+
+
+def read_version():
+    regexp = re.compile('^VERSION\W*=\W*\(([^\(\)]*)\)')
+    init_py = os.path.join(here, 'src', '__init__.py')
+    with open(init_py, encoding='utf-8') as f:
+        for line in f:
+            match = regexp.match(line)
+            if match is not None:
+                return match.group(1).replace(', ', '.')
+        else:
+            raise RuntimeError('Cannot find version in src/__init__.py')
 
 
 dialects = [
@@ -20,7 +34,7 @@ dialects = [
 
 setup(
     name='clickhouse-sqlalchemy',
-    version='0.0.4',
+    version=read_version(),
 
     description='Simple ClickHouse SQLAlchemy Dialect',
     long_description=long_description,
