@@ -1,4 +1,6 @@
 
+from sqlalchemy import util as sa_util
+
 from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
 from . import connector
 
@@ -23,6 +25,13 @@ class ClickHouseDialect_http(ClickHouseDialect):
         return connector
 
     def create_connect_args(self, url):
+        if 'http' not in url.drivername:
+            sa_util.warn(
+                "http dialect is deprecated as default. Specify "
+                "clickhouse+http as schema or switch to "
+                "native dialect: clickhouse+native."
+            )
+
         kwargs = {}
         protocol = url.query.pop('protocol', 'http')
         port = url.port or 8123
