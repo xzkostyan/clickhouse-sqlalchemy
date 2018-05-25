@@ -438,8 +438,7 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @reflection.cache
     def get_schema_names(self, connection, **kw):
-        # No support for schemas.
-        return []
+        return [row.name for row in connection.execute('SHOW DATABASES')]
 
     @reflection.cache
     def get_foreign_keys(self, connection, table_name, schema=None, **kw):
