@@ -1,8 +1,8 @@
 from sqlalchemy import Column, exc, func, literal
 from sqlalchemy import tuple_
 
-from src import types, Table
-from src.ext.clauses import Lambda
+from clickhouse_sqlalchemy import types, Table
+from clickhouse_sqlalchemy.ext.clauses import Lambda
 from tests.session import session
 from tests.testcase import BaseTestCase
 

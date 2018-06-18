@@ -3,7 +3,7 @@ from datetime import date
 from responses import mock
 from sqlalchemy import Column, func
 
-from src import types, Table
+from clickhouse_sqlalchemy import types, Table
 from tests.session import session
 from tests.testcase import BaseTestCase
 

@@ -3,11 +3,15 @@ import re
 from sqlalchemy import create_engine
 from sqlalchemy.dialects import registry
 
-from src import make_session
+from clickhouse_sqlalchemy import make_session
 
 
-registry.register("clickhouse", "src.drivers.http.base", "dialect")
-registry.register("clickhouse.native", "src.drivers.native.base", "dialect")
+registry.register(
+    "clickhouse", "clickhouse_sqlalchemy.drivers.http.base", "dialect"
+)
+registry.register(
+    "clickhouse.native", "clickhouse_sqlalchemy.drivers.native.base", "dialect"
+)
 
 uri = 'clickhouse://default:@localhost:8123/default'
 session = make_session(create_engine(uri))

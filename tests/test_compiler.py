@@ -1,8 +1,8 @@
 import enum
 from sqlalchemy import sql
 
-from src import types
-from src.util import compat
+from clickhouse_sqlalchemy import types
+from clickhouse_sqlalchemy.util import compat
 from tests.testcase import BaseTestCase
 
 

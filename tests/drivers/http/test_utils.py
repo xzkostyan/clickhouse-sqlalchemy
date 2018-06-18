@@ -1,4 +1,4 @@
-from src.drivers.http.utils import parse_tsv
+from clickhouse_sqlalchemy.drivers.http.utils import parse_tsv
 from tests.testcase import BaseTestCase
 
 

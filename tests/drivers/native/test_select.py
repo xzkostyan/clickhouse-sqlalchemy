@@ -1,6 +1,6 @@
 from sqlalchemy import Column
 
-from src import engines, types, Table
+from clickhouse_sqlalchemy import engines, types, Table
 from tests.session import native_session, mocked_engine
 from tests.testcase import BaseTestCase
 

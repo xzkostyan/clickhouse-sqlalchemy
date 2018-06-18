@@ -1,6 +1,6 @@
 from sqlalchemy import exc
 
-from src.ext.clauses import Lambda
+from clickhouse_sqlalchemy.ext.clauses import Lambda
 from tests.testcase import BaseTestCase
 
 

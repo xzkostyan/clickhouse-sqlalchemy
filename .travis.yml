@@ -11,6 +11,6 @@ install:
 before_script:
   flake8
 script:
-  coverage run --source=src setup.py test
+  coverage run --source=clickhouse_sqlalchemy setup.py test
 after_success:
   coveralls

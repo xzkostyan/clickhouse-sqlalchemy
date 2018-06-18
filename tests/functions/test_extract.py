@@ -3,7 +3,7 @@ Test EXTRACT
 """
 from sqlalchemy import Column, extract
 
-from src import types
+from clickhouse_sqlalchemy import types
 from tests.testcase import BaseTestCase
 
 

@@ -1,6 +1,6 @@
 from sqlalchemy import Column
 
-from src import types, select, Table
+from clickhouse_sqlalchemy import types, select, Table
 from tests.testcase import BaseTestCase
 
 

@@ -1,8 +1,8 @@
 from sqlalchemy import Column
 from sqlalchemy.sql.ddl import CreateTable
 
-from src import types, engines, Table
-from src.sql.ddl import DropTable
+from clickhouse_sqlalchemy import types, engines, Table
+from clickhouse_sqlalchemy.sql.ddl import DropTable
 from tests.testcase import BaseTestCase
 from tests.session import mocked_engine
 

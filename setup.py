@@ -12,14 +12,16 @@ with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 def read_version():
     regexp = re.compile('^VERSION\W*=\W*\(([^\(\)]*)\)')
-    init_py = os.path.join(here, 'src', '__init__.py')
+    init_py = os.path.join(here, 'clickhouse_sqlalchemy', '__init__.py')
     with open(init_py, encoding='utf-8') as f:
         for line in f:
             match = regexp.match(line)
             if match is not None:
                 return match.group(1).replace(', ', '.')
         else:
-            raise RuntimeError('Cannot find version in src/__init__.py')
+            raise RuntimeError(
+                'Cannot find version in clickhouse_sqlalchemy/__init__.py'
+            )
 
 
 dialects = [
@@ -81,14 +83,7 @@ setup(
 
     keywords='ClickHouse db database cloud analytics',
 
-    packages=[
-        p.replace('src', 'clickhouse_sqlalchemy')
-        for p in find_packages(exclude=['tests'])
-        if p.startswith('src')
-    ],
-    package_dir={
-        'clickhouse_sqlalchemy': 'src',
-    },
+    packages=find_packages('.'),
     install_requires=[
         'sqlalchemy',
         'requests',

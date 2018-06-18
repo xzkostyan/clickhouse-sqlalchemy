@@ -1,7 +1,7 @@
 from sqlalchemy import Column
 from sqlalchemy.sql.ddl import CreateTable
 
-from src import types, engines, get_declarative_base
+from clickhouse_sqlalchemy import types, engines, get_declarative_base
 from tests.testcase import BaseTestCase
 
 
