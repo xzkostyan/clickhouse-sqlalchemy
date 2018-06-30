@@ -1,10 +1,12 @@
 import re
+from contextlib import contextmanager
 from unittest import TestCase
 
 from sqlalchemy import MetaData
 from sqlalchemy.orm import Query
 
-from tests.session import session
+from tests.config import database as test_database
+from tests.session import session, native_session, system_native_session
 
 
 class BaseTestCase(TestCase):
@@ -35,3 +37,30 @@ class BaseTestCase(TestCase):
         return self.strip_spaces.sub(
             '', str(self._compile(clause, **kwargs))
         )
+
+
+class TypesTestCase(BaseTestCase):
+    session = native_session
+
+    @classmethod
+    def setUpClass(cls):
+        # System database is always present.
+        system_native_session.execute(
+            'DROP DATABASE IF EXISTS {}'.format(test_database)
+        )
+        system_native_session.execute(
+            'CREATE DATABASE {}'.format(test_database)
+        )
+
+        super(BaseTestCase, cls).setUpClass()
+
+    @contextmanager
+    def create_table(self, table):
+        table.drop(bind=self.session.bind, if_exists=True)
+        table.create(bind=self.session.bind)
+        try:
+            yield
+        except Exception:
+            raise
+        finally:
+            table.drop(bind=self.session.bind)

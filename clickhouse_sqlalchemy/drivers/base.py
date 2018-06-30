@@ -1,12 +1,10 @@
-import re
-
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
     compiler, expression, type_api, literal_column, elements
 )
-from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
-from sqlalchemy.util import inspect_getargspec
+from sqlalchemy.types import DATE, DATETIME, FLOAT
+from sqlalchemy.util import inspect_getargspec, warn
 
 from .. import types
 from ..util import compat
@@ -18,23 +16,24 @@ colspecs = {}
 
 # Type converters
 ischema_names = {
-    'Int64': INTEGER,
-    'Int32': INTEGER,
-    'Int16': INTEGER,
-    'Int8': INTEGER,
-    'UInt64': INTEGER,
-    'UInt32': INTEGER,
-    'UInt16': INTEGER,
-    'UInt8': INTEGER,
+    'Int64': types.Int64,
+    'Int32': types.Int32,
+    'Int16': types.Int16,
+    'Int8': types.Int8,
+    'UInt64': types.UInt64,
+    'UInt32': types.UInt32,
+    'UInt16': types.UInt16,
+    'UInt8': types.UInt8,
     'Date': DATE,
     'DateTime': DATETIME,
     'Float64': FLOAT,
     'Float32': FLOAT,
-    'String': VARCHAR,
-    'FixedString': VARCHAR,
+    'String': types.String,
+    'FixedString': types.String,
     'Enum8': types.Enum8,
     'Enum16': types.Enum16,
-    'Array': types.Array
+    '_array': types.Array,
+    '_nullable': types.Nullable
 }
 
 
@@ -424,20 +423,40 @@ class ClickHouseDialect(default.DefaultDialect):
         rows = self._execute(connection, query)
 
         columns = []
-        for name, type_, default_type, default_expression in rows:
-            # Get only type without extra modifiers.
-            type_ = re.search(r'^\w+', type_).group(0)
-            try:
-                type_ = ischema_names[type_]
-            except KeyError:
-                type_ = sqltypes.NullType
-            columns.append({
-                'name': name,
-                'type': type_,
-                'nullable': True,
-                'default': None,
-            })
+        for name, format_type, default_type, default_expression in rows:
+            columns.append(self._get_column_info(name, format_type))
         return columns
+
+    def _get_col_type(self, name, spec):
+        if spec.startswith('Array'):
+            inner = spec[6:-1]
+            coltype = self.ischema_names['_array']
+            return coltype(self._get_col_type(name, inner))
+
+        elif spec.startswith('FixedString'):
+            length = int(spec[12:-1])
+            return self.ischema_names['FixedString'](length)
+
+        elif spec.startswith('Nullable'):
+            inner = spec[9:-1]
+            coltype = self.ischema_names['_nullable']
+            return coltype(self._get_col_type(name, inner))
+
+        else:
+            try:
+                return self.ischema_names[spec]
+            except KeyError:
+                warn("Did not recognize type '%s' of column '%s'" %
+                     (spec, name))
+                return sqltypes.NullType
+
+    def _get_column_info(self, name, format_type):
+        return {
+            'name': name,
+            'type': self._get_col_type(name, format_type),
+            'nullable': True,
+            'default': None,
+        }
 
     @reflection.cache
     def get_schema_names(self, connection, **kw):
