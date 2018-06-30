@@ -341,6 +341,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_date(self, type_, **kw):
         return 'Date'
 
+    def visit_datetime(self, type_, **kw):
+        return 'DateTime'
+
     def visit_float32(self, type_, **kw):
         return 'Float32'
 

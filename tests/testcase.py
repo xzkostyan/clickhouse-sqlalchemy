@@ -11,8 +11,9 @@ class BaseTestCase(TestCase):
     strip_spaces = re.compile(r'[\n\t]')
     session = session
 
-    def metadata(self):
-        return MetaData(bind=self.session.bind)
+    @classmethod
+    def metadata(cls):
+        return MetaData(bind=cls.session.bind)
 
     def _compile(self, clause, bind=session.bind, literal_binds=False):
         if isinstance(clause, Query):

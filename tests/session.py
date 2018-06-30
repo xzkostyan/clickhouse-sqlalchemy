@@ -1,23 +1,15 @@
 import re
 
 from sqlalchemy import create_engine
-from sqlalchemy.dialects import registry
 
 from clickhouse_sqlalchemy import make_session
+from tests.config import uri, native_uri, system_native_uri
 
-
-registry.register(
-    "clickhouse", "clickhouse_sqlalchemy.drivers.http.base", "dialect"
-)
-registry.register(
-    "clickhouse.native", "clickhouse_sqlalchemy.drivers.native.base", "dialect"
-)
-
-uri = 'clickhouse://default:@localhost:8123/default'
 session = make_session(create_engine(uri))
 
-native_uri = 'clickhouse+native://default:@localhost/default'
 native_session = make_session(create_engine(native_uri))
+
+system_native_session = make_session(create_engine(system_native_uri))
 
 
 class MockedEngine(object):
