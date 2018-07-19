@@ -83,7 +83,7 @@ setup(
 
     keywords='ClickHouse db database cloud analytics',
 
-    packages=find_packages('.'),
+    packages=find_packages('.', exclude=["tests*"]),
     install_requires=[
         'sqlalchemy',
         'requests',
