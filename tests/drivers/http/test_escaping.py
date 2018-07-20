@@ -22,7 +22,8 @@ class EscapingTestCase(BaseTestCase):
 
     def test_escaper(self):
         e = Escaper()
-        self.assertEqual(e.escape([None]), ['NULL'])
+        self.assertEqual(e.escape([None]), '[NULL]')
+        self.assertEqual(e.escape([[None]]), '[[NULL]]')
         self.assertEqual(e.escape([[123]]), [[123]])
         self.assertEqual(e.escape({'x': 'str'}), {'x': "'str'"})
         self.assertEqual(e.escape([Decimal('10')]), [10.0])
