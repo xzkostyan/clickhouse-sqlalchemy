@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.0.6] - 2018-07-20
+### Added
+- Schema names as databases support. Pull request [#16](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/16) by [AchilleAsh](https://github.com/AchilleAsh).
+- DateTime type.
+- Reflection Array, FixedString and Nullable types.
+
+### Fixed
+- Pip install in editable mode.
+
+### Removed
+- Python 3.3 support.
+
 ## [0.0.5] - 2017-11-06
 ### Added
 - `JOIN` clause support via `tuple_()`.
@@ -58,7 +70,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.5...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.6...HEAD
+[0.0.6]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.5...0.0.6
 [0.0.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.4...0.0.5
 [0.0.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.3...0.0.4
 [0.0.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.2...0.0.3
