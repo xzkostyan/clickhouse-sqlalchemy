@@ -22,12 +22,13 @@ class EscapingTestCase(BaseTestCase):
 
     def test_escaper(self):
         e = Escaper()
-        self.assertEqual(e.escape([None]), ['NULL'])
-        self.assertEqual(e.escape([[123]]), [[123]])
+        self.assertEqual(e.escape([None]), '[NULL]')
+        self.assertEqual(e.escape([[None]]), '[[NULL]]')
+        self.assertEqual(e.escape([[123]]), '[[123]]')
         self.assertEqual(e.escape({'x': 'str'}), {'x': "'str'"})
-        self.assertEqual(e.escape([Decimal('10')]), [10.0])
-        self.assertEqual(e.escape([10.0]), [10.0])
-        self.assertEqual(e.escape([date(2017, 1, 2)]), ["'2017-01-02'"])
+        self.assertEqual(e.escape([Decimal('10')]), '[10.0]')
+        self.assertEqual(e.escape([10.0]), '[10.0]')
+        self.assertEqual(e.escape([date(2017, 1, 2)]), "['2017-01-02']")
 
         with self.assertRaises(Exception) as ex:
             e.escape([object()])
