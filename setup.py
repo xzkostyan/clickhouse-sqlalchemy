@@ -97,7 +97,7 @@ setup(
     test_suite='nose.collector',
     tests_require=[
         'nose',
-        'SQLAlchemy>=1.0',
+        'SQLAlchemy>=1.1.18',
         'mock',
         'requests',
         'responses',
