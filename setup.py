@@ -86,7 +86,7 @@ setup(
     install_requires=[
         'sqlalchemy',
         'requests',
-        'clickhouse_driver>=0.0.8'
+        'clickhouse_driver>=0.0.14'
     ],
 
     # Registering `clickhouse` as dialect.
@@ -97,7 +97,7 @@ setup(
     test_suite='nose.collector',
     tests_require=[
         'nose',
-        'SQLAlchemy>=1.0',
+        'SQLAlchemy>=1.1.0',
         'mock',
         'requests',
         'responses',
