@@ -1,4 +1,7 @@
 from datetime import datetime
+from functools import partial
+
+import pytz
 
 import requests
 
@@ -7,34 +10,48 @@ from .exceptions import HTTPException
 from .utils import parse_tsv
 
 
-converters = {
-    'Int8': int,
-    'UInt8': int,
-    'Int16': int,
-    'UInt16': int,
-    'Int32': int,
-    'UInt32': int,
-    'Int64': int,
-    'UInt64': int,
-    'Float32': float,
-    'Float64': float,
-    'Date': lambda x: datetime.strptime(
-        x.replace("0000-00-00", "1970-01-01"), '%Y-%m-%d').date(),
-    'DateTime': lambda x: datetime.strptime(
-        x.replace("0000-00-00", "1970-01-01"), '%Y-%m-%d %H:%M:%S'),
-}
-
-
 class RequestsTransport(object):
     def __init__(self, db_url, db_name, username, password, timeout=None,
-                 tz=None, **kwargs):
+                tz=None, converters=None, **kwargs):
+        """
+
+        :param db_url:
+        :param db_name:
+        :param username:
+        :param password:
+        :param timeout:
+        :param tz: timezone in the server config
+        :param converters: functions dict to replace standart
+                           functions parsing response from ClickHouse
+        :param kwargs:
+        """
         self.db_url = db_url
         self.db_name = db_name
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
         if tz:
-            import pytz  # TODO: maybe no additioanal requirements?
             self.tz = pytz.timezone(tz)
+
+        self.converters = {
+            'Int8': int,
+            'UInt8': int,
+            'Int16': int,
+            'UInt16': int,
+            'Int32': int,
+            'UInt32': int,
+            'Int64': int,
+            'UInt64': int,
+            'Float32': float,
+            'Float64': float,
+            'Date': lambda x: datetime.strptime(
+                x.replace("0000-00-00", "1970-01-01"), '%Y-%m-%d').date(),
+            'DateTime': lambda dt, tz=self.tz: datetime.strptime(
+                    dt.replace("0000-00-00", "1970-01-01"), '%Y-%m-%d %H:%M:%S'
+                ).replace(tzinfo=pytz.timezone(tz) if tz else None),
+        }
+        if converters:
+            self.converters.update(converters)
+
         super(RequestsTransport, self).__init__()
 
     def execute(self, query, params=None):
@@ -46,13 +63,20 @@ class RequestsTransport(object):
         lines = r.iter_lines()
         names = parse_tsv(next(lines))
         types = parse_tsv(next(lines))
-        convs = [converters.get(type_) for type_ in types]
+        convs = []
+        for type_ in types:
+            if self.converters.get(type_):  # simple case
+                convs.append(self.converters[type_])
+            elif type_.startswith("DateTime("):  # datetime with timezone
+                convs.append(partial(self.converters['DateTime'], tz=type_[10:-2]))
+            else:
+                convs.append(None)
 
         yield names
         yield types
 
         for line in lines:
-            if line == "":  # TODO: separator for total row
+            if line in ['', b'']:  # TODO: separator for total row
                 continue    # total is latest row, maybe somehow standalone?
             yield [
                 (converter(x) if converter else x)

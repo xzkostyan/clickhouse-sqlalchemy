@@ -79,7 +79,8 @@ setup(
         'six',
         'sqlalchemy',
         'requests',
-        'clickhouse_driver>=0.0.5'
+        'clickhouse_driver>=0.0.5',
+        'pytz',
     ],
 
     # Registering `clickhouse` as dialect.

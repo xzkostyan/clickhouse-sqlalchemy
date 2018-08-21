@@ -251,14 +251,6 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
 
         return ' ENGINE = ' + self.process(engine)
 
-    def visit_drop_table(self, drop):
-        text = '\nDROP TABLE '
-
-        if drop.if_exists:
-            text += 'IF EXISTS '
-
-        return text + self.preparer.format_table(drop.element)
-
 
 class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_string(self, type_, **kw):

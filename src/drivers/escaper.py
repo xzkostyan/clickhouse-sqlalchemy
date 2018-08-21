@@ -6,9 +6,6 @@ import six
 
 class Escaper(object):
 
-    number_types = six.integer_types + (float, )
-    string_types = six.string_types
-
     escape_chars = {
         "\b": "\\b",
         "\f": "\\f",
@@ -20,8 +17,25 @@ class Escaper(object):
         "'": "\\'"
     }
 
-    def __init__(self, tz=None):
+    def __init__(self, tz=None, escapers=None):
+        """
+
+        :param tz: clickhouse server timezone
+        :param escapers: functions dict to replace standart
+                         functions preparing values for ClickHouse
+        """
         self.tz = tz
+
+        self.escapers = [
+            (bool, self.escape_bool),
+            (six.integer_types + (float, ), self.escape_number),
+            (datetime, self.escape_datetime),
+            (date, self.escape_date),
+            (Decimal, self.escape_decimal),
+            (six.string_types, self.escape_string),
+        ]
+        if escapers:
+            self.escapers.update(escapers)
 
     def escape_string(self, value):
         value = ''.join(self.escape_chars.get(c, c) for c in value)
@@ -55,19 +69,10 @@ class Escaper(object):
     def escape_item(self, item):
         if item is None:
             return 'NULL'
-        elif isinstance(item, bool):
-            return self.escape_bool(item)
-        elif isinstance(item, self.number_types):
-            return self.escape_number(item)
-        elif isinstance(item, datetime):
-            return self.escape_datetime(item)
-        elif isinstance(item, date):
-            return self.escape_date(item)
-        elif isinstance(item, Decimal):
-            return self.escape_decimal(item)
-        elif isinstance(item, self.string_types):
-            return self.escape_string(item)
-        elif isinstance(item, (list, tuple)):
+        for _type, func in self.escapers:
+            if isinstance(item, _type):
+                return func(item)
+        if isinstance(item, (list, tuple)):
             return [self.escape_item(x) for x in item]
         else:
             raise Exception("Unsupported object {}".format(item))
