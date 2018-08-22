@@ -1,6 +1,7 @@
-from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
-from . import connector
+from sqlalchemy.util import asbool
 
+from . import connector
+from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
 
 # Export connector version
 VERSION = (0, 0, 2, None)
@@ -25,6 +26,10 @@ class ClickHouseDialect_native(ClickHouseDialect):
         kwargs = {}
         port = url.port or 9000
         db_name = url.database or 'default'
+
+        secure = url.query.get('secure')
+        if secure is not None:
+            url.query['secure'] = asbool(secure)
 
         kwargs.update(url.query)
 
