@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- Handling boolean values of `secure` query parameter of database url
 
 ## [0.0.7] - 2018-07-31
 ### Fixed
