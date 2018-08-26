@@ -67,6 +67,7 @@ class Cursor(object):
         self._connection = connection
         self._reset_state()
         self._arraysize = 1
+        self._stream_results = False
         super(Cursor, self).__init__()
 
     @property
@@ -109,18 +110,35 @@ class Cursor(object):
 
         return tables
 
+    def _prepare(self, context):
+        execution_options = context.execution_options
+
+        external_tables = self.make_external_tables(
+            context.dialect, execution_options
+        )
+
+        transport = self._connection.transport
+        execute = transport.execute
+        execute_iter = getattr(transport, 'execute_iter', None)
+
+        self._stream_results = execution_options.get('stream_results', False)
+        settings = execution_options.get('settings')
+
+        if self._stream_results and execute_iter:
+            execute = execute_iter
+            settings = settings or {}
+            settings['max_block_size'] = execution_options['max_row_buffer']
+
+        return external_tables, execute, settings
+
     def execute(self, operation, parameters=None, context=None):
         self._reset_state()
         self._begin_query()
 
-        settings = context.execution_options.get('settings')
-
-        transport = self._connection.transport
         try:
-            external_tables = self.make_external_tables(
-                context.dialect, context.execution_options
-            )
-            response = transport.execute(
+            external_tables, execute, settings = self._prepare(context)
+
+            response = execute(
                 operation, params=parameters, with_column_types=True,
                 external_tables=external_tables, settings=settings
             )
@@ -128,21 +146,17 @@ class Cursor(object):
         except DriverError as orig:
             raise DatabaseException(orig)
 
-        self._process_response(response)
+        self._process_response(response, context)
         self._end_query()
 
     def executemany(self, operation, seq_of_parameters, context=None):
         self._reset_state()
         self._begin_query()
 
-        settings = context.execution_options.get('settings')
-
-        transport = self._connection.transport
         try:
-            external_tables = self.make_external_tables(
-                context.dialect, context.execution_options
-            )
-            response = transport.execute(
+            external_tables, execute, settings = self._prepare(context)
+
+            response = execute(
                 operation, params=seq_of_parameters,
                 external_tables=external_tables, settings=settings
             )
@@ -150,17 +164,21 @@ class Cursor(object):
         except DriverError as orig:
             raise DatabaseException(orig)
 
-        self._process_response(response)
+        self._process_response(response, context)
         self._end_query()
 
     def fetchone(self):
         if self._state == self._states.NONE:
             raise RuntimeError("No query yet")
 
-        if not self._rows:
-            return None
+        if self._stream_results:
+            return next(self._rows, None)
 
-        return self._rows.pop(0)
+        else:
+            if not self._rows:
+                return None
+
+            return self._rows.pop(0)
 
     def fetchmany(self, size=None):
         if size is None:
@@ -210,12 +228,17 @@ class Cursor(object):
     def __iter__(self):
         return self
 
-    def _process_response(self, response):
+    def _process_response(self, response, context):
         if not response:
             self._columns = self._types = self._rows = []
             return
 
-        rows, columns_with_types = response
+        if self._stream_results:
+            columns_with_types = next(response)
+            rows = response
+
+        else:
+            rows, columns_with_types = response
 
         if columns_with_types:
             self._columns, self._types = zip(*columns_with_types)

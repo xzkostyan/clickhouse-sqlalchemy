@@ -1,10 +1,11 @@
 from sqlalchemy import Column, exc, func, literal
+from sqlalchemy import text
 from sqlalchemy import tuple_
 
 from clickhouse_sqlalchemy import types, Table
 from clickhouse_sqlalchemy.ext.clauses import Lambda
 from tests.session import session
-from tests.testcase import BaseTestCase
+from tests.testcase import BaseTestCase, NativeSessionTestCase
 
 
 class SelectTestCase(BaseTestCase):
@@ -140,3 +141,41 @@ class JoinTestCase(BaseTestCase):
             "SELECT x AS t0_x, x AS t1_x FROM t0 "
             "GLOBAL ALL LEFT OUTER JOIN t1 USING x, y"
         )
+
+
+class YieldTest(NativeSessionTestCase):
+    def test_yield_per_and_execution_options(self):
+        numbers = Table(
+            'numbers', self.metadata(),
+            Column('number', types.UInt64, primary_key=True),
+        )
+
+        query = self.session.query(numbers.c.number).limit(100).yield_per(15)
+        query = query.execution_options(foo='bar')
+        self.assertIsNotNone(query._yield_per)
+        self.assertEqual(
+            query._execution_options,
+            {'stream_results': True, 'foo': 'bar', 'max_row_buffer': 15}
+        )
+
+    def test_basic(self):
+        numbers = Table(
+            'numbers', self.metadata(),
+            Column('number', types.UInt64, primary_key=True),
+        )
+
+        q = iter(
+            self.session.query(numbers.c.number)
+            .yield_per(1)
+            .from_statement(text('SELECT * FROM system.numbers LIMIT 3'))
+        )
+
+        ret = []
+        ret.append(next(q))
+        ret.append(next(q))
+        ret.append(next(q))
+        try:
+            next(q)
+            assert False
+        except StopIteration:
+            pass

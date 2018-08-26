@@ -39,7 +39,7 @@ class BaseTestCase(TestCase):
         )
 
 
-class TypesTestCase(BaseTestCase):
+class NativeSessionTestCase(BaseTestCase):
     session = native_session
 
     @classmethod
@@ -54,6 +54,8 @@ class TypesTestCase(BaseTestCase):
 
         super(BaseTestCase, cls).setUpClass()
 
+
+class TypesTestCase(NativeSessionTestCase):
     @contextmanager
     def create_table(self, table):
         table.drop(bind=self.session.bind, if_exists=True)
