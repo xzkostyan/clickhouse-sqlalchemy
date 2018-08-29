@@ -1,3 +1,4 @@
+from __future__ import generator_stop
 from uuid import uuid1
 
 from .escaper import Escaper
