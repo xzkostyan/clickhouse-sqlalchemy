@@ -217,16 +217,12 @@ class Cursor(object):
         pass
 
     # Iteration support.
-    def __next__(self):
-        one = self.fetchone()
-        if one is None:
-            raise StopIteration
-        return one
-
-    next = __next__
-
     def __iter__(self):
-        return self
+        while True:
+            one = self.fetchone()
+            if one is None:
+                return
+            yield one
 
     def _process_response(self, response, context):
         if not response:
