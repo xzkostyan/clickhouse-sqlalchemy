@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 from ..sql.schema import Table
 
 
-class ChickHouseDeclarativeMeta(DeclarativeMeta):
+class ClickHouseDeclarativeMeta(DeclarativeMeta):
     """
     Generates __tablename__ automatically. Taken from flask-sqlalchemy.
     Also adds custom __table_cls__.
@@ -42,5 +42,5 @@ class ChickHouseDeclarativeMeta(DeclarativeMeta):
 
 def get_declarative_base(metadata=None):
     return declarative_base(
-        metadata=metadata, metaclass=ChickHouseDeclarativeMeta
+        metadata=metadata, metaclass=ClickHouseDeclarativeMeta
     )
