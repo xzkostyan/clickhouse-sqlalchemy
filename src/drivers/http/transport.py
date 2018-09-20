@@ -4,8 +4,9 @@ from functools import partial
 import pytz
 
 import requests
+from requests.exceptions import RequestException
 
-from ...exceptions import DatabaseException
+from ...exceptions import DatabaseException, DatabaseNotAvailableException
 from .exceptions import HTTPException
 from .utils import parse_tsv
 
@@ -100,11 +101,14 @@ class RequestsTransport(object):
         params['database'] = self.db_name
 
         # TODO: retries, prepared requests
+        try:
+            r = requests.post(
+                self.db_url, auth=self.auth, params=params, data=data,
+                stream=stream, timeout=self.timeout
+            )
+        except RequestException as e:
+            raise DatabaseNotAvailableException(e)
 
-        r = requests.post(
-            self.db_url, auth=self.auth, params=params, data=data,
-            stream=stream, timeout=self.timeout
-        )
         if r.status_code != 200:
             orig = HTTPException(r.text)
             raise DatabaseException(orig)

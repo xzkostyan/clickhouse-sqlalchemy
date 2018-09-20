@@ -15,3 +15,7 @@ class DatabaseException(Exception):
 
         else:
             return six.text_type(text).encode('utf-8')
+
+
+class DatabaseNotAvailableException(DatabaseException):
+    pass
