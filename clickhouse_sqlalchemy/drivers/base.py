@@ -1,3 +1,5 @@
+import re, ast, enum
+
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
@@ -442,6 +444,20 @@ class ClickHouseDialect(default.DefaultDialect):
             coltype = self.ischema_names['_nullable']
             return coltype(self._get_column_type(name, inner))
 
+        elif spec.startswith('Enum'):
+            type = spec[:spec.find('(')]
+            coltype = self.ischema_names[type]
+            choices = self._get_enum_choices(spec)
+            if not choices:
+                return sqltypes.NullType
+
+            type_enum = enum.Enum('%s_enum' % name, choices)
+
+            def partial_type():
+                return coltype(type_enum)
+
+            return partial_type
+
         else:
             try:
                 return self.ischema_names[spec]
@@ -457,6 +473,12 @@ class ClickHouseDialect(default.DefaultDialect):
             'nullable': True,
             'default': None,
         }
+
+    def _get_enum_choices(self, format_type):
+        specs = re.findall("\((.+)\)", format_type)
+        if specs:
+            raw = "{%s}" % specs[0].replace("=", ":")  # hack to avoid parsing
+            return ast.literal_eval(raw)
 
     @reflection.cache
     def get_schema_names(self, connection, **kw):
