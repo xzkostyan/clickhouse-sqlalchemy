@@ -427,11 +427,11 @@ class ClickHouseDialect(default.DefaultDialect):
             columns.append(self._get_column_info(name, format_type))
         return columns
 
-    def _get_col_type(self, name, spec):
+    def _get_column_type(self, name, spec):
         if spec.startswith('Array'):
             inner = spec[6:-1]
             coltype = self.ischema_names['_array']
-            return coltype(self._get_col_type(name, inner))
+            return coltype(self._get_column_type(name, inner))
 
         elif spec.startswith('FixedString'):
             length = int(spec[12:-1])
@@ -440,7 +440,7 @@ class ClickHouseDialect(default.DefaultDialect):
         elif spec.startswith('Nullable'):
             inner = spec[9:-1]
             coltype = self.ischema_names['_nullable']
-            return coltype(self._get_col_type(name, inner))
+            return coltype(self._get_column_type(name, inner))
 
         else:
             try:
@@ -453,7 +453,7 @@ class ClickHouseDialect(default.DefaultDialect):
     def _get_column_info(self, name, format_type):
         return {
             'name': name,
-            'type': self._get_col_type(name, format_type),
+            'type': self._get_column_type(name, format_type),
             'nullable': True,
             'default': None,
         }
