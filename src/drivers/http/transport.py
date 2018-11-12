@@ -30,8 +30,6 @@ class RequestsTransport(object):
         self.db_name = db_name
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
-        if tz:
-            self.tz = pytz.timezone(tz)
 
         self.converters = {
             'Int8': int,
@@ -46,7 +44,7 @@ class RequestsTransport(object):
             'Float64': float,
             'Date': lambda x: datetime.strptime(
                 x.replace("0000-00-00", "1970-01-01"), '%Y-%m-%d').date(),
-            'DateTime': lambda dt, tz=self.tz: datetime.strptime(
+            'DateTime': lambda dt, tz=tz: datetime.strptime(
                     dt.replace("0000-00-00", "1970-01-01"), '%Y-%m-%d %H:%M:%S'
                 ).replace(tzinfo=pytz.timezone(tz) if tz else None),
         }
