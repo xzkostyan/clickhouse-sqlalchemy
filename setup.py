@@ -11,7 +11,7 @@ with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 
 def read_version():
-    regexp = re.compile('^VERSION\W*=\W*\(([^\(\)]*)\)')
+    regexp = re.compile(r'^VERSION\W*=\W*\(([^\(\)]*)\)')
     init_py = os.path.join(here, 'clickhouse_sqlalchemy', '__init__.py')
     with open(init_py, encoding='utf-8') as f:
         for line in f:
