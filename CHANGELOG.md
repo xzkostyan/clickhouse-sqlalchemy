@@ -1,8 +1,18 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.0.8] - 2018-11-25
+### Added
+- Streaming support via `yield_per`.
+- Python 3.7 in Travis CI build matrix.
+
 ### Fixed
-- Handling boolean values of `secure` query parameter of database url
+- Handling boolean values of `secure` query parameter of database url.
+- `Cursor.__iter__` now conforms with PEP 479. Pull request [#29](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/29) by [khvn26](https://github.com/khvn26).
+Solves issue [#27](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/27).
+- Multiprocessing/asyncio pickling issues. Pull request [#36](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/36) by [jhirniak](https://github.com/jhirniak).
+Solves issue [#13](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/13).
 
 ## [0.0.7] - 2018-07-31
 ### Fixed
@@ -76,7 +86,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.7...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.8...HEAD
+[0.0.8]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.7...0.0.8
 [0.0.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.6...0.0.7
 [0.0.6]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.5...0.0.6
 [0.0.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.4...0.0.5

@@ -283,6 +283,13 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
 
         return text + ')'
 
+    def create_table_suffix(self, table):
+        cluster = table.dialect_options['clickhouse']['cluster']
+        if cluster:
+            return 'ON CLUSTER ' + self.preparer.quote(cluster)
+
+        return ''
+
     def post_create_table(self, table):
         engine = getattr(table, 'engine', None)
 
@@ -297,7 +304,15 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         if drop.if_exists:
             text += 'IF EXISTS '
 
-        return text + self.preparer.format_table(drop.element)
+        rv = text + self.preparer.format_table(drop.element)
+
+        if drop.on_cluster:
+            rv += (
+                ' ON CLUSTER ' +
+                self.preparer.quote(drop.on_cluster)
+            )
+
+        return rv
 
 
 class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
@@ -401,7 +416,8 @@ class ClickHouseDialect(default.DefaultDialect):
 
     construct_arguments = [
         (schema.Table, {
-            "data": []
+            "data": [],
+            "cluster": None
         })
     ]
 

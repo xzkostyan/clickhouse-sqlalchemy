@@ -115,6 +115,27 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    def test_table_create_on_cluster(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            engines.Memory(),
+            clickhouse_cluster='test_cluster'
+        )
+        create_sql = (
+            'CREATE TABLE t1 ON CLUSTER test_cluster '
+            '(x Int32) ENGINE = Memory'
+        )
+
+        with mocked_engine() as engine:
+            table.create()
+            engine.assert_sql([create_sql])
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            create_sql
+        )
+
     def test_drop_table_clause(self):
         table = Table(
             't1', self.metadata(),
@@ -139,3 +160,20 @@ class DDLTestCase(BaseTestCase):
         with mocked_engine() as engine:
             table.drop(if_exists=True)
             engine.assert_sql(['DROP TABLE IF EXISTS t1'])
+
+    def test_table_drop_on_cluster(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            clickhouse_cluster='test_cluster'
+        )
+        drop_sql = 'DROP TABLE IF EXISTS t1 ON CLUSTER test_cluster'
+
+        with mocked_engine() as engine:
+            table.drop(if_exists=True)
+            engine.assert_sql([drop_sql])
+
+        self.assertEqual(
+            self.compile(DropTable(table, if_exists=True)),
+            drop_sql
+        )

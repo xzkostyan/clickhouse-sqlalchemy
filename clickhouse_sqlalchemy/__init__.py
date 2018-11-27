@@ -4,7 +4,7 @@ from .orm.session import make_session
 from .sql import Table, select
 
 
-VERSION = (0, 0, 7)
+VERSION = (0, 0, 8)
 __version__ = '.'.join(str(x) for x in VERSION)
 
 
