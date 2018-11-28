@@ -382,6 +382,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_float64(self, type_, **kw):
         return 'Float64'
 
+    def visit_numeric(self, type_, **kw):
+        return 'Decimal(%s,%s)' % (type_.precision, type_.scale)
+
     def _render_enum(self, db_type, type_, **kw):
         choices = (
             "'%s' = %d" %
