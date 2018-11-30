@@ -110,12 +110,16 @@ class Cursor(object):
 
         return tables
 
-    def _prepare(self, context):
-        execution_options = context.execution_options
+    def _prepare(self, context=None):
+        if context:
+            execution_options = context.execution_options
 
-        external_tables = self.make_external_tables(
-            context.dialect, execution_options
-        )
+            external_tables = self.make_external_tables(
+                context.dialect, execution_options
+            )
+        else:
+            execution_options = {}
+            external_tables = None
 
         transport = self._connection.transport
         execute = transport.execute
