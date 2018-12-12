@@ -3,7 +3,7 @@ import re
 import six
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
-from sqlalchemy.sql import compiler, expression, type_api
+from sqlalchemy.sql import compiler, expression, type_api, crud
 from sqlalchemy.types import DATE, DATETIME, INTEGER, VARCHAR, FLOAT
 
 from .. import types
@@ -178,6 +178,26 @@ class ClickHouseCompiler(compiler.SQLCompiler):
              self.process(join.right, asfrom=True, **kwargs),
              "ON", self.process(join.onclause, asfrom=True, **kwargs)
              ))
+
+    def visit_update(self, update_stmt, asfrom=False, **kw):
+        text = 'ALTER TABLE '
+        table_text = self.update_tables_clause(update_stmt, update_stmt.table, [], **kw)
+        text += table_text
+        text += ' UPDATE '
+        crud_params = crud._setup_crud_params(
+            self, update_stmt, crud.ISUPDATE, include_table=False, **kw)
+
+        text += ', '.join(
+            c[0]._compiler_dispatch(self,
+                                    include_table=False) +
+            '=' + c[1] for c in crud_params
+        )
+
+        if update_stmt._whereclause is not None:
+            t = update_stmt._whereclause._compiler_dispatch(self, include_table=False)
+            if t:
+                text += " WHERE " + t
+        return text
 
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
