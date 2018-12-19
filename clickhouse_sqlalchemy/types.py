@@ -43,6 +43,10 @@ class Nullable(types.TypeEngine):
         super(Nullable, self).__init__()
 
 
+class UUID(String):
+    __visit_name__ = 'uuid'
+
+
 class Int8(Int):
     __visit_name__ = 'int8'
 
