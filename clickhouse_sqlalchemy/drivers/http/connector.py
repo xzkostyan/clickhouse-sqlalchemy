@@ -189,9 +189,14 @@ class Cursor(object):
 
     def _process_response(self, response):
         response = iter(response)
-
-        self._columns = next(response, None)
-        self._types = next(response, None)
+        try:
+            self._columns = next(response, None)
+        except StopIteration:
+            pass
+        try:
+            self._types = next(response, None)
+        except StopIteration:
+            pass
 
         # Reverse list for further pop()
         self._rows = list(response)[::-1]
