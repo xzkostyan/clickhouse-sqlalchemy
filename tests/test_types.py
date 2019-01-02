@@ -39,7 +39,7 @@ class NumericTypeTestCase(TypesTestCase):
     def test_create_table(self):
         self.assertEqual(
             self.compile(CreateTable(self.table)),
-            'CREATE TABLE test (x Decimal(10,2)) ENGINE = Memory'
+            'CREATE TABLE test (x Decimal(10, 2)) ENGINE = Memory'
         )
 
     def test_select_insert(self):
@@ -62,6 +62,19 @@ class NumericTypeTestCase(TypesTestCase):
         value = Decimal('12345678901234567890.1234567890')
 
         with self.create_table(self.table):
-            with self.assertRaisesRegex(DatabaseException,
-                                        'Column x: argument out of range$'):
+            with self.assertRaises(DatabaseException) as ex:
                 self.session.execute(self.table.insert(), [{'x': value}])
+
+            self.assertIn('out of range', str(ex.exception))
+
+    def test_create_table_decimal_symlink(self):
+        table = Table(
+            'test', TypesTestCase.metadata(),
+            Column('x', types.Decimal(10, 2)),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE test (x Decimal(10, 2)) ENGINE = Memory'
+        )
