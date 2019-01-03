@@ -1,4 +1,4 @@
-import re, ast, enum
+import enum
 
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
@@ -37,6 +37,10 @@ ischema_names = {
     '_array': types.Array,
     '_nullable': types.Nullable
 }
+
+
+# Quotes used when parsing enum options
+enum_option_quotes = ("'",)
 
 
 class ClickHouseIdentifierPreparer(compiler.IdentifierPreparer):
@@ -168,13 +172,21 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
             if select._hints:
                 text += ', '.join(
-                    [f._compiler_dispatch(self, asfrom=True,
-                                          fromhints=byfrom, **kwargs)
-                     for f in froms])
+                    [
+                        f._compiler_dispatch(
+                                self,
+                                asfrom=True,
+                                fromhints=byfrom,
+                                **kwargs
+                        )
+                        for f in froms
+                    ]
+                )
             else:
                 text += ', '.join(
                     [f._compiler_dispatch(self, asfrom=True, **kwargs)
-                     for f in froms])
+                    for f in froms]
+                )
         else:
             text += self.default_from()
 
@@ -270,9 +282,9 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         for param in engine_params:
             if isinstance(param, tuple):
                 compiled = (
-                    '(' +
-                    ', '.join(compile_param(p) for p in param) +
-                    ')'
+                    '('
+                    + ', '.join(compile_param(p) for p in param)
+                    + ')'
                 )
             else:
                 compiled = compile_param(param)
@@ -445,6 +457,14 @@ class ClickHouseDialect(default.DefaultDialect):
             columns.append(self._get_column_info(name, format_type))
         return columns
 
+    def _get_column_info(self, name, format_type):
+        return {
+            'name': name,
+            'type': self._get_column_type(name, format_type),
+            'nullable': True,
+            'default': None,
+        }
+
     def _get_column_type(self, name, spec):
         if spec.startswith('Array'):
             inner = spec[6:-1]
@@ -461,13 +481,17 @@ class ClickHouseDialect(default.DefaultDialect):
             return coltype(self._get_column_type(name, inner))
 
         elif spec.startswith('Enum'):
-            type = spec[:spec.find('(')]
+            pos = spec.find('(')
+            type = spec[:pos]
             coltype = self.ischema_names[type]
-            choices = self._get_enum_choices(spec)
-            if not choices:
+
+            options = dict()
+            if pos >= 0:
+                options = self._parse_enum_options(spec[pos + 1: spec.rfind(')')])
+            if not options:
                 return sqltypes.NullType
 
-            type_enum = enum.Enum('%s_enum' % name, choices)
+            type_enum = enum.Enum('%s_enum' % name, options)
 
             def partial_type():
                 return coltype(type_enum)
@@ -482,19 +506,48 @@ class ClickHouseDialect(default.DefaultDialect):
                      (spec, name))
                 return sqltypes.NullType
 
-    def _get_column_info(self, name, format_type):
-        return {
-            'name': name,
-            'type': self._get_column_type(name, format_type),
-            'nullable': True,
-            'default': None,
-        }
+    @staticmethod
+    def _parse_enum_options(option_string):
+        options = dict()
+        after_name = False
+        escaped = False
+        quote_character = None
+        name = ''
+        value = ''
 
-    def _get_enum_choices(self, format_type):
-        specs = re.findall("\((.+)\)", format_type)
-        if specs:
-            raw = "{%s}" % specs[0].replace("=", ":")  # hack to avoid parsing
-            return ast.literal_eval(raw)
+        for ch in option_string:
+            if escaped:
+                name += ch
+                escaped = False  # accepting escaped character
+
+            elif after_name:
+                if ch in (' ', '='):
+                    pass
+                elif ch == ',':
+                    options.setdefault(name, int(value))
+                    after_name = False
+                    name = ''
+                    value = ''  # reset before collecting new option
+                else:
+                    value += ch
+
+            elif quote_character:
+                if ch == '\\':
+                    escaped = True
+                elif ch == quote_character:
+                    quote_character = None
+                    after_name = True  # start collecting option value
+                else:
+                    name += ch
+
+            else:
+                if ch in enum_option_quotes:
+                    quote_character = ch
+
+        if after_name:
+            options.setdefault(name, int(value))  # append word after last comma
+
+        return options
 
     @reflection.cache
     def get_schema_names(self, connection, **kw):
