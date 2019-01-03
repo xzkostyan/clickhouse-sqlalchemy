@@ -185,7 +185,7 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             else:
                 text += ', '.join(
                     [f._compiler_dispatch(self, asfrom=True, **kwargs)
-                    for f in froms]
+                     for f in froms]
                 )
         else:
             text += self.default_from()
@@ -487,7 +487,9 @@ class ClickHouseDialect(default.DefaultDialect):
 
             options = dict()
             if pos >= 0:
-                options = self._parse_enum_options(spec[pos + 1: spec.rfind(')')])
+                options = self._parse_enum_options(
+                    spec[pos + 1: spec.rfind(')')]
+                )
             if not options:
                 return sqltypes.NullType
 
@@ -518,7 +520,7 @@ class ClickHouseDialect(default.DefaultDialect):
         for ch in option_string:
             if escaped:
                 name += ch
-                escaped = False  # accepting escaped character
+                escaped = False  # Accepting escaped character
 
             elif after_name:
                 if ch in (' ', '='):
@@ -527,7 +529,7 @@ class ClickHouseDialect(default.DefaultDialect):
                     options.setdefault(name, int(value))
                     after_name = False
                     name = ''
-                    value = ''  # reset before collecting new option
+                    value = ''  # Reset before collecting new option
                 else:
                     value += ch
 
@@ -536,7 +538,7 @@ class ClickHouseDialect(default.DefaultDialect):
                     escaped = True
                 elif ch == quote_character:
                     quote_character = None
-                    after_name = True  # start collecting option value
+                    after_name = True  # Start collecting option value
                 else:
                     name += ch
 
@@ -545,7 +547,7 @@ class ClickHouseDialect(default.DefaultDialect):
                     quote_character = ch
 
         if after_name:
-            options.setdefault(name, int(value))  # append word after last comma
+            options.setdefault(name, int(value))  # Word after last comma
 
         return options
 
