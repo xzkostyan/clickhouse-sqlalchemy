@@ -12,7 +12,7 @@ from .. import types
 from ..util import compat
 
 
-# Column spec
+# Column specifications
 colspecs = {}
 
 
@@ -47,7 +47,7 @@ class ClickHouseIdentifierPreparer(compiler.IdentifierPreparer):
 
 class ClickHouseCompiler(compiler.SQLCompiler):
     def visit_mod_binary(self, binary, operator, **kw):
-        return self.process(binary.left, **kw) + " %% " + \
+        return self.process(binary.left, **kw) + ' %% ' + \
             self.process(binary.right, **kw)
 
     def post_process_text(self, text):
@@ -60,7 +60,7 @@ class ClickHouseCompiler(compiler.SQLCompiler):
     def visit_case(self, clause, **kwargs):
         text = 'CASE '
         if clause.value is not None:
-            text += clause.value._compiler_dispatch(self, **kwargs) + " "
+            text += clause.value._compiler_dispatch(self, **kwargs) + ' '
         for cond, result in clause.whens:
             text += 'WHEN ' + cond._compiler_dispatch(
                 self, **kwargs
@@ -324,11 +324,11 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_array(self, type_, **kw):
         item_type = type_api.to_instance(type_.item_type)
-        return "Array(%s)" % self.process(item_type, **kw)
+        return 'Array(%s)' % self.process(item_type, **kw)
 
     def visit_nullable(self, type_, **kw):
         nested_type = type_api.to_instance(type_.nested_type)
-        return "Nullable(%s)" % self.process(nested_type, **kw)
+        return 'Nullable(%s)' % self.process(nested_type, **kw)
 
     def visit_int8(self, type_, **kw):
         return 'Int8'
@@ -369,9 +369,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def _render_enum(self, db_type, type_, **kw):
         choices = (
             "'%s' = %d" %
-            (x.name.replace("'", "\\'"), x.value) for x in type_.enum_type
+            (x.name.replace("'", r"\'"), x.value) for x in type_.enum_type
         )
-        return "%s(%s)" % (db_type, ', '.join(choices))
+        return '%s(%s)' % (db_type, ', '.join(choices))
 
     def visit_enum8(self, type_, **kw):
         return self._render_enum('Enum8', type_, **kw)
@@ -416,8 +416,8 @@ class ClickHouseDialect(default.DefaultDialect):
 
     construct_arguments = [
         (schema.Table, {
-            "data": [],
-            "cluster": None
+            'data': [],
+            'cluster': None
         })
     ]
 
