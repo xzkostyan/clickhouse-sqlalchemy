@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.0.9] - 2019-01-21
+### Added
+- `ON CLUSTER` clause in `CREATE TABLE`, `DROP TABLE`.
+
+### Fixed
+- Raw connection execute. Pull request [#40](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/40) by [AchilleAsh](https://github.com/AchilleAsh).
+Solves issue [#39](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/39).
+
 ## [0.0.8] - 2018-11-25
 ### Added
 - Streaming support via `yield_per`.
@@ -86,7 +94,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.8...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.9...HEAD
+[0.0.9]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.8...0.0.9
 [0.0.8]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.7...0.0.8
 [0.0.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.6...0.0.7
 [0.0.6]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.5...0.0.6
