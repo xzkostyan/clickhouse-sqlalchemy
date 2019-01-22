@@ -494,11 +494,7 @@ class ClickHouseDialect(default.DefaultDialect):
                 return sqltypes.NullType
 
             type_enum = enum.Enum('%s_enum' % name, options)
-
-            def partial_type():
-                return coltype(type_enum)
-
-            return partial_type
+            return lambda: coltype(type_enum)
 
         else:
             try:
