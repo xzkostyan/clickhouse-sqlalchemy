@@ -377,7 +377,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def _render_enum(self, db_type, type_, **kw):
         choices = (
             "'%s' = %d" %
-            (x.name.replace("'", r"\'"), x.value) for x in type_.enum_type
+            (x.name.replace("'", r"\'"), x.value) for x in type_.enum_class
         )
         return '%s(%s)' % (db_type, ', '.join(choices))
 

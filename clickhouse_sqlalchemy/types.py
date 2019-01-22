@@ -98,7 +98,6 @@ class Enum8(types.Enum):
         if not enums:
             enums = kw.get('_enums', ())  # passed as keyword
 
-        self.enum_type = enums[0]
         super(Enum8, self).__init__(*enums, **kw)
 
 

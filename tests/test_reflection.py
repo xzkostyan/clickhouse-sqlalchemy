@@ -57,7 +57,7 @@ class ReflectionTestCase(TypesTestCase):
 
         self.assertIsInstance(coltype, types.Enum8)
         self.assertEqual(
-            {o.name: o.value for o in coltype.enum_type}, enum_options
+            {o.name: o.value for o in coltype.enum_class}, enum_options
         )
 
     def test_enum16(self):
@@ -68,5 +68,5 @@ class ReflectionTestCase(TypesTestCase):
 
         self.assertIsInstance(coltype, types.Enum16)
         self.assertEqual(
-            {o.name: o.value for o in coltype.enum_type}, enum_options
+            {o.name: o.value for o in coltype.enum_class}, enum_options
         )
