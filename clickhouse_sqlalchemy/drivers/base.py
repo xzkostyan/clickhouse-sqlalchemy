@@ -39,10 +39,6 @@ ischema_names = {
 }
 
 
-# Quotes used when parsing enum options
-enum_option_quotes = ("'",)
-
-
 class ClickHouseIdentifierPreparer(compiler.IdentifierPreparer):
     def _escape_identifier(self, value):
         value = value.replace(self.escape_quote, self.escape_to_quote)
@@ -487,7 +483,7 @@ class ClickHouseDialect(default.DefaultDialect):
 
             options = dict()
             if pos >= 0:
-                options = self._parse_enum_options(
+                options = self._parse_options(
                     spec[pos + 1: spec.rfind(')')]
                 )
             if not options:
@@ -505,7 +501,7 @@ class ClickHouseDialect(default.DefaultDialect):
                 return sqltypes.NullType
 
     @staticmethod
-    def _parse_enum_options(option_string):
+    def _parse_options(option_string):
         options = dict()
         after_name = False
         escaped = False
@@ -522,7 +518,7 @@ class ClickHouseDialect(default.DefaultDialect):
                 if ch in (' ', '='):
                     pass
                 elif ch == ',':
-                    options.setdefault(name, int(value))
+                    options[name] = int(value)
                     after_name = False
                     name = ''
                     value = ''  # Reset before collecting new option
@@ -539,7 +535,7 @@ class ClickHouseDialect(default.DefaultDialect):
                     name += ch
 
             else:
-                if ch in enum_option_quotes:
+                if ch == "'":
                     quote_character = ch
 
         if after_name:
