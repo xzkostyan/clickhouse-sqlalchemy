@@ -1,3 +1,5 @@
+import enum
+
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
@@ -10,7 +12,7 @@ from .. import types
 from ..util import compat
 
 
-# Column spec
+# Column specifications
 colspecs = {}
 
 
@@ -45,7 +47,7 @@ class ClickHouseIdentifierPreparer(compiler.IdentifierPreparer):
 
 class ClickHouseCompiler(compiler.SQLCompiler):
     def visit_mod_binary(self, binary, operator, **kw):
-        return self.process(binary.left, **kw) + " %% " + \
+        return self.process(binary.left, **kw) + ' %% ' + \
             self.process(binary.right, **kw)
 
     def post_process_text(self, text):
@@ -58,7 +60,7 @@ class ClickHouseCompiler(compiler.SQLCompiler):
     def visit_case(self, clause, **kwargs):
         text = 'CASE '
         if clause.value is not None:
-            text += clause.value._compiler_dispatch(self, **kwargs) + " "
+            text += clause.value._compiler_dispatch(self, **kwargs) + ' '
         for cond, result in clause.whens:
             text += 'WHEN ' + cond._compiler_dispatch(
                 self, **kwargs
@@ -166,13 +168,21 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
             if select._hints:
                 text += ', '.join(
-                    [f._compiler_dispatch(self, asfrom=True,
-                                          fromhints=byfrom, **kwargs)
-                     for f in froms])
+                    [
+                        f._compiler_dispatch(
+                                self,
+                                asfrom=True,
+                                fromhints=byfrom,
+                                **kwargs
+                        )
+                        for f in froms
+                    ]
+                )
             else:
                 text += ', '.join(
                     [f._compiler_dispatch(self, asfrom=True, **kwargs)
-                     for f in froms])
+                     for f in froms]
+                )
         else:
             text += self.default_from()
 
@@ -268,9 +278,9 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         for param in engine_params:
             if isinstance(param, tuple):
                 compiled = (
-                    '(' +
-                    ', '.join(compile_param(p) for p in param) +
-                    ')'
+                    '('
+                    + ', '.join(compile_param(p) for p in param)
+                    + ')'
                 )
             else:
                 compiled = compile_param(param)
@@ -322,11 +332,11 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_array(self, type_, **kw):
         item_type = type_api.to_instance(type_.item_type)
-        return "Array(%s)" % self.process(item_type, **kw)
+        return 'Array(%s)' % self.process(item_type, **kw)
 
     def visit_nullable(self, type_, **kw):
         nested_type = type_api.to_instance(type_.nested_type)
-        return "Nullable(%s)" % self.process(nested_type, **kw)
+        return 'Nullable(%s)' % self.process(nested_type, **kw)
 
     def visit_int8(self, type_, **kw):
         return 'Int8'
@@ -367,9 +377,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def _render_enum(self, db_type, type_, **kw):
         choices = (
             "'%s' = %d" %
-            (x.name.replace("'", "\\'"), x.value) for x in type_.enum_type
+            (x.name.replace("'", r"\'"), x.value) for x in type_.enum_type
         )
-        return "%s(%s)" % (db_type, ', '.join(choices))
+        return '%s(%s)' % (db_type, ', '.join(choices))
 
     def visit_enum8(self, type_, **kw):
         return self._render_enum('Enum8', type_, **kw)
@@ -414,8 +424,8 @@ class ClickHouseDialect(default.DefaultDialect):
 
     construct_arguments = [
         (schema.Table, {
-            "data": [],
-            "cluster": None
+            'data': [],
+            'cluster': None
         })
     ]
 
@@ -443,11 +453,19 @@ class ClickHouseDialect(default.DefaultDialect):
             columns.append(self._get_column_info(name, format_type))
         return columns
 
-    def _get_col_type(self, name, spec):
+    def _get_column_info(self, name, format_type):
+        return {
+            'name': name,
+            'type': self._get_column_type(name, format_type),
+            'nullable': True,
+            'default': None,
+        }
+
+    def _get_column_type(self, name, spec):
         if spec.startswith('Array'):
             inner = spec[6:-1]
             coltype = self.ischema_names['_array']
-            return coltype(self._get_col_type(name, inner))
+            return coltype(self._get_column_type(name, inner))
 
         elif spec.startswith('FixedString'):
             length = int(spec[12:-1])
@@ -456,7 +474,23 @@ class ClickHouseDialect(default.DefaultDialect):
         elif spec.startswith('Nullable'):
             inner = spec[9:-1]
             coltype = self.ischema_names['_nullable']
-            return coltype(self._get_col_type(name, inner))
+            return coltype(self._get_column_type(name, inner))
+
+        elif spec.startswith('Enum'):
+            pos = spec.find('(')
+            type = spec[:pos]
+            coltype = self.ischema_names[type]
+
+            options = dict()
+            if pos >= 0:
+                options = self._parse_options(
+                    spec[pos + 1: spec.rfind(')')]
+                )
+            if not options:
+                return sqltypes.NullType
+
+            type_enum = enum.Enum('%s_enum' % name, options)
+            return lambda: coltype(type_enum)
 
         else:
             try:
@@ -466,13 +500,48 @@ class ClickHouseDialect(default.DefaultDialect):
                      (spec, name))
                 return sqltypes.NullType
 
-    def _get_column_info(self, name, format_type):
-        return {
-            'name': name,
-            'type': self._get_col_type(name, format_type),
-            'nullable': True,
-            'default': None,
-        }
+    @staticmethod
+    def _parse_options(option_string):
+        options = dict()
+        after_name = False
+        escaped = False
+        quote_character = None
+        name = ''
+        value = ''
+
+        for ch in option_string:
+            if escaped:
+                name += ch
+                escaped = False  # Accepting escaped character
+
+            elif after_name:
+                if ch in (' ', '='):
+                    pass
+                elif ch == ',':
+                    options[name] = int(value)
+                    after_name = False
+                    name = ''
+                    value = ''  # Reset before collecting new option
+                else:
+                    value += ch
+
+            elif quote_character:
+                if ch == '\\':
+                    escaped = True
+                elif ch == quote_character:
+                    quote_character = None
+                    after_name = True  # Start collecting option value
+                else:
+                    name += ch
+
+            else:
+                if ch == "'":
+                    quote_character = ch
+
+        if after_name:
+            options.setdefault(name, int(value))  # Word after last comma
+
+        return options
 
     @reflection.cache
     def get_schema_names(self, connection, **kw):

@@ -95,6 +95,9 @@ class Enum8(types.Enum):
     __visit_name__ = 'enum8'
 
     def __init__(self, *enums, **kw):
+        if not enums:
+            enums = kw.get('_enums', ())  # passed as keyword
+
         self.enum_type = enums[0]
         super(Enum8, self).__init__(*enums, **kw)
 

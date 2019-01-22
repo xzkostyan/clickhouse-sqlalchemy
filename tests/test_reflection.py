@@ -1,3 +1,5 @@
+import enum
+
 from sqlalchemy import Column, inspect
 
 from clickhouse_sqlalchemy import types, engines, Table
@@ -46,3 +48,25 @@ class ReflectionTestCase(TypesTestCase):
 
         self.assertIsInstance(coltype, types.Nullable)
         self.assertEqual(coltype.nested_type, types.Int32)
+
+    def test_enum8(self):
+        enum_options = {'three': 3, "quoted' ": 9, 'comma, ': 14}
+        coltype = self._type_round_trip(
+            types.Enum8(enum.Enum('any8_enum', enum_options))
+        )[0]
+
+        self.assertIsInstance(coltype, types.Enum8)
+        self.assertEqual(
+            {o.name: o.value for o in coltype.enum_type}, enum_options
+        )
+
+    def test_enum16(self):
+        enum_options = {'first': 1024, 'second': 2048}
+        coltype = self._type_round_trip(
+            types.Enum16(enum.Enum('any16_enum', enum_options))
+        )[0]
+
+        self.assertIsInstance(coltype, types.Enum16)
+        self.assertEqual(
+            {o.name: o.value for o in coltype.enum_type}, enum_options
+        )
