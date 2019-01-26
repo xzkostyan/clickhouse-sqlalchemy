@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+-  Handling additional column`comment_expression` in `DESCRIBE TABLE` results during reflection (in ClickHouse server >= 18.15).
+
 ## [0.0.9] - 2019-01-21
 ### Added
 - `ON CLUSTER` clause in `CREATE TABLE`, `DROP TABLE`.

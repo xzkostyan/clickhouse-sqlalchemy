@@ -448,10 +448,7 @@ class ClickHouseDialect(default.DefaultDialect):
         query = 'DESCRIBE TABLE {}'.format(table_name)
         rows = self._execute(connection, query)
 
-        columns = []
-        for name, format_type, default_type, default_expression in rows:
-            columns.append(self._get_column_info(name, format_type))
-        return columns
+        return [self._get_column_info(row.name, row.type) for row in rows]
 
     def _get_column_info(self, name, format_type):
         return {
