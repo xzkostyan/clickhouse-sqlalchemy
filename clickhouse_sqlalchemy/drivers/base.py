@@ -32,6 +32,7 @@ ischema_names = {
     'Float64': FLOAT,
     'Float32': FLOAT,
     'String': types.String,
+    'UUID': types.UUID,
     'FixedString': types.String,
     'Enum8': types.Enum8,
     'Enum16': types.Enum16,
@@ -397,6 +398,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_enum16(self, type_, **kw):
         return self._render_enum('Enum16', type_, **kw)
+
+    def visit_uuid(self, type_, **kw):
+        return 'UUID'
 
 
 class ClickHouseExecutionContextBase(default.DefaultExecutionContext):
