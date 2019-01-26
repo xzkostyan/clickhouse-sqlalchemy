@@ -6,7 +6,8 @@ from sqlalchemy.sql import (
     compiler, expression, type_api, literal_column, elements
 )
 from sqlalchemy.types import DATE, DATETIME, FLOAT
-from sqlalchemy.util import inspect_getargspec, warn
+from sqlalchemy.util import warn
+from sqlalchemy.util.compat import inspect_getfullargspec
 
 from .. import types
 from ..util import compat
@@ -102,12 +103,19 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
     def visit_lambda(self, lambda_, **kw):
         func = lambda_.func
-        spec = inspect_getargspec(func)
+        spec = inspect_getfullargspec(func)
 
         if spec.varargs:
             raise exc.CompileError('Lambdas with *args are not supported')
 
-        if spec.keywords:
+        try:
+            # ArgSpec in SA>=1.3.0b2
+            keywords = spec.keywords
+        except AttributeError:
+            # FullArgSpec in SA>=1.3.0b2
+            keywords = spec.varkw
+
+        if keywords:
             raise exc.CompileError('Lambdas with **kwargs are not supported')
 
         text = ', '.join(spec.args) + ' -> '
