@@ -30,6 +30,9 @@ class RequestsTransport(object):
         self.db_name = db_name
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
+        if tz:
+            # кроме использования самим классом, tz берет ещё и Cursor
+            self.tz = pytz.timezone(tz)
 
         self.converters = {
             'Int8': int,
