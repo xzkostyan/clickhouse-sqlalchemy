@@ -1,4 +1,10 @@
-from sqlalchemy import Column, exc, func, literal
+from sqlalchemy import (
+    Column,
+    exc,
+    func,
+    literal,
+    literal_column,
+)
 from sqlalchemy import text
 from sqlalchemy import tuple_
 
@@ -9,12 +15,13 @@ from tests.testcase import BaseTestCase, NativeSessionTestCase
 
 
 class SelectTestCase(BaseTestCase):
-    def create_table(self):
+    def create_table(self, *columns):
         metadata = self.metadata()
 
         return Table(
             't1', metadata,
-            Column('x', types.Int32, primary_key=True)
+            Column('x', types.Int32, primary_key=True),
+            *columns
         )
 
     def test_select(self):
@@ -46,6 +53,27 @@ class SelectTestCase(BaseTestCase):
 
         self.assertIn('with_totals', str(ex.exception))
 
+    def make_count_query(self, base_query):
+        return base_query.from_self(func.count(literal_column('*')))
+
+    def test_array_join(self):
+        table = self.create_table(
+            Column('nested.array_column', types.Array(types.Int8)),
+            Column('nested.another_array_column', types.Array(types.Int8))
+        )
+        first_label = table.c['nested.array_column'].label('from_array')
+        second_not_label = table.c['nested.another_array_column']
+        query = session.query(first_label, second_not_label)\
+            .array_join(first_label, second_not_label)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT '
+            '"nested.array_column" AS from_array, '
+            '"nested.another_array_column" AS "t1_nested.another_array_column"'
+            ' FROM t1 '
+            'ARRAY JOIN nested.array_column, nested.another_array_column'
+        )
+
     def test_sample(self):
         table = self.create_table()
 
@@ -54,7 +82,8 @@ class SelectTestCase(BaseTestCase):
             self.compile(query),
             'SELECT x AS t1_x FROM t1 SAMPLE %(param_1)s GROUP BY x'
         )
-
+        q = self.make_count_query(query)
+        self.compile(q)
         self.assertEqual(
             self.compile(query, literal_binds=True),
             'SELECT x AS t1_x FROM t1 SAMPLE 0.1 GROUP BY x'
