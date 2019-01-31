@@ -31,6 +31,10 @@ class ClickHouseDialect_native(ClickHouseDialect):
         if secure is not None:
             url.query['secure'] = asbool(secure)
 
+        verify = url.query.get('verify')
+        if verify is not None:
+            url.query['verify'] = asbool(verify)
+
         kwargs.update(url.query)
 
         return (url.host, port, db_name, url.username, url.password), kwargs
