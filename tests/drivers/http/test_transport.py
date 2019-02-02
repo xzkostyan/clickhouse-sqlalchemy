@@ -1,7 +1,7 @@
 from datetime import date
 
 from responses import mock
-from unittest.mock import patch
+from mock import patch
 from sqlalchemy import Column, func
 
 from clickhouse_sqlalchemy import types, Table
