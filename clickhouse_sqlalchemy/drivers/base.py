@@ -6,8 +6,8 @@ from sqlalchemy.sql import (
     compiler, expression, type_api, literal_column, elements
 )
 from sqlalchemy.types import DATE, DATETIME, FLOAT
+from sqlalchemy.util.compat import inspect_getfullargspec
 from sqlalchemy.util import (
-    inspect_getfullargspec,
     warn,
     to_list,
 )
