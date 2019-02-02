@@ -83,8 +83,14 @@ class EnginesDeclarativeTestCase(BaseTestCase):
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
-            'CREATE TABLE test_table (date Date, x Int32, y String) '
-            'ENGINE = MergeTree() PARTITION BY date ORDER BY (date, x) PRIMARY KEY (x, y) SAMPLE BY hashFunc(x) SETTINGS setting1=2, setting2=5'
+            'CREATE TABLE test_table '
+            '(date Date, x Int32, y String) '
+            'ENGINE = MergeTree() '
+            'PARTITION BY date '
+            'ORDER BY (date, x) '
+            'PRIMARY KEY (x, y) '
+            'SAMPLE BY hashFunc(x) '
+            'SETTINGS setting1=2, setting2=5'
         )
 
     def test_create_table_without_engine(self):
@@ -107,15 +113,25 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             sign = Column(types.Int8)
 
             __table_args__ = (
-                engines.CollapsingMergeTree(sign, date, (date, x), (x, y), func.random(), key='value'),
+                engines.CollapsingMergeTree(
+                    sign,
+                    date,
+                    (date, x),
+                    (x, y),
+                    func.random(),
+                    key='value'),
             )
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
             'CREATE TABLE test_table '
             '(date Date, x Int32, y String, sign Int8) '
-            'ENGINE = CollapsingMergeTree(sign) PARTITION BY date ORDER BY (date, x) '
-            'PRIMARY KEY (x, y) SAMPLE BY random() SETTINGS key=value'
+            'ENGINE = CollapsingMergeTree(sign) '
+            'PARTITION BY date '
+            'ORDER BY (date, x) '
+            'PRIMARY KEY (x, y) '
+            'SAMPLE BY random() '
+            'SETTINGS key=value'
         )
 
     def test_summing_merge_tree(self):
