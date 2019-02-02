@@ -3,7 +3,6 @@ from sqlalchemy.sql import type_api
 from sqlalchemy.sql.elements import (
     BindParameter,
     ColumnElement,
-    ClauseElement,
     ClauseList,
 )
 from sqlalchemy.sql.visitors import Visitable
