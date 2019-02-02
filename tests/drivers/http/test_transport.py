@@ -1,9 +1,11 @@
 from datetime import date
 
 from responses import mock
+from unittest.mock import patch
 from sqlalchemy import Column, func
 
 from clickhouse_sqlalchemy import types, Table
+from clickhouse_sqlalchemy.drivers.base import ClickHouseDialect
 from tests.session import session
 from tests.testcase import BaseTestCase
 
@@ -71,8 +73,10 @@ class TransportCase(BaseTestCase):
         rv = session.query(*table.c).first()
         self.assertEqual(rv, tuple([42.0] * len(columns)))
 
+    # do not call that method
+    @patch.object(ClickHouseDialect, '_get_server_version_info')
     @mock.activate
-    def test_parse_date_types(self):
+    def test_parse_date_types(self, patched_server_info):
         mock.add(
             mock.POST, 'http://localhost:8123', status=200,
             body=(

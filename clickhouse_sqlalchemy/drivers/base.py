@@ -6,8 +6,11 @@ from sqlalchemy.sql import (
     compiler, expression, type_api, literal_column, elements
 )
 from sqlalchemy.types import DATE, DATETIME, FLOAT
-from sqlalchemy.util import warn
-from sqlalchemy.util.compat import inspect_getfullargspec
+from sqlalchemy.util import (
+    inspect_getargspec,
+    warn,
+    to_list,
+)
 
 from .. import types
 from ..util import compat
@@ -262,22 +265,64 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         # Do not render PKs.
         return ''
 
+    def _compile_param(self, expr):
+        compiler = self.sql_compiler
+        if isinstance(expr, (list, tuple)):
+            return '(' + ', '.join(self._compile_param(el) for el in expr) + ')'
+        if not isinstance(expr, expression.ColumnClause):
+            if not hasattr(expr, 'self_group'):
+                # assuming base type (int, string, etc.)
+                return compat.text_type(expr)
+            else:
+                expr = expr.self_group()
+        return compiler.process(
+            expr, include_table=False, literal_binds=True
+        )
+
+
+    def visit_merge_tree(self, engine):
+
+        text = '{0}{1}\n'.format(engine.name, self._compile_param(
+            to_list(
+                engine.get_parameters())
+        ) or '()')
+        if engine.partition_by:
+            text += ' PARTITION BY {0}\n'.format(
+                self._compile_param(
+                    engine.partition_by.get_column()
+                )
+            )
+        if engine.order_by:
+            text += ' ORDER BY {0}\n'.format(
+                self._compile_param(
+                    engine.order_by.get_expressions_or_columns()
+                )
+            )
+        if engine.primary_key:
+            text += ' PRIMARY KEY {0}\n'.format(
+                self._compile_param(
+                    engine.primary_key.get_expressions_or_columns()
+                )
+            )
+        if engine.sample:
+            text += ' SAMPLE BY {0}\n'.format(
+                self._compile_param(engine.sample.get_expressions_or_columns()[0])
+            )
+        if engine.settings:
+            text += ' SETTINGS ' + ', '.join(
+                '{key}={value}'.format(
+                    key=key,
+                    value=value
+                )
+                for key, value in engine.settings.items()
+            )
+        return text
+
     def visit_engine(self, engine):
         compiler = self.sql_compiler
 
-        def compile_param(expr):
-            if not isinstance(expr, expression.ColumnClause):
-                if not hasattr(expr, 'self_group'):
-                    # assuming base type (int, string, etc.)
-                    return compat.text_type(expr)
-                else:
-                    expr = expr.self_group()
-            return compiler.process(
-                expr, include_table=False, literal_binds=True
-            )
-
-        engine_params = engine.get_params()
-        text = engine.name()
+        engine_params = engine.get_parameters()
+        text = engine.name
         if not engine_params:
             return text
 
@@ -288,11 +333,11 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             if isinstance(param, tuple):
                 compiled = (
                     '('
-                    + ', '.join(compile_param(p) for p in param)
+                    + ', '.join(self._compile_param(p) for p in param)
                     + ')'
                 )
             else:
-                compiled = compile_param(param)
+                compiled = self._compile_param(param)
 
             compiled_params.append(compiled)
 
@@ -593,3 +638,6 @@ class ClickHouseDialect(default.DefaultDialect):
 
     def _check_unicode_description(self, connection):
         return True
+
+    def _get_server_version_info(self, connection):
+        return tuple(int(x) for x in connection.scalar('select version()').split('.'))
