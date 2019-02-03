@@ -117,29 +117,29 @@ class JoinTestCase(BaseTestCase):
             Column('y', types.Int32, primary_key=True),
         ) for i in range(num)]
 
-    def test_unsupported_expressoin(self):
-        t1, t2 = self.create_tables(2)
-
-        query = session.query(t1.c.x).join(t2, literal(True), any=True)
-        with self.assertRaises(exc.CompileError) as ex:
-            self.compile(query)
-
-        self.assertIn('Only tuple elements are supported', str(ex.exception))
-
     def test_joins(self):
         t1, t2 = self.create_tables(2)
 
         query = session.query(t1.c.x, t2.c.x) \
-            .join(t2, tuple_(t1.c.x, t1.c.y), any=True)
+            .join(
+            t2,
+            t1.c.x == t1.c.y,
+            type='inner',
+            strictness='any')
 
         self.assertEqual(
             self.compile(query),
             "SELECT x AS t0_x, x AS t1_x FROM t0 "
-            "ANY INNER JOIN t1 USING x, y"
+            "ANY INNER JOIN t1 ON x = y"
         )
 
         query = session.query(t1.c.x, t2.c.x) \
-            .join(t2, tuple_(t1.c.x, t1.c.y), all=True)
+            .join(
+            t2,
+            tuple_(t1.c.x, t1.c.y),
+            type='inner',
+            strictness='all'
+        )
 
         self.assertEqual(
             self.compile(query),
@@ -148,7 +148,11 @@ class JoinTestCase(BaseTestCase):
         )
 
         query = session.query(t1.c.x, t2.c.x) \
-            .join(t2, tuple_(t1.c.x, t1.c.y), all=True, global_=True)
+            .join(t2,
+                  tuple_(t1.c.x, t1.c.y),
+                  type='inner',
+                  strictness='all',
+                  distribution='global')
 
         self.assertEqual(
             self.compile(query),
@@ -157,7 +161,12 @@ class JoinTestCase(BaseTestCase):
         )
 
         query = session.query(t1.c.x, t2.c.x) \
-            .outerjoin(t2, tuple_(t1.c.x, t1.c.y), all=True, global_=True)
+            .outerjoin(t2,
+                       tuple_(t1.c.x, t1.c.y),
+                       type='left outer',
+                       strictness='all',
+                       distribution='global'
+        )
 
         self.assertEqual(
             self.compile(query),
@@ -166,7 +175,13 @@ class JoinTestCase(BaseTestCase):
         )
 
         query = session.query(t1.c.x, t2.c.x) \
-            .outerjoin(t2, tuple_(t1.c.x, t1.c.y), all=True, global_=True)
+            .outerjoin(
+            t2,
+            tuple_(t1.c.x, t1.c.y),
+            type='LEFT OUTER',
+            strictness='ALL',
+            distribution='GLOBAL'
+        )
 
         self.assertEqual(
             self.compile(query),
@@ -175,7 +190,10 @@ class JoinTestCase(BaseTestCase):
         )
 
         query = session.query(t1.c.x, t2.c.x) \
-            .outerjoin(t2, tuple_(t1.c.x, t1.c.y), all=True, full=True)
+            .outerjoin(t2,
+                       tuple_(t1.c.x, t1.c.y),
+                       strictness='ALL',
+                       type='FULL OUTER')
 
         self.assertEqual(
             self.compile(query),
