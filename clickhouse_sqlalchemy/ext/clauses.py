@@ -1,9 +1,11 @@
 from sqlalchemy import util, exc
+from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql import type_api
 from sqlalchemy.sql.elements import (
     BindParameter,
     ColumnElement,
     ClauseList,
+    ColumnClause,
 )
 from sqlalchemy.sql.visitors import Visitable
 
@@ -40,6 +42,25 @@ class Lambda(ColumnElement):
 
         self.type = type_api.NULLTYPE
         self.func = func
+
+
+class NestedColumn(ColumnClause):
+    """serves the role of the "nested" column in a nested type expression."""
+
+    def __init__(self, parent, sub_column):
+        self.parent = parent
+        self.sub_column = sub_column
+        super(NestedColumn, self).__init__(
+            sub_column.name, sub_column.type, _selectable=self.parent.table
+        )
+
+
+@compiles(NestedColumn)
+def _comp(element, compiler, **kw):
+    return "%s.%s" % (
+        compiler.process(element.parent),
+        compiler.visit_column(element, include_table=False),
+    )
 
 
 class ArrayJoin(ClauseList):

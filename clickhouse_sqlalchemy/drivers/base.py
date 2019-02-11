@@ -4,6 +4,7 @@ from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
     compiler, expression, type_api, literal_column, elements
 )
+from sqlalchemy.sql.ddl import CreateColumn
 from sqlalchemy.sql.elements import Label
 from sqlalchemy.types import DATE, DATETIME, FLOAT
 from sqlalchemy.util import warn
@@ -396,6 +397,14 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_numeric(self, type_, **kw):
         return 'Decimal(%s, %s)' % (type_.precision, type_.scale)
+
+    def visit_nested(self, nested, **kwargs):
+        ddl_compiler = self.dialect.ddl_compiler(self.dialect, None)
+        cols_create = [
+            ddl_compiler.visit_create_column(CreateColumn(nested_child))
+            for nested_child in nested.columns
+        ]
+        return 'Nested(%s)' % ', '.join(cols_create)
 
     def _render_enum(self, db_type, type_, **kw):
         choices = (

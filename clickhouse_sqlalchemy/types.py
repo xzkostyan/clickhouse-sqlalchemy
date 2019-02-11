@@ -1,5 +1,6 @@
-from sqlalchemy.sql.type_api import to_instance
-from sqlalchemy import types
+from sqlalchemy.sql.type_api import to_instance, UserDefinedType
+from sqlalchemy import types, Column
+from .ext.clauses import NestedColumn
 
 
 class String(types.String):
@@ -111,3 +112,43 @@ class Enum16(Enum8):
 
 class Decimal(types.Numeric):
     __visit_name__ = 'numeric'
+
+
+class Nested(types.TypeEngine):
+    __visit_name__ = 'nested'
+
+    def __init__(self, *columns):
+        if not columns:
+            raise ValueError('columns must be specified for nested type')
+        self.columns = columns
+        # for column in columns:
+        #     self.columns.append(
+        #         NestedChild(
+        #             column
+        #         ))
+        self._columns_dict = {col.name: col for col in columns}
+        super(Nested, self).__init__()
+
+    class Comparator(UserDefinedType.Comparator):
+        def __getattr__(self, key):
+            # this is a particular convention for serving names that conflict
+            # with existing elements on Column which you can choose
+            # to replace with something else, see below
+            str_key = key.rstrip("_")
+            try:
+                sub = self.type._columns_dict[str_key]
+            except KeyError:
+                raise AttributeError(key)
+            else:
+                # probably want to cache these eventually
+                original_type = sub.type
+                try:
+                    sub.type = Array(sub.type)
+                    expr = NestedColumn(self.expr, sub)
+                    return expr
+                finally:
+                    sub.type = original_type
+
+
+    comparator_factory = Comparator
+
