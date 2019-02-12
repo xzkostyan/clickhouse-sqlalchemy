@@ -53,9 +53,6 @@ class SelectTestCase(BaseTestCase):
 
         self.assertIn('with_totals', str(ex.exception))
 
-    def make_count_query(self, base_query):
-        return base_query.from_self(func.count(literal_column('*')))
-
     def test_array_join(self):
         table = self.create_table(
             Column('nested.array_column', types.Array(types.Int8)),
@@ -82,8 +79,6 @@ class SelectTestCase(BaseTestCase):
             self.compile(query),
             'SELECT x AS t1_x FROM t1 SAMPLE %(param_1)s GROUP BY x'
         )
-        q = self.make_count_query(query)
-        self.compile(q)
         self.assertEqual(
             self.compile(query, literal_binds=True),
             'SELECT x AS t1_x FROM t1 SAMPLE 0.1 GROUP BY x'
