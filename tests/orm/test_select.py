@@ -142,6 +142,15 @@ class JoinTestCase(BaseTestCase):
             "GLOBAL ALL LEFT OUTER JOIN t1 USING x, y"
         )
 
+        query = session.query(t1.c.x, t2.c.x) \
+            .outerjoin(t2, tuple_(t1.c.x, t1.c.y), all=True, full=True)
+
+        self.assertEqual(
+            self.compile(query),
+            "SELECT x AS t0_x, x AS t1_x FROM t0 "
+            "ALL FULL OUTER JOIN t1 USING x, y"
+        )
+
 
 class YieldTest(NativeSessionTestCase):
     def test_yield_per_and_execution_options(self):

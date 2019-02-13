@@ -150,7 +150,9 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         if join.all:
             join_type += "ALL "
 
-        if join.isouter:
+        if join.full:
+            join_type += "FULL OUTER JOIN "
+        elif join.isouter:
             join_type += "LEFT OUTER JOIN "
         else:
             join_type += "INNER JOIN "
