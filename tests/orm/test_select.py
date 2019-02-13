@@ -3,7 +3,6 @@ from sqlalchemy import (
     exc,
     func,
     literal,
-    literal_column,
 )
 from sqlalchemy import text
 from sqlalchemy import tuple_
