@@ -1,5 +1,5 @@
 from sqlalchemy.sql.type_api import to_instance, UserDefinedType
-from sqlalchemy import types, Column
+from sqlalchemy import types
 from .ext.clauses import NestedColumn
 
 
@@ -140,6 +140,4 @@ class Nested(types.TypeEngine):
                 finally:
                     sub.type = original_type
 
-
     comparator_factory = Comparator
-

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, func, and_
+from sqlalchemy import Column, and_
 
 from clickhouse_sqlalchemy import types, select, Table
 from tests.testcase import BaseTestCase
@@ -64,8 +64,7 @@ class SelectTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.compile(query, literal_binds=True),
-            'SELECT parent.child1 FROM t1 ' 
+            'SELECT parent.child1 FROM t1 '
             'WHERE parent.child1 = [1, 2] '
             'AND parent.child2 = [\'foo\', \'bar\']'
         )
-
