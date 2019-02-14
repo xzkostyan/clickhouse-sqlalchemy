@@ -1,6 +1,10 @@
 from sqlalchemy import util, exc
 from sqlalchemy.sql import type_api
-from sqlalchemy.sql.elements import BindParameter, ColumnElement
+from sqlalchemy.sql.elements import (
+    BindParameter,
+    ColumnElement,
+    ClauseList,
+)
 from sqlalchemy.sql.visitors import Visitable
 
 
@@ -36,3 +40,7 @@ class Lambda(ColumnElement):
 
         self.type = type_api.NULLTYPE
         self.func = func
+
+
+class ArrayJoin(ClauseList):
+    __visit_name__ = 'ARRAY_JOIN'

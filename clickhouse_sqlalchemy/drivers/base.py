@@ -1,10 +1,10 @@
 import enum
-
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
     compiler, expression, type_api, literal_column, elements
 )
+from sqlalchemy.sql.elements import Label
 from sqlalchemy.types import DATE, DATETIME, FLOAT
 from sqlalchemy.util import warn
 from sqlalchemy.util.compat import inspect_getfullargspec
@@ -196,6 +196,15 @@ class ClickHouseCompiler(compiler.SQLCompiler):
                 )
         else:
             text += self.default_from()
+
+        if select._array_join:
+            text += ' \nARRAY JOIN {columns}'.format(
+                columns=', '.join(
+                    col.element.name if isinstance(col, Label) else col.name
+                    for col in select._array_join
+
+                )
+            )
 
         sample_clause = getattr(select, '_sample_clause', None)
 
