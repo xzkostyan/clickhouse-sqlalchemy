@@ -69,7 +69,7 @@ class SelectTestCase(BaseTestCase):
             'AS "t1_nested.another_array_column" '
             'FROM t1 '
             'ARRAY JOIN "nested.array_column" AS from_array, '
-            'nested.another_array_column'
+            '"nested.another_array_column"'
         )
 
     def test_sample(self):
