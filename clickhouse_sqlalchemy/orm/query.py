@@ -1,7 +1,10 @@
 from sqlalchemy import exc
 from sqlalchemy.orm.query import Query as BaseQuery
 
-from ..ext.clauses import sample_clause
+from ..ext.clauses import (
+    sample_clause,
+    ArrayJoin,
+)
 
 
 class Query(BaseQuery):
@@ -31,7 +34,7 @@ class Query(BaseQuery):
         return self
 
     def array_join(self, *columns):
-        self._array_join = columns
+        self._array_join = ArrayJoin(*columns)
         return self
 
     def sample(self, sample):

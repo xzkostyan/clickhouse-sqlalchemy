@@ -6,6 +6,7 @@ from sqlalchemy.sql.elements import (
     ColumnElement,
     ClauseList,
     ColumnClause,
+    Label,
 )
 from sqlalchemy.sql.visitors import Visitable
 
@@ -45,23 +46,33 @@ class Lambda(ColumnElement):
 
 
 class NestedColumn(ColumnClause):
-    """serves the role of the "nested" column in a nested type expression."""
-
     def __init__(self, parent, sub_column):
         self.parent = parent
         self.sub_column = sub_column
+        if isinstance(self.parent, Label):
+            table = self.parent.element.table
+        else:
+            table = self.parent.table
         super(NestedColumn, self).__init__(
-            sub_column.name, sub_column.type, _selectable=self.parent.table
+            sub_column.name,
+            sub_column.type,
+            _selectable=table
         )
 
 
 @compiles(NestedColumn)
 def _comp(element, compiler, **kw):
+    from_labeled_label = False
+    if isinstance(element.parent, Label):
+        from_labeled_label = True
     return "%s.%s" % (
-        compiler.process(element.parent),
+        compiler.process(element.parent,
+                         from_labeled_label=from_labeled_label,
+                         within_label_clause=False,
+                         within_columns_clause=True),
         compiler.visit_column(element, include_table=False),
     )
 
 
 class ArrayJoin(ClauseList):
-    __visit_name__ = 'ARRAY_JOIN'
+    __visit_name__ = 'array_join'

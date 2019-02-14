@@ -171,6 +171,27 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             " USING " + join.onclause._compiler_dispatch(self, **kwargs)
         )
 
+    def visit_array_join(self, array_join, **kwargs):
+        return ' \nARRAY JOIN {columns}'.format(
+            columns=', '.join(
+                col._compiler_dispatch(self,
+                                       within_label_clause=False,
+                                       within_columns_clause=True,
+                                       **kwargs)
+                for col in array_join.clauses
+
+            )
+        )
+
+    def visit_label(self,
+                    label,
+                    from_labeled_label=False,
+                    **kw):
+        if from_labeled_label:
+            return super(ClickHouseCompiler, self).visit_label(label, render_label_as_label=label)
+        else:
+            return super(ClickHouseCompiler, self).visit_label(label, **kw)
+
     def _compose_select_body(
             self, text, select, inner_columns, froms, byfrom, kwargs):
         text += ', '.join(inner_columns)
@@ -198,14 +219,9 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         else:
             text += self.default_from()
 
-        if select._array_join:
-            text += ' \nARRAY JOIN {columns}'.format(
-                columns=', '.join(
-                    col.element.name if isinstance(col, Label) else col.name
-                    for col in select._array_join
+        if select._array_join is not None:
+            text += select._array_join._compiler_dispatch(self, **kwargs)
 
-                )
-            )
 
         sample_clause = getattr(select, '_sample_clause', None)
 
