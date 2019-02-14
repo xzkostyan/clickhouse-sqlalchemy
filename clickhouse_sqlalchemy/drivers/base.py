@@ -5,7 +5,6 @@ from sqlalchemy.sql import (
     compiler, expression, type_api, literal_column, elements
 )
 from sqlalchemy.sql.ddl import CreateColumn
-from sqlalchemy.sql.elements import Label
 from sqlalchemy.types import DATE, DATETIME, FLOAT
 from sqlalchemy.util import warn
 from sqlalchemy.util.compat import inspect_getfullargspec
@@ -188,9 +187,15 @@ class ClickHouseCompiler(compiler.SQLCompiler):
                     from_labeled_label=False,
                     **kw):
         if from_labeled_label:
-            return super(ClickHouseCompiler, self).visit_label(label, render_label_as_label=label)
+            return super(ClickHouseCompiler, self).visit_label(
+                label,
+                render_label_as_label=label
+            )
         else:
-            return super(ClickHouseCompiler, self).visit_label(label, **kw)
+            return super(ClickHouseCompiler, self).visit_label(
+                label,
+                **kw
+            )
 
     def _compose_select_body(
             self, text, select, inner_columns, froms, byfrom, kwargs):
@@ -221,7 +226,6 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         if select._array_join is not None:
             text += select._array_join._compiler_dispatch(self, **kwargs)
-
 
         sample_clause = getattr(select, '_sample_clause', None)
 
