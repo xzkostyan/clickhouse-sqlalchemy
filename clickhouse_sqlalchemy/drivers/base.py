@@ -4,7 +4,7 @@ from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
     compiler, expression, type_api, literal_column, elements
 )
-from sqlalchemy.sql.elements import Label
+from sqlalchemy.sql.ddl import CreateColumn
 from sqlalchemy.types import DATE, DATETIME, FLOAT
 from sqlalchemy.util import warn
 from sqlalchemy.util.compat import inspect_getfullargspec
@@ -170,6 +170,33 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             " USING " + join.onclause._compiler_dispatch(self, **kwargs)
         )
 
+    def visit_array_join(self, array_join, **kwargs):
+        return ' \nARRAY JOIN {columns}'.format(
+            columns=', '.join(
+                col._compiler_dispatch(self,
+                                       within_label_clause=False,
+                                       within_columns_clause=True,
+                                       **kwargs)
+                for col in array_join.clauses
+
+            )
+        )
+
+    def visit_label(self,
+                    label,
+                    from_labeled_label=False,
+                    **kw):
+        if from_labeled_label:
+            return super(ClickHouseCompiler, self).visit_label(
+                label,
+                render_label_as_label=label
+            )
+        else:
+            return super(ClickHouseCompiler, self).visit_label(
+                label,
+                **kw
+            )
+
     def _compose_select_body(
             self, text, select, inner_columns, froms, byfrom, kwargs):
         text += ', '.join(inner_columns)
@@ -197,14 +224,8 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         else:
             text += self.default_from()
 
-        if select._array_join:
-            text += ' \nARRAY JOIN {columns}'.format(
-                columns=', '.join(
-                    col.element.name if isinstance(col, Label) else col.name
-                    for col in select._array_join
-
-                )
-            )
+        if select._array_join is not None:
+            text += select._array_join._compiler_dispatch(self, **kwargs)
 
         sample_clause = getattr(select, '_sample_clause', None)
 
@@ -396,6 +417,14 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_numeric(self, type_, **kw):
         return 'Decimal(%s, %s)' % (type_.precision, type_.scale)
+
+    def visit_nested(self, nested, **kwargs):
+        ddl_compiler = self.dialect.ddl_compiler(self.dialect, None)
+        cols_create = [
+            ddl_compiler.visit_create_column(CreateColumn(nested_child))
+            for nested_child in nested.columns
+        ]
+        return 'Nested(%s)' % ', '.join(cols_create)
 
     def _render_enum(self, db_type, type_, **kw):
         choices = (

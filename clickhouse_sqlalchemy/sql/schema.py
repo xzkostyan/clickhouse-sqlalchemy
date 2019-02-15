@@ -1,5 +1,7 @@
 from sqlalchemy import Table as TableBase
-from sqlalchemy.sql.base import _bind_or_error
+from sqlalchemy.sql.base import (
+    _bind_or_error,
+)
 
 from . import ddl
 

@@ -1,5 +1,6 @@
 from sqlalchemy.sql.selectable import Select as StandardSelect
 
+from clickhouse_sqlalchemy.ext.clauses import ArrayJoin
 from ..ext.clauses import sample_clause
 
 
@@ -20,7 +21,7 @@ class Select(StandardSelect):
         return self
 
     def array_join(self, *columns):
-        self._array_join = columns
+        self._array_join = ArrayJoin(*columns)
         return self
 
 

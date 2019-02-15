@@ -83,6 +83,28 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    def test_create_table_nested(self):
+        table = Table(
+            't1',
+            self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            Column('parent', types.Nested(
+                Column('child1', types.Int32),
+                Column('child2', types.String),
+            )),
+            engines.Memory()
+        )
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'x Int32, '
+            'parent Nested('
+            'child1 Int32, '
+            "child2 String"
+            ')'
+            ') ENGINE = Memory'
+        )
+
     def test_create_table_nested_nullable(self):
         table = Table(
             't1', self.metadata(),
