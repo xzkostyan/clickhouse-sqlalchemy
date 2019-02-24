@@ -1,11 +1,21 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Support for `full` parameter in `.visit_join()`.
+
+## [0.0.10] - 2019-02-05
+### Added
+- Self-signed certificate support. Pull request [#46](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/46) by [rrockru](https://github.com/rrockru).
+- UUID type. Pull request [#41](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/41) by [BolshakovNO](https://github.com/BolshakovNO).
+- Enum type reflection. Pull request [#33](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/33) by [sochi](https://github.com/sochi).
+- Decimal type. Pull request [#38](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/38) by [nikitka](https://github.com/nikitka).
+
+### Changed
+- Minimal SQLAlchemy version supported is 1.2 now.
 
 ### Fixed
-- Decimal type.
 - Handling additional column`comment_expression` in `DESCRIBE TABLE` results during reflection (in ClickHouse server >= 18.15).
-- Support for `full` parameter in `.visit_join()`.
 
 ## [0.0.9] - 2019-01-21
 ### Added
@@ -99,7 +109,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.9...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.10...HEAD
+[0.0.10]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.9...0.0.10
 [0.0.9]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.8...0.0.9
 [0.0.8]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.7...0.0.8
 [0.0.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.6...0.0.7
