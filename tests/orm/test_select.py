@@ -26,10 +26,17 @@ class SelectTestCase(BaseTestCase):
     def test_select(self):
         table = self.create_table()
 
-        query = session.query(table.c.x).filter(table.c.x.in_([1, 2]))
+        query = session.query(table.c.x)\
+            .filter(table.c.x.in_([1, 2]))\
+            .having(func.count() > 0)\
+            .order_by(table.c.x.desc())
         self.assertEqual(
             self.compile(query),
-            'SELECT x AS t1_x FROM t1 WHERE x IN (%(x_1)s, %(x_2)s)'
+            'SELECT x AS t1_x '
+            'FROM t1 '
+            'WHERE x IN (%(x_1)s, %(x_2)s) '
+            'HAVING count(*) > %(count_1)s '
+            'ORDER BY x DESC'
         )
 
     def test_group_by_query(self):

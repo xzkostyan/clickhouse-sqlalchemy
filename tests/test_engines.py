@@ -23,7 +23,9 @@ class EnginesDeclarativeTestCase(BaseTestCase):
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
             'CREATE TABLE test_table (date Date, x Int32, y String) '
-            'ENGINE = MergeTree(date, (date, x), 8192)'
+            'ENGINE = MergeTree() '
+            'PARTITION BY date '
+            'ORDER BY (date, x)'
         )
 
     def test_text_engine_columns(self):
@@ -38,7 +40,9 @@ class EnginesDeclarativeTestCase(BaseTestCase):
         self.assertEqual(
             self.compile(CreateTable(table)),
             'CREATE TABLE t1 (date Date, x Int32, y String) '
-            'ENGINE = MergeTree(date, (date, x), 8192)'
+            'ENGINE = MergeTree() '
+            'PARTITION BY date '
+            'ORDER BY (date, x)'
         )
 
     def test_func_engine_columns(self):
@@ -49,31 +53,44 @@ class EnginesDeclarativeTestCase(BaseTestCase):
 
             __table_args__ = (
                 engines.MergeTree('date', ('date', func.intHash32(x)),
-                                  sampling=func.intHash32(x)),
+                                  sample=func.intHash32(x)),
             )
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
             'CREATE TABLE test_table (date Date, x Int32, y String) '
-            'ENGINE = MergeTree('
-            'date, intHash32(x), (date, intHash32(x)), 8192'
-            ')'
+            'ENGINE = MergeTree() PARTITION BY date '
+            'ORDER BY (date, intHash32(x)) '
+            'SAMPLE BY intHash32(x)'
         )
 
-    def test_merge_tree_index_granularity(self):
+    def test_merge_tree_all_settings(self):
         class TestTable(self.base):
             date = Column(types.Date, primary_key=True)
             x = Column(types.Int32)
             y = Column(types.String)
 
             __table_args__ = (
-                engines.MergeTree(date, (date, x), index_granularity=4096),
+                engines.MergeTree(
+                    partition_by=date,
+                    order_by=(date, x),
+                    primary_key=(x, y),
+                    sample=func.hashFunc(x),
+                    setting1=2,
+                    setting2=5
+                ),
             )
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
-            'CREATE TABLE test_table (date Date, x Int32, y String) '
-            'ENGINE = MergeTree(date, (date, x), 4096)'
+            'CREATE TABLE test_table '
+            '(date Date, x Int32, y String) '
+            'ENGINE = MergeTree() '
+            'PARTITION BY date '
+            'ORDER BY (date, x) '
+            'PRIMARY KEY (x, y) '
+            'SAMPLE BY hashFunc(x) '
+            'SETTINGS setting1=2, setting2=5'
         )
 
     def test_create_table_without_engine(self):
@@ -96,14 +113,25 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             sign = Column(types.Int8)
 
             __table_args__ = (
-                engines.CollapsingMergeTree(date, (date, x), sign),
+                engines.CollapsingMergeTree(
+                    sign,
+                    date,
+                    (date, x),
+                    (x, y),
+                    func.random(),
+                    key='value'),
             )
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
             'CREATE TABLE test_table '
             '(date Date, x Int32, y String, sign Int8) '
-            'ENGINE = CollapsingMergeTree(date, (date, x), 8192, sign)'
+            'ENGINE = CollapsingMergeTree(sign) '
+            'PARTITION BY date '
+            'ORDER BY (date, x) '
+            'PRIMARY KEY (x, y) '
+            'SAMPLE BY random() '
+            'SETTINGS key=value'
         )
 
     def test_summing_merge_tree(self):
@@ -113,13 +141,15 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             y = Column(types.Int32)
 
             __table_args__ = (
-                engines.SummingMergeTree(date, (date, x), (y, )),
+                engines.SummingMergeTree((y, ), date, (date, x)),
             )
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
             'CREATE TABLE test_table (date Date, x Int32, y Int32) '
-            'ENGINE = SummingMergeTree(date, (date, x), 8192, (y))'
+            'ENGINE = SummingMergeTree(y) '
+            'PARTITION BY date '
+            'ORDER BY (date, x)'
         )
 
     def test_buffer(self):
@@ -163,15 +193,15 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             x = Column(types.Int32)
 
             __table_args__ = (
-                engines.GraphiteMergeTree(date, (date, x), 'config_section'),
+                engines.GraphiteMergeTree('config_section', date, (date, x)),
             )
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
             "CREATE TABLE test_table (date Date, x Int32) "
-            "ENGINE = GraphiteMergeTree("
-            "date, (date, x), 8192, 'config_section'"
-            ")"
+            "ENGINE = GraphiteMergeTree('config_section') "
+            "PARTITION BY date "
+            "ORDER BY (date, x)"
         )
 
     def test_memory(self):
@@ -205,8 +235,9 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             self.compile(CreateTable(TestTable.__table__)),
             "CREATE TABLE test_table (date Date, x Int32, y String) "
             "ENGINE = ReplicatedMergeTree("
-            "'/table/path', 'name', date, (date, x), 8192"
-            ")"
+            "'/table/path', 'name') "
+            "PARTITION BY date "
+            "ORDER BY (date, x)"
         )
 
     def test_replacing_merge_tree(self):
@@ -218,7 +249,9 @@ class EnginesDeclarativeTestCase(BaseTestCase):
 
             __table_args__ = (
                 engines.ReplacingMergeTree(
-                    'date', ('date', 'x'), 'version'
+                    'version',
+                    'date',
+                    ('date', 'x'),
                 ),
             )
 
@@ -227,5 +260,7 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             "CREATE TABLE test_table ("
             "date Date, x Int32, y String, version Int32"
             ") "
-            "ENGINE = ReplacingMergeTree(date, (date, x), 8192, version)"
+            "ENGINE = ReplacingMergeTree(version) "
+            "PARTITION BY date "
+            "ORDER BY (date, x)"
         )
