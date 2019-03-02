@@ -2,7 +2,7 @@ import codecs
 
 
 def unescape(value):
-    return codecs.escape_decode(value)[0].decode('utf-8')
+    return codecs.escape_decode(value)[0].decode('utf-8', errors='replace')
 
 
 def parse_tsv(line):
