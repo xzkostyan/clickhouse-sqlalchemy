@@ -1,6 +1,9 @@
+from ipaddress import IPv4Network, IPv6Network
+
 from sqlalchemy.sql.type_api import to_instance, UserDefinedType
-from sqlalchemy import types
+from sqlalchemy import types, func, and_, or_
 from .ext.clauses import NestedColumn
+from .util.compat import text_type
 
 
 class String(types.String):
@@ -141,3 +144,67 @@ class Nested(types.TypeEngine):
                     sub.type = original_type
 
     comparator_factory = Comparator
+
+
+class IPv4(types.UserDefinedType):
+    __visit_name__ = "ipv4"
+
+    def bind_processor(self, dialect):
+        def process(value):
+            return text_type(value)
+
+        return process
+
+    def bind_expression(self, bindvalue):
+        return func.toIPv4(bindvalue)
+
+    class comparator_factory(types.UserDefinedType.Comparator):
+        def in_(self, other):
+            if not isinstance(other, IPv4Network):
+                other = IPv4Network(other)
+
+            return and_(
+                self >= other[0],
+                self <= other[-1]
+            )
+
+        def notin_(self, other):
+            if not isinstance(other, IPv4Network):
+                other = IPv4Network(other)
+
+            return or_(
+                self < other[0],
+                self > other[-1]
+            )
+
+
+class IPv6(types.UserDefinedType):
+    __visit_name__ = "ipv6"
+
+    def bind_processor(self, dialect):
+        def process(value):
+            return text_type(value)
+
+        return process
+
+    def bind_expression(self, bindvalue):
+        return func.toIPv6(bindvalue)
+
+    class comparator_factory(types.UserDefinedType.Comparator):
+        def in_(self, other):
+            if not isinstance(other, IPv6Network):
+                other = IPv6Network(other)
+
+            return and_(
+                self >= other[0],
+                self <= other[-1]
+            )
+
+        def notin_(self, other):
+            if not isinstance(other, IPv6Network):
+                other = IPv6Network(other)
+
+            return or_(
+                self < other[0],
+                self > other[-1]
+            )

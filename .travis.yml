@@ -1,4 +1,5 @@
 env:
+  - VERSION=19.3.5
   - VERSION=18.14.9
 language: python
 python:
