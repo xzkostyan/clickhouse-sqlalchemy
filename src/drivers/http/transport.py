@@ -31,7 +31,7 @@ class RequestsTransport(object):
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
         if tz:
-            # кроме использования самим классом, tz берет ещё и Cursor
+            # except using tz in this class, Cursor use tz from this class
             self.tz = pytz.timezone(tz)
 
         self.converters = {
