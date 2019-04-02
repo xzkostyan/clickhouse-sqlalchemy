@@ -6,7 +6,7 @@ class HttpUtilsTestCase(BaseTestCase):
     def test_unescape(self):
         test_values = [b'', b'a', b'\xff']
         actual = [unescape(t) for t in test_values]
-        assert actual == ['', 'a', '�']        
+        assert actual == [u'', u'a', u'\ufffd']
 
     def test_parse_tsv(self):
         test_values = [b'', b'a\tb\tc', b'a\tb\t\xff']
