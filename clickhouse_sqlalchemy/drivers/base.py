@@ -36,6 +36,8 @@ ischema_names = {
     'Float32': FLOAT,
     'String': types.String,
     'UUID': types.UUID,
+    'IPv4': types.IPv4,
+    'IPv6': types.IPv6,
     'FixedString': types.String,
     'Enum8': types.Enum8,
     'Enum16': types.Enum16,
@@ -487,6 +489,12 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_uuid(self, type_, **kw):
         return 'UUID'
+
+    def visit_ipv4(self, type_, **kw):
+        return 'IPv4'
+
+    def visit_ipv6(self, type_, **kw):
+        return 'IPv6'
 
 
 class ClickHouseExecutionContextBase(default.DefaultExecutionContext):
