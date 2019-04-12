@@ -351,7 +351,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
                     key=key,
                     value=value
                 )
-                for key, value in engine.settings.items()
+                for key, value in sorted(engine.settings.items())
             )
         return text
 
