@@ -10,10 +10,10 @@ here = os.path.abspath(os.path.dirname(__file__))
 PY34 = sys.version_info[0:2] >= (3, 4)
 
 install_requires = [
-        'sqlalchemy>=1.2',
-        'requests',
-        'clickhouse_driver>=0.0.19'
-    ]
+    'sqlalchemy>=1.2',
+    'requests',
+    'clickhouse-driver>=0.0.19'
+]
 if not PY34:
     install_requires.append('ipaddress')
 
