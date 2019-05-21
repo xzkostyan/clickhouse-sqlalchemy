@@ -75,4 +75,4 @@ class Escaper(object):
         if isinstance(item, (list, tuple)):
             return [self.escape_item(x) for x in item]
         else:
-            raise Exception("Unsupported object {}".format(item))
+            raise Exception("Unsupported object {} ({})".format(item, type(item)))

@@ -1,5 +1,6 @@
 from datetime import datetime
 from functools import partial
+from decimal import Decimal
 
 import pytz
 
@@ -71,6 +72,8 @@ class RequestsTransport(object):
                 convs.append(self.converters[type_])
             elif type_.startswith("DateTime("):  # datetime with timezone
                 convs.append(partial(self.converters['DateTime'], tz=type_[10:-2]))
+            elif type_.startswith("Decimal"):
+                convs.append(Decimal)
             else:
                 convs.append(None)
 

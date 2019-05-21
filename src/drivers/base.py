@@ -330,6 +330,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_DATETIME(self, type_, **kw):
         return 'DateTime'
 
+    def visit_numeric(self, type_, **kw):
+        return 'Decimal(%s, %s)' % (type_.precision, type_.scale)
+
 
 class ClickHouseExecutionContextBase(default.DefaultExecutionContext):
     @sa_util.memoized_property

@@ -83,3 +83,7 @@ class Enum8(types.Enum):
 
 class Enum16(Enum8):
     __visit_name__ = 'enum16'
+
+
+class Decimal(types.Numeric):
+    __visit_name__ = 'numeric'
