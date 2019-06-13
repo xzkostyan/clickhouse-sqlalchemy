@@ -165,12 +165,13 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         return text
 
     def visit_join(self, join, asfrom=False, **kwargs):
-        """ full here is all if True or any if False """
-        prefix = "ALL" if join.full else "ANY"
-        if not join.isouter:
-            join_type = "INNER JOIN"
-        else:
+        prefix = "ALL"  # standard SQL behaviour
+        if join.full:
+            join_type = "FULL JOIN "
+        elif join.isouter:
             join_type = "LEFT JOIN"
+        else:
+            join_type = "INNER JOIN"
         return ' '.join(
             (self.process(join.left, asfrom=True, **kwargs),
              prefix,

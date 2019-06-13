@@ -20,7 +20,7 @@ dialects = [
 
 setup(
     name='clickhouse-sqlalchemy',
-    version='0.0.3.8',
+    version='0.0.3.9',
 
     description='Simple ClickHouse SQLAlchemy Dialect',
     long_description=long_description,

@@ -17,14 +17,14 @@ class Query(BaseQuery):
 
         return context
 
-    def with_totals(self):
+    def with_totals(self, _with_totals=True):
         if not self._group_by:
             raise exc.InvalidRequestError(
                 "Query.with_totals() can be used only with specified "
                 "GROUP BY, call group_by()"
             )
 
-        self._with_totals = True
+        self._with_totals = _with_totals
 
         return self
 
