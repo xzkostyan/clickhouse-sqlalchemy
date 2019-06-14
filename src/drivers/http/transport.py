@@ -68,6 +68,8 @@ class RequestsTransport(object):
         types = parse_tsv(next(lines))
         convs = []
         for type_ in types:
+            if type_.startswith("Nullable("):
+                type_ = type_[len("Nullable("):-1]
             if self.converters.get(type_):  # simple case
                 convs.append(self.converters[type_])
             elif type_.startswith("DateTime("):  # datetime with timezone
@@ -84,7 +86,7 @@ class RequestsTransport(object):
             if line in ['', b'']:  # TODO: separator for total row
                 continue    # total is latest row, maybe somehow standalone?
             yield [
-                (converter(x) if converter else x)
+                (converter(x) if converter and x is not None else x)
                 for x, converter in zip(parse_tsv(line), convs)
             ]
 
