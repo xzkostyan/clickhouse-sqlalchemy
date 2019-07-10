@@ -49,6 +49,12 @@ class ReflectionTestCase(TypesTestCase):
         self.assertIsInstance(coltype, types.Nullable)
         self.assertEqual(coltype.nested_type, types.Int32)
 
+    def test_lowcardinality(self):
+        coltype = self._type_round_trip(types.LowCardinality(types.String))[0]
+
+        self.assertIsInstance(coltype, types.LowCardinality)
+        self.assertEqual(coltype.nested_type, types.String)
+
     def test_enum8(self):
         enum_options = {'three': 3, "quoted' ": 9, 'comma, ': 14}
         coltype = self._type_round_trip(

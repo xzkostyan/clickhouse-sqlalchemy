@@ -42,7 +42,8 @@ ischema_names = {
     'Enum8': types.Enum8,
     'Enum16': types.Enum16,
     '_array': types.Array,
-    '_nullable': types.Nullable
+    '_nullable': types.Nullable,
+    '_lowcardinality': types.LowCardinality,
 }
 
 
@@ -427,6 +428,10 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         nested_type = type_api.to_instance(type_.nested_type)
         return 'Nullable(%s)' % self.process(nested_type, **kw)
 
+    def visit_lowcardinality(self, type_, **kw):
+        nested_type = type_api.to_instance(type_.nested_type)
+        return "LowCardinality(%s)" % self.process(nested_type, **kw)
+
     def visit_int8(self, type_, **kw):
         return 'Int8'
 
@@ -580,6 +585,11 @@ class ClickHouseDialect(default.DefaultDialect):
         elif spec.startswith('Nullable'):
             inner = spec[9:-1]
             coltype = self.ischema_names['_nullable']
+            return coltype(self._get_column_type(name, inner))
+
+        elif spec.startswith('LowCardinality'):
+            inner = spec[15:-1]
+            coltype = self.ischema_names['_lowcardinality']
             return coltype(self._get_column_type(name, inner))
 
         elif spec.startswith('Enum'):
