@@ -1,6 +1,9 @@
+from contextlib import contextmanager
 from sqlalchemy import exc
+import sqlalchemy.orm.query as query_module
 from sqlalchemy.orm.query import Query as BaseQuery
-
+from sqlalchemy.orm.util import _ORMJoin as _StandardORMJoin
+from clickhouse_sqlalchemy.sql.selectable import Join
 from ..ext.clauses import (
     sample_clause,
     ArrayJoin,
@@ -43,45 +46,57 @@ class Query(BaseQuery):
         return self
 
     def join(self, *props, **kwargs):
-        global_ = kwargs.pop('global_', False)
-
-        any_ = kwargs.pop('any', None)
-        all_ = kwargs.pop('all', None)
-
-        if all_ is None and any_ is None:
-            raise ValueError("ANY or ALL must be specified")
-
+        type = kwargs.pop('type', None)
+        strictness = kwargs.pop('strictness', None)
+        distribution = kwargs.pop('distribution', None)
         rv = super(Query, self).join(*props, **kwargs)
-        diff = set(rv._from_obj) - set(self._from_obj)
+        joined = list(set(rv._from_obj) - set(self._from_obj))[0]
+        new = _ORMJoin._from_standard(joined,
+                                      type=type,
+                                      strictness=strictness,
+                                      distribution=distribution)
 
-        assert len(diff) < 2
+        @contextmanager
+        def replace_join():
+            original = query_module.orm_join
+            query_module.orm_join = new
+            yield
+            query_module.orm_join = original
 
-        if diff:
-            orm_join = diff.pop()
-            orm_join.any = any_
-            orm_join.all = all_
-            orm_join.global_ = global_
-
-        return rv
+        with replace_join():
+            return super(Query, self).join(*props, **kwargs)
 
     def outerjoin(self, *props, **kwargs):
-        global_ = kwargs.pop('global_', False)
+        kwargs['type'] = kwargs.get('type') or 'LEFT OUTER'
+        return self.join(*props, **kwargs)
 
-        any_ = kwargs.pop('any', None)
-        all_ = kwargs.pop('all', None)
 
-        if all_ is None and any_ is None:
-            raise ValueError("ANY or ALL must be specified")
+class _ORMJoin(_StandardORMJoin):
+    @classmethod
+    def _from_standard(cls, standard_join, type, strictness, distribution):
+        return cls(
+            standard_join.left,
+            standard_join.right,
+            standard_join.onclause,
+            type=type,
+            strictness=strictness,
+            distribution=distribution
+        )
 
-        rv = super(Query, self).outerjoin(*props, **kwargs)
-        diff = set(rv._from_obj) - set(self._from_obj)
+    def __init__(self, left, right, onclause=None, type=None, strictness=None, distribution=None):
+        if type is None:
+            raise ValueError('JOIN type must be specified, '
+                             'expected one of: '
+                             'INNER, RIGHT OUTER, LEFT OUTER, FULL OUTER, CROSS')
+        super().__init__(left, right, onclause, False, False, None, None)
+        self.distribution = distribution
+        self.strictness = str
+        self.type = type
+        self.strictness = None
+        if strictness:
+            self.strictness = strictness
+        self.distribution = distribution
+        self.type = type
 
-        assert len(diff) < 2
-
-        if diff:
-            orm_join = diff.pop()
-            orm_join.any = any_
-            orm_join.all = all_
-            orm_join.global_ = global_
-
-        return rv
+    def __call__(self, *args, **kwargs):
+        return self
