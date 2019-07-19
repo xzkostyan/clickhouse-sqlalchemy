@@ -51,6 +51,14 @@ class UUID(String):
     __visit_name__ = 'uuid'
 
 
+class LowCardinality(types.TypeEngine):
+    __visit_name__ = 'lowcardinality'
+
+    def __init__(self, nested_type):
+        self.nested_type = nested_type
+        super(LowCardinality, self).__init__()
+
+
 class Int8(Int):
     __visit_name__ = 'int8'
 
