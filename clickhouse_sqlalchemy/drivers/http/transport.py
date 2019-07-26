@@ -7,6 +7,10 @@ from .exceptions import HTTPException
 from .utils import parse_tsv
 
 
+DATE_NULL = '0000-00-00'
+DATETIME_NULL = '0000-00-00 00:00:00'
+
+
 converters = {
     'Int8': int,
     'UInt8': int,
@@ -18,9 +22,13 @@ converters = {
     'UInt64': int,
     'Float32': float,
     'Float64': float,
-    'Date': lambda x: datetime.strptime(x, '%Y-%m-%d').date(),
-    'DateTime': lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+    'Date': lambda x: datetime.strptime(x, '%Y-%m-%d').date() if x != DATE_NULL else None,
+    'DateTime': lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S') if x != DATETIME_NULL else None,
 }
+
+
+def _get_type(type_str):
+    return converters.get(type_str)
 
 
 class RequestsTransport(object):
@@ -30,6 +38,13 @@ class RequestsTransport(object):
         self.db_name = db_name
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
+        self.headers = {
+            k.replace('header__', ''): v for k, v in kwargs.items() if k.startswith('header__')
+        }
+        ddl_timeout = kwargs.pop('ddl_timeout', None)
+        if ddl_timeout is not None:
+            ddl_timeout = int(ddl_timeout)
+        self.ddl_timeout = ddl_timeout
         super(RequestsTransport, self).__init__()
 
     def execute(self, query, params=None):
@@ -39,9 +54,13 @@ class RequestsTransport(object):
         """
         r = self._send(query, params=params, stream=True)
         lines = r.iter_lines()
-        names = parse_tsv(next(lines))
-        types = parse_tsv(next(lines))
-        convs = [converters.get(type_) for type_ in types]
+        try:
+            names = parse_tsv(next(lines))
+            types = parse_tsv(next(lines))
+        except StopIteration:
+            return
+
+        convs = [_get_type(type_) for type_ in types]
 
         yield names
         yield types
@@ -67,13 +86,16 @@ class RequestsTransport(object):
         data = data.encode('utf-8')
         params = params or {}
         params['database'] = self.db_name
+        if self.ddl_timeout:
+            params['distributed_ddl_task_timeout'] = self.ddl_timeout
 
         # TODO: retries, prepared requests
         r = requests.post(
             self.db_url, auth=self.auth, params=params, data=data,
-            stream=stream, timeout=self.timeout
+            stream=stream, timeout=self.timeout, headers=self.headers,
         )
         if r.status_code != 200:
             orig = HTTPException(r.text)
+            orig.code = r.status_code
             raise DatabaseException(orig)
         return r

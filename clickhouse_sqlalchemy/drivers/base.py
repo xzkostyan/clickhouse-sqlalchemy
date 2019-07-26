@@ -586,9 +586,10 @@ class ClickHouseDialect(default.DefaultDialect):
         return [self._get_column_info(row.name, row.type) for row in rows]
 
     def _get_column_info(self, name, format_type):
+        col_type = self._get_column_type(name, format_type)
         return {
             'name': name,
-            'type': self._get_column_type(name, format_type),
+            'type': col_type,
             'nullable': True,
             'default': None,
         }
