@@ -569,14 +569,26 @@ class ClickHouseDialect(default.DefaultDialect):
                 return True
         return False
 
-    def reflecttable(self, connection, table, include_columns, exclude_columns,
-                     resolve_fks, **opts):
-        table.metadata.remove(table)
-        ch_table = Table._make_from_standard(table)
+    def reflecttable(
+            self, connection, table, include_columns, exclude_columns,
+            # Temporary(-ish): `*args` because there's a `resolve_fks` argument
+            # added in sqlalchemy 1.3 but not present in sqlalchemy 1.2
+            *args,
+            **opts):
+        """
+        Hack to ensure the autoloaded table class is `clickhouse_sqlalchemy.Table`
+        (to support CH-specific features e.g. joins).
+        """
+        # This check is necessary to support direct instantiation of
+        # `clickhouse_sqlalchemy.Table` and then reflection of it.
+        if not isinstance(table, Table):
+            table.metadata.remove(table)
+            ch_table = Table._make_from_standard(table)
+        else:
+            ch_table = table
         return super(ClickHouseDialect, self).reflecttable(
             connection, ch_table, include_columns, exclude_columns,
-            resolve_fks, **opts
-        )
+            *args, **opts)
 
     @reflection.cache
     def get_columns(self, connection, table_name, schema=None, **kw):
