@@ -147,8 +147,8 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
     def visit_join(self, join, asfrom=False, **kwargs):
         text = join.left._compiler_dispatch(self, asfrom=asfrom, **kwargs)
-        join_type = join.type
-        # need to make variable to prevent leaks in some debuggers
+        # need to make a variable to prevent leaks in some debuggers
+        join_type = getattr(join, 'type', None)
         if join_type is None:
             if join.isouter:
                 join_type = 'LEFT OUTER'
@@ -170,10 +170,10 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         if join.full and 'FULL' not in join_type:
             join_type = 'FULL ' + join_type
 
-        if join.strictness:
+        if getattr(join, 'strictness', None):
             join_type = join.strictness.upper() + ' ' + join_type
 
-        if join.distribution:
+        if getattr(join, 'distribution', None):
             join_type = join.distribution.upper() + ' ' + join_type
 
         if join_type is not None:
@@ -242,7 +242,7 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         else:
             text += self.default_from()
 
-        if select._array_join is not None:
+        if getattr(select, '_array_join', None) is not None:
             text += select._array_join._compiler_dispatch(self, **kwargs)
 
         sample_clause = getattr(select, '_sample_clause', None)
