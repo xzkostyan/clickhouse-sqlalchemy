@@ -599,12 +599,13 @@ class ClickHouseDialect(default.DefaultDialect):
 
     def _get_column_info(self, name, format_type):
         col_type = self._get_column_type(name, format_type)
-        return {
+        result = {
             'name': name,
             'type': col_type,
             'nullable': True,
             'default': None,
         }
+        return result
 
     def _get_column_type(self, name, spec):
         if spec.startswith('Array'):

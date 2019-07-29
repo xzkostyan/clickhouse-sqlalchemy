@@ -7,6 +7,7 @@ from .exceptions import HTTPException
 from .utils import parse_tsv
 
 
+DEFAULT_DDL_TIMEOUT = None
 DATE_NULL = '0000-00-00'
 DATETIME_NULL = '0000-00-00 00:00:00'
 
@@ -41,7 +42,7 @@ class RequestsTransport(object):
         self.headers = {
             k.replace('header__', ''): v for k, v in kwargs.items() if k.startswith('header__')
         }
-        ddl_timeout = kwargs.pop('ddl_timeout', None)
+        ddl_timeout = kwargs.pop('ddl_timeout', DEFAULT_DDL_TIMEOUT)
         if ddl_timeout is not None:
             ddl_timeout = int(ddl_timeout)
         self.ddl_timeout = ddl_timeout
