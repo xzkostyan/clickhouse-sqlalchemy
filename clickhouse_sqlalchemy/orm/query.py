@@ -1,9 +1,10 @@
 from contextlib import contextmanager
+
 from sqlalchemy import exc
 import sqlalchemy.orm.query as query_module
 from sqlalchemy.orm.query import Query as BaseQuery
 from sqlalchemy.orm.util import _ORMJoin as _StandardORMJoin
-from clickhouse_sqlalchemy.sql.selectable import Join
+
 from ..ext.clauses import (
     sample_clause,
     ArrayJoin,
@@ -83,12 +84,16 @@ class _ORMJoin(_StandardORMJoin):
             distribution=distribution
         )
 
-    def __init__(self, left, right, onclause=None, type=None, strictness=None, distribution=None):
+    def __init__(self, left, right, onclause=None, type=None, strictness=None,
+                 distribution=None):
         if type is None:
-            raise ValueError('JOIN type must be specified, '
-                             'expected one of: '
-                             'INNER, RIGHT OUTER, LEFT OUTER, FULL OUTER, CROSS')
-        super().__init__(left, right, onclause, False, False, None, None)
+            raise ValueError(
+                'JOIN type must be specified, '
+                'expected one of: '
+                'INNER, RIGHT OUTER, LEFT OUTER, FULL OUTER, CROSS'
+            )
+        super(_ORMJoin, self).__init__(left, right, onclause, False, False,
+                                       None, None)
         self.distribution = distribution
         self.strictness = str
         self.type = type

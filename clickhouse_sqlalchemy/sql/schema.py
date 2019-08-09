@@ -18,7 +18,8 @@ class Table(TableBase):
                           self,
                           checkfirst=checkfirst, if_exists=if_exists)
 
-    def join(self, right, onclause=None, isouter=False, full=False, type=None, strictness=None, distribution=None):
+    def join(self, right, onclause=None, isouter=False, full=False,
+             type=None, strictness=None, distribution=None):
         return Join(self, right,
                     onclause=onclause, type=type,
                     isouter=isouter, full=full,

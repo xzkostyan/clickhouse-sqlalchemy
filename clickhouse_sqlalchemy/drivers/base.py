@@ -1,4 +1,5 @@
 import enum
+
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
@@ -145,8 +146,9 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             return column
 
     def visit_join(self, join, asfrom=False, **kwargs):
-        join_stmt = join.left._compiler_dispatch(self, asfrom=asfrom, **kwargs)
-        join_type = join.type  # need to make variable to prevent leaks in some debuggers
+        text = join.left._compiler_dispatch(self, asfrom=asfrom, **kwargs)
+        join_type = join.type
+        # need to make variable to prevent leaks in some debuggers
         if join_type is None:
             if join.isouter:
                 join_type = 'LEFT OUTER'
@@ -155,10 +157,16 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         elif join_type is not None:
             join_type = join_type.upper()
             if join.isouter and 'INNER' in join_type:
-                raise exc.CompileError('can\'t compile join with specified INNER type and isouter=True')
+                raise exc.CompileError(
+                    "can't compile join with specified "
+                    "INNER type and isouter=True"
+                )
             # isouter=False by default, disable that checking
             # elif not join.isouter and 'OUTER' in join.type:
-            #     raise exc.CompileError('can\'t compile join with specified OUTER type and isouter=False')
+            #     raise exc.CompileError(
+            #         "can't compile join with specified "
+            #         "OUTER type and isouter=False"
+            #     )
         if join.full and 'FULL' not in join_type:
             join_type = 'FULL ' + join_type
 
@@ -169,15 +177,16 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             join_type = join.distribution.upper() + ' ' + join_type
 
         if join_type is not None:
-            join_stmt += ' ' + join_type.upper() + ' JOIN '
+            text += ' ' + join_type.upper() + ' JOIN '
 
-        join_stmt += join.right._compiler_dispatch(self, asfrom=asfrom, **kwargs)
+        onclause = join.onclause
 
-        if isinstance(join.onclause, elements.Tuple):
-            join_stmt += ' USING ' + join.onclause._compiler_dispatch(self, **kwargs)
+        text += join.right._compiler_dispatch(self, asfrom=asfrom, **kwargs)
+        if isinstance(onclause, elements.Tuple):
+            text += ' USING ' + onclause._compiler_dispatch(self, **kwargs)
         else:
-            join_stmt += ' ON ' + join.onclause._compiler_dispatch(self, **kwargs)
-        return join_stmt
+            text += ' ON ' + onclause._compiler_dispatch(self, **kwargs)
+        return text
 
     def visit_array_join(self, array_join, **kwargs):
         return ' \nARRAY JOIN {columns}'.format(
@@ -560,10 +569,13 @@ class ClickHouseDialect(default.DefaultDialect):
                 return True
         return False
 
-    def reflecttable(self, connection, table, include_columns, exclude_columns, **opts):
+    def reflecttable(self, connection, table, include_columns, exclude_columns,
+                     **opts):
         table.metadata.remove(table)
         ch_table = Table._make_from_standard(table)
-        super().reflecttable(connection, ch_table, include_columns, exclude_columns, **opts)
+        return super(ClickHouseDialect, self).reflecttable(
+            connection, ch_table, include_columns, exclude_columns, **opts
+        )
 
     @reflection.cache
     def get_columns(self, connection, table_name, schema=None, **kw):
@@ -707,5 +719,7 @@ class ClickHouseDialect(default.DefaultDialect):
         return True
 
     def _get_server_version_info(self, connection):
-        version = connection.scalar('select version() format TabSeparatedWithNamesAndTypes;')
+        version = connection.scalar(
+            'select version() format TabSeparatedWithNamesAndTypes'
+        )
         return tuple(int(x) for x in version.split('.'))

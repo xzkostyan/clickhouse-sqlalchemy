@@ -161,11 +161,12 @@ class JoinTestCase(BaseTestCase):
         )
 
         query = session.query(t1.c.x, t2.c.x) \
-            .outerjoin(t2,
-                       tuple_(t1.c.x, t1.c.y),
-                       type='left outer',
-                       strictness='all',
-                       distribution='global'
+            .outerjoin(
+            t2,
+            tuple_(t1.c.x, t1.c.y),
+            type='left outer',
+            strictness='all',
+            distribution='global'
         )
 
         self.assertEqual(

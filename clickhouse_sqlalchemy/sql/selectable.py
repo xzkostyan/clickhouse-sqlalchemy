@@ -17,7 +17,8 @@ class Join(StandardJoin):
                  type=None, strictness=None, distribution=None):
         if type is not None:
             type = type.upper()
-        super().__init__(left, right, onclause, isouter=isouter, full=full)
+        super(Join, self).__init__(left, right, onclause,
+                                   isouter=isouter, full=full)
         self.strictness = None
         if strictness:
             self.strictness = strictness
@@ -42,7 +43,8 @@ class Select(StandardSelect):
         self._array_join = ArrayJoin(*columns)
         return self
 
-    def join(self, right, onclause=None, isouter=False, full=False, type=None, strictness=None, distribution=None):
+    def join(self, right, onclause=None, isouter=False, full=False, type=None,
+             strictness=None, distribution=None):
         return Join(self, right,
                     onclause=onclause, type=type,
                     isouter=isouter, full=full,

@@ -160,8 +160,12 @@ class SelectTestCase(BaseTestCase):
         )
 
     def test_join(self):
-        table_1 = self.create_table('table_1', Column('x', types.UInt32, primary_key=True))
-        table_2 = self.create_table('table_2', Column('y', types.UInt32, primary_key=True))
+        table_1 = self.create_table(
+            'table_1', Column('x', types.UInt32, primary_key=True)
+        )
+        table_2 = self.create_table(
+            'table_2', Column('y', types.UInt32, primary_key=True)
+        )
 
         def make_statement(type=None,
                            strictness=None,
@@ -294,8 +298,6 @@ class SelectTestCase(BaseTestCase):
             'SELECT x FROM table_1 '
             'FULL INNER JOIN table_2 ON y = x'
         )
-
-
 
         self.assertEqual(
             self.compile(make_statement(
