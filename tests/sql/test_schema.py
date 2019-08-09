@@ -1,40 +1,29 @@
-from sqlalchemy.orm import aliased
 
-from clickhouse_sqlalchemy import (
-    types,
-    Table as CHTable,
-    engines,
-)
-from sqlalchemy import (
-    MetaData,
-    Column,
-    text,
-)
-from tests.session import native_session
-from tests.testcase import BaseTestCase
+from sqlalchemy import Column, text
+
+from clickhouse_sqlalchemy import types, Table as CHTable, engines
+from tests.testcase import NativeSessionTestCase
 
 
-class SchemaTestCase(BaseTestCase):
+class SchemaTestCase(NativeSessionTestCase):
     def test_reflect(self):
         """
         checking, that after call metadata.reflect()
         we have clickohouse-specific table, which have overridden join methods
         """
-        unbound_metadata = MetaData(bind=native_session.bind)
+        metadata = self.metadata()
         table = CHTable(
             'test_reflect',
-            unbound_metadata,
+            metadata,
             Column('x', types.Int32),
             engines.Log()
         )
-        table.drop(native_session.bind, if_exists=True)
-        table.create(native_session.bind)
+        table.drop(self.session.bind, if_exists=True)
+        table.create(self.session.bind)
 
-        std_metadata = self.metadata()
-        self.assertFalse(std_metadata.tables)
-        std_metadata.reflect(only=[table.name])
-        table = std_metadata.tables.get(table.name)
-        assert table is not None
+        metadata.clear()
+        metadata.reflect(only=[table.name])
+        assert table.name in metadata.tables
         self.assertTrue(isinstance(table, CHTable))
 
         query = table.select().join(

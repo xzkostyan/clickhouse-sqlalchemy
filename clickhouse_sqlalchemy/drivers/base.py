@@ -570,11 +570,12 @@ class ClickHouseDialect(default.DefaultDialect):
         return False
 
     def reflecttable(self, connection, table, include_columns, exclude_columns,
-                     **opts):
+                     resolve_fks, **opts):
         table.metadata.remove(table)
         ch_table = Table._make_from_standard(table)
         return super(ClickHouseDialect, self).reflecttable(
-            connection, ch_table, include_columns, exclude_columns, **opts
+            connection, ch_table, include_columns, exclude_columns,
+            resolve_fks, **opts
         )
 
     @reflection.cache
