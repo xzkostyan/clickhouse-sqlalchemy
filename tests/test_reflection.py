@@ -4,6 +4,7 @@ from sqlalchemy import Column, inspect
 
 from clickhouse_sqlalchemy import types, engines, Table
 from tests.testcase import TypesTestCase
+from tests.util import require_server_version
 
 
 class ReflectionTestCase(TypesTestCase):
@@ -49,7 +50,8 @@ class ReflectionTestCase(TypesTestCase):
         self.assertIsInstance(coltype, types.Nullable)
         self.assertEqual(coltype.nested_type, types.Int32)
 
-    def test_lowcardinality(self):
+    @require_server_version(19, 3, 3)
+    def test_low_cardinality(self):
         coltype = self._type_round_trip(types.LowCardinality(types.String))[0]
 
         self.assertIsInstance(coltype, types.LowCardinality)
