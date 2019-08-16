@@ -1,4 +1,4 @@
-from sqlalchemy import util
+from sqlalchemy import util, func
 from sqlalchemy.sql import ClauseElement
 from sqlalchemy.sql.base import SchemaEventTarget
 from sqlalchemy.sql.schema import ColumnCollectionMixin, SchemaItem
@@ -13,6 +13,18 @@ class Engine(SchemaEventTarget, Visitable):
 
     def get_params(self):
         raise NotImplementedError()
+
+    def get_partition_by(self):
+        return None
+
+    def get_order_by(self):
+        return None
+
+    def get_sample_by(self):
+        return None
+
+    def get_settings(self):
+        return None
 
     def name(self):
         return self.__class__.__name__
@@ -87,15 +99,19 @@ class MergeTree(Engine):
         params = []
         if self.replica_name:
             params.extend(map(escaper.escape_string, [self.replica_table_path, self.replica_name]))
-
-        params.append(self.date_col.get_column())
-
-        if self.sampling:
-            params.append(self.sampling.get_expressions_or_columns()[0])
-
-        params.append(tuple(self.key_cols.get_expressions_or_columns()))
-        params.append(self.index_granularity)
         return params
+
+    def get_partition_by(self):
+        return func.toYYYYMM(self.date_col.get_column())
+
+    def get_order_by(self):
+        return self.key_cols.get_expressions_or_columns()
+
+    def get_sample_by(self):
+        return self.sampling.get_expressions_or_columns()[0] if self.sampling else None
+
+    def get_settings(self):
+        return {"index_granularity": self.index_granularity}
 
     def name(self):
         return ("Replicated" if self.replica_name else "") + self.__class__.__name__

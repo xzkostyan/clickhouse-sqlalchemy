@@ -235,28 +235,46 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             )
 
         engine_params = engine.get_params()
+        engine_partition_by = engine.get_partition_by()
+        engine_order_by = engine.get_order_by()
+        engine_sample_by = engine.get_sample_by()
+        engine_settings = engine.get_settings()
         text = engine.name()
-        if not engine_params:
-            return text
 
-        text += '('
+        if engine_params:
+            text += '('
 
-        compiled_params = []
-        for param in engine_params:
-            if isinstance(param, tuple):
-                compiled = (
-                    '(' +
-                    ', '.join(compile_param(p) for p in param) +
-                    ')'
-                )
-            else:
-                compiled = compile_param(param)
+            compiled_params = []
+            for param in engine_params:
+                if isinstance(param, tuple):
+                    compiled = (
+                        '(' +
+                        ', '.join(compile_param(p) for p in param) +
+                        ')'
+                    )
+                else:
+                    compiled = compile_param(param)
 
-            compiled_params.append(compiled)
+                compiled_params.append(compiled)
 
-        text += ', '.join(compiled_params)
+            text += ', '.join(compiled_params)
 
-        return text + ')'
+            text += ')'
+
+        if engine_partition_by is not None:
+            text += "\nPARTITION BY " + compile_param(engine_partition_by)
+
+        if engine_order_by is not None:
+            text += "\nORDER BY (" + ', '.join([compile_param(p) for p in engine_order_by]) + ")"
+
+        if engine_sample_by is not None:
+            text += "\nSAMPLE BY " + compile_param(engine_sample_by)
+
+        if engine_settings is not None:
+            text += "\nSETTINGS " + ', '.join([k + '=' + compile_param(v) for k, v in engine_settings.items()])
+
+        return text
+
 
     def post_create_table(self, table):
         engine = getattr(table, 'engine', None)
