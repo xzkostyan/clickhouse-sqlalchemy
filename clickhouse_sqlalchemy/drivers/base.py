@@ -576,7 +576,8 @@ class ClickHouseDialect(default.DefaultDialect):
             *args,
             **opts):
         """
-        Hack to ensure the autoloaded table class is `clickhouse_sqlalchemy.Table`
+        Hack to ensure the autoloaded table class is
+        `clickhouse_sqlalchemy.Table`
         (to support CH-specific features e.g. joins).
         """
         # This check is necessary to support direct instantiation of

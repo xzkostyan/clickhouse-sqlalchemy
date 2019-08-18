@@ -12,6 +12,18 @@ DATE_NULL = '0000-00-00'
 DATETIME_NULL = '0000-00-00 00:00:00'
 
 
+def date_converter(x):
+    if x != DATE_NULL:
+        return datetime.strptime(x, '%Y-%m-%d').date()
+    return None
+
+
+def datetime_converter(x):
+    if x != DATETIME_NULL:
+        return datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+    return None
+
+
 converters = {
     'Int8': int,
     'UInt8': int,
@@ -23,8 +35,8 @@ converters = {
     'UInt64': int,
     'Float32': float,
     'Float64': float,
-    'Date': lambda x: datetime.strptime(x, '%Y-%m-%d').date() if x != DATE_NULL else None,
-    'DateTime': lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S') if x != DATETIME_NULL else None,
+    'Date': date_converter,
+    'DateTime': datetime_converter,
 }
 
 
@@ -40,7 +52,8 @@ class RequestsTransport(object):
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
         self.headers = {
-            k.replace('header__', ''): v for k, v in kwargs.items() if k.startswith('header__')
+            k.replace('header__', ''): v for k, v in kwargs.items()
+            if k.startswith('header__')
         }
         ddl_timeout = kwargs.pop('ddl_timeout', DEFAULT_DDL_TIMEOUT)
         if ddl_timeout is not None:
