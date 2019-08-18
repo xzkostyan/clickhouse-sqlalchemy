@@ -147,8 +147,8 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
     def visit_join(self, join, asfrom=False, **kwargs):
         text = join.left._compiler_dispatch(self, asfrom=asfrom, **kwargs)
-        join_type = join.type
-        # need to make variable to prevent leaks in some debuggers
+        # need to make a variable to prevent leaks in some debuggers
+        join_type = getattr(join, 'type', None)
         if join_type is None:
             if join.isouter:
                 join_type = 'LEFT OUTER'
@@ -170,10 +170,10 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         if join.full and 'FULL' not in join_type:
             join_type = 'FULL ' + join_type
 
-        if join.strictness:
+        if getattr(join, 'strictness', None):
             join_type = join.strictness.upper() + ' ' + join_type
 
-        if join.distribution:
+        if getattr(join, 'distribution', None):
             join_type = join.distribution.upper() + ' ' + join_type
 
         if join_type is not None:
@@ -242,7 +242,7 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         else:
             text += self.default_from()
 
-        if select._array_join is not None:
+        if getattr(select, '_array_join', None) is not None:
             text += select._array_join._compiler_dispatch(self, **kwargs)
 
         sample_clause = getattr(select, '_sample_clause', None)
@@ -569,14 +569,26 @@ class ClickHouseDialect(default.DefaultDialect):
                 return True
         return False
 
-    def reflecttable(self, connection, table, include_columns, exclude_columns,
-                     resolve_fks, **opts):
-        table.metadata.remove(table)
-        ch_table = Table._make_from_standard(table)
+    def reflecttable(
+            self, connection, table, include_columns, exclude_columns,
+            # Temporary(-ish): `*args` because there's a `resolve_fks` argument
+            # added in sqlalchemy 1.3 but not present in sqlalchemy 1.2
+            *args,
+            **opts):
+        """
+        Hack to ensure the autoloaded table class is `clickhouse_sqlalchemy.Table`
+        (to support CH-specific features e.g. joins).
+        """
+        # This check is necessary to support direct instantiation of
+        # `clickhouse_sqlalchemy.Table` and then reflection of it.
+        if not isinstance(table, Table):
+            table.metadata.remove(table)
+            ch_table = Table._make_from_standard(table)
+        else:
+            ch_table = table
         return super(ClickHouseDialect, self).reflecttable(
             connection, ch_table, include_columns, exclude_columns,
-            resolve_fks, **opts
-        )
+            *args, **opts)
 
     @reflection.cache
     def get_columns(self, connection, table_name, schema=None, **kw):
@@ -586,12 +598,14 @@ class ClickHouseDialect(default.DefaultDialect):
         return [self._get_column_info(row.name, row.type) for row in rows]
 
     def _get_column_info(self, name, format_type):
-        return {
+        col_type = self._get_column_type(name, format_type)
+        result = {
             'name': name,
-            'type': self._get_column_type(name, format_type),
+            'type': col_type,
             'nullable': True,
             'default': None,
         }
+        return result
 
     def _get_column_type(self, name, spec):
         if spec.startswith('Array'):

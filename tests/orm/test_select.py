@@ -3,6 +3,7 @@ from sqlalchemy import (
     exc,
     func,
     literal,
+    select,
 )
 from sqlalchemy import text
 from sqlalchemy import tuple_
@@ -37,6 +38,16 @@ class SelectTestCase(BaseTestCase):
             'WHERE x IN (%(x_1)s, %(x_2)s) '
             'HAVING count(*) > %(count_1)s '
             'ORDER BY x DESC'
+        )
+
+    def test_very_simple_select(self):
+        """
+        A non-CH specific select statement should work too.
+        """
+        query = select([literal(1).label('col1')])
+        self.assertEqual(
+            self.compile(query),
+            'SELECT %(param_1)s AS col1'
         )
 
     def test_group_by_query(self):

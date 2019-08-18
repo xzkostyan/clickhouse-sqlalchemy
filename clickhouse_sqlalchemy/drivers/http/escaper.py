@@ -1,5 +1,6 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
+import enum
 
 from ...util import compat
 
@@ -39,6 +40,9 @@ class Escaper(object):
     def escape_date(self, item):
         return self.escape_string(item.strftime('%Y-%m-%d'))
 
+    def escape_datetime(self, item):
+        return self.escape_string(item.strftime('%Y-%m-%d %H:%M:%S'))
+
     def escape_decimal(self, item):
         return float(item)
 
@@ -47,6 +51,8 @@ class Escaper(object):
             return 'NULL'
         elif isinstance(item, self.number_types):
             return self.escape_number(item)
+        elif isinstance(item, datetime):
+            return self.escape_datetime(item)
         elif isinstance(item, date):
             return self.escape_date(item)
         elif isinstance(item, Decimal):
@@ -57,5 +63,7 @@ class Escaper(object):
             return "[" + ", ".join(
                 [str(self.escape_item(x)) for x in item]
             ) + "]"
+        elif isinstance(item, enum.Enum):
+            return self.escape_string(item.name)
         else:
             raise Exception("Unsupported object {}".format(item))

@@ -65,6 +65,11 @@ class Cursor(object):
 
     _params_escaper = Escaper()
 
+    _columns = None
+    _types = None
+    _response = None
+    _rows = None
+
     def __init__(self, connection):
         self._connection = connection
         self._reset_state()
@@ -118,10 +123,11 @@ class Cursor(object):
         if self._state == self._states.NONE:
             raise RuntimeError("No query yet")
 
-        if not self._rows:
-            return None
-
-        return self._rows.pop()
+        if self._rows is not None:
+            if not self._rows:
+                return None
+            return self._rows.pop()
+        return next(self._response, None)
 
     def fetchmany(self, size=None):
         if size is None:
@@ -187,14 +193,16 @@ class Cursor(object):
         self._query_id = None
         self._rows = None
 
-    def _process_response(self, response):
+    def _process_response(self, response, prefetch=False):
         response = iter(response)
 
         self._columns = next(response, None)
         self._types = next(response, None)
+        self._response = response
 
-        # Reverse list for further pop()
-        self._rows = list(response)[::-1]
+        if prefetch:
+            # Reverse list for further pop()
+            self._rows = list(response)[::-1]
 
     def _reset_state(self):
         """
@@ -206,6 +214,7 @@ class Cursor(object):
         self._columns = None
         self._types = None
         self._rows = None
+        self._response = None
 
     def _begin_query(self):
         self._state = self._states.RUNNING

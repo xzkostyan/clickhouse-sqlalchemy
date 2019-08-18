@@ -27,10 +27,11 @@ class ClickHouseDialect_http(ClickHouseDialect):
         protocol = url.query.pop('protocol', 'http')
         port = url.port or 8123
         db_name = url.database or 'default'
+        endpoint = url.query.pop('endpoint', '')
 
         kwargs.update(url.query)
 
-        db_url = '%s://%s:%d/' % (protocol, url.host, port)
+        db_url = '%s://%s:%d/%s' % (protocol, url.host, port, endpoint)
 
         return (db_url, db_name, url.username, url.password), kwargs
 
