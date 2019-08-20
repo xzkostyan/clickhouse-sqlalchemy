@@ -16,7 +16,8 @@ class SchemaTestCase(NativeSessionTestCase):
 
         # ### Maybe: ###
         # # session = native_session  # database=test
-        # session = self.__class__.session  # same as in `self.metadata()`  # database=default
+        # session = self.__class__.session
+        # same as in `self.metadata()`  # database=default
         # unbound_metadata = MetaData(bind=session.bind)
 
         table = CHTable(
