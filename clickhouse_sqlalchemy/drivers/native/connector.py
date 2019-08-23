@@ -1,3 +1,5 @@
+from itertools import islice
+
 from clickhouse_driver.client import Client
 from clickhouse_driver.errors import Error as DriverError
 
@@ -171,7 +173,12 @@ class Cursor(object):
         self._process_response(response, context)
         self._end_query()
 
+    def check_query_started(self):
+        if self._state == self._states.NONE:
+            raise RuntimeError("No query yet")
+
     def fetchone(self):
+        self.check_query_started()
         if self._state == self._states.NONE:
             raise RuntimeError("No query yet")
 
@@ -184,27 +191,25 @@ class Cursor(object):
 
             return self._rows.pop(0)
 
-    def fetchmany(self, size=None):
-        if size is None:
-            size = 1
-        rows = []
-        for _ in range(size):
-            row = self.fetchone()
-            if row is None:
-                break
-            rows.append(row)
+    def fetchmany(self, size=1):
+        self.check_query_started()
 
-        return rows
+        if self._stream_results:
+            return list(islice(self._rows, size))
+
+        rv = self._rows[:size]
+        self._rows = rv[size:]
+        return rv
 
     def fetchall(self):
-        rows = []
-        while True:
-            row = self.fetchone()
-            if row is None:
-                break
-            rows.append(row)
+        self.check_query_started()
 
-        return rows
+        if self._stream_results:
+            return list(self._rows)
+
+        rv = self._rows
+        self._rows = []
+        return rv
 
     @property
     def arraysize(self):

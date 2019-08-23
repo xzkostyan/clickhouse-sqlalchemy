@@ -250,3 +250,5 @@ class YieldTest(NativeSessionTestCase):
             assert False
         except StopIteration:
             pass
+
+        self.assertEqual(ret, [(0, ), (1, ), (2, )])

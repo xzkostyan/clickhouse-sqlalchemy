@@ -119,37 +119,31 @@ class Cursor(object):
         )
         self.execute(operation[:index] + params)
 
-    def fetchone(self):
+    def check_query_started(self):
         if self._state == self._states.NONE:
             raise RuntimeError("No query yet")
 
-        if self._rows is not None:
-            if not self._rows:
-                return None
-            return self._rows.pop()
-        return next(self._response, None)
+    def fetchone(self):
+        self.check_query_started()
 
-    def fetchmany(self, size=None):
-        if size is None:
-            size = 1
-        rows = []
-        for _ in range(size):
-            row = self.fetchone()
-            if row is None:
-                break
-            rows.append(row)
+        if not self._rows:
+            return None
 
-        return rows
+        return self._rows.pop()
+
+    def fetchmany(self, size=1):
+        self.check_query_started()
+
+        rv = self._rows[:size]
+        self._rows = rv[size:]
+        return rv
 
     def fetchall(self):
-        rows = []
-        while True:
-            row = self.fetchone()
-            if row is None:
-                break
-            rows.append(row)
+        self.check_query_started()
 
-        return rows
+        rv = self._rows
+        self._rows = []
+        return rv
 
     @property
     def arraysize(self):
@@ -178,10 +172,7 @@ class Cursor(object):
         """
         Cancels query. Not in PEP 249 standard.
         """
-        if self._state == self._states.NONE:
-            raise RuntimeError("No query yet")
-
-        if self._query_id is None:
+        if self._state == self._states.NONE or self._query_id is None:
             raise RuntimeError("No query yet")
 
         # Try to cancel query by sending query with the same query_id.
@@ -193,16 +184,14 @@ class Cursor(object):
         self._query_id = None
         self._rows = None
 
-    def _process_response(self, response, prefetch=False):
+    def _process_response(self, response):
         response = iter(response)
 
         self._columns = next(response, None)
         self._types = next(response, None)
         self._response = response
 
-        if prefetch:
-            # Reverse list for further pop()
-            self._rows = list(response)[::-1]
+        self._rows = list(response)
 
     def _reset_state(self):
         """
