@@ -135,7 +135,7 @@ class Cursor(object):
         self.check_query_started()
 
         rv = self._rows[:size]
-        self._rows = rv[size:]
+        self._rows = self._rows[size:]
         return rv
 
     def fetchall(self):
