@@ -70,12 +70,12 @@ class Cursor(object):
         self._reset_state()
         self._arraysize = 1
         self._stream_results = False
+        self._rowcount = -1
         super(Cursor, self).__init__()
 
     @property
     def rowcount(self):
-        # TODO: initial len(self._rows)?
-        return -1
+        return self._rowcount
 
     @property
     def description(self):
@@ -152,7 +152,7 @@ class Cursor(object):
         except DriverError as orig:
             raise DatabaseException(orig)
 
-        self._process_response(response, context)
+        self._process_response(response)
         self._end_query()
 
     def executemany(self, operation, seq_of_parameters, context=None):
@@ -170,7 +170,7 @@ class Cursor(object):
         except DriverError as orig:
             raise DatabaseException(orig)
 
-        self._process_response(response, context)
+        self._process_response(response, executemany=True)
         self._end_query()
 
     def check_query_started(self):
@@ -233,7 +233,11 @@ class Cursor(object):
                 return
             yield one
 
-    def _process_response(self, response, context):
+    def _process_response(self, response, executemany=False):
+        if executemany:
+            self._rowcount = response
+            response = None
+
         if not response:
             self._columns = self._types = self._rows = []
             return
@@ -261,6 +265,7 @@ class Cursor(object):
         self._columns = None
         self._types = None
         self._rows = None
+        self._rowcount = -1
 
     def _begin_query(self):
         self._state = self._states.RUNNING
