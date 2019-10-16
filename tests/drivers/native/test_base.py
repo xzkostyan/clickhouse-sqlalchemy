@@ -12,7 +12,7 @@ class TestConnectArgs(BaseTestCase):
             username='default',
             password='default',
             host='localhost',
-            port='9000',
+            port='9001',
             database='default',
         )
 
@@ -37,5 +37,20 @@ class TestConnectArgs(BaseTestCase):
         connect_args = self.dialect.create_connect_args(self.url)
         self.assertEqual(
             connect_args[0],
-            ('localhost', 9000, 'default', 'default', '')
+            ('localhost', 9001, 'default', 'default', '')
+        )
+
+    def test_default_ports(self):
+        self.url.port = None
+        connect_args = self.dialect.create_connect_args(self.url)
+        self.assertEqual(
+            connect_args[0],
+            ('localhost', 9000, 'default', 'default', 'default')
+        )
+
+        self.url.query = {'secure': 'true'}
+        connect_args = self.dialect.create_connect_args(self.url)
+        self.assertEqual(
+            connect_args[0],
+            ('localhost', 9440, 'default', 'default', 'default')
         )
