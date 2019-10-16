@@ -135,18 +135,24 @@ class Cursor(object):
             settings = settings or {}
             settings['max_block_size'] = execution_options['max_row_buffer']
 
-        return external_tables, execute, settings
+        execute_kwargs = {
+            'settings': settings,
+            'external_tables': external_tables,
+            'types_check': execution_options.get('types_check', False)
+        }
+
+        return execute, execute_kwargs
 
     def execute(self, operation, parameters=None, context=None):
         self._reset_state()
         self._begin_query()
 
         try:
-            external_tables, execute, settings = self._prepare(context)
+            execute, execute_kwargs = self._prepare(context)
 
             response = execute(
                 operation, params=parameters, with_column_types=True,
-                external_tables=external_tables, settings=settings
+                **execute_kwargs
             )
 
         except DriverError as orig:
@@ -160,11 +166,10 @@ class Cursor(object):
         self._begin_query()
 
         try:
-            external_tables, execute, settings = self._prepare(context)
+            execute, execute_kwargs = self._prepare(context)
 
             response = execute(
-                operation, params=seq_of_parameters,
-                external_tables=external_tables, settings=settings
+                operation, params=seq_of_parameters, **execute_kwargs
             )
 
         except DriverError as orig:
