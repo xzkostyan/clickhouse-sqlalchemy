@@ -4,7 +4,7 @@ from clickhouse_sqlalchemy.drivers.native.base import ClickHouseDialect_native
 from tests.testcase import BaseTestCase
 
 
-class TestCreateEngineUrlQueryParameterSecure(BaseTestCase):
+class TestConnectArgs(BaseTestCase):
     def setUp(self):
         self.dialect = ClickHouseDialect_native()
         self.url = URL(
@@ -30,3 +30,12 @@ class TestCreateEngineUrlQueryParameterSecure(BaseTestCase):
         self.url.query = {}
         connect_args = self.dialect.create_connect_args(self.url)
         self.assertEqual(connect_args[1], {})
+
+    def test_no_auth(self):
+        self.url.username = None
+        self.url.password = None
+        connect_args = self.dialect.create_connect_args(self.url)
+        self.assertEqual(
+            connect_args[0],
+            ('localhost', 9000, 'default', 'default', '')
+        )

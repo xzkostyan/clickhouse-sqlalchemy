@@ -26,6 +26,8 @@ class ClickHouseDialect_native(ClickHouseDialect):
         kwargs = {}
         port = url.port or 9000
         db_name = url.database or 'default'
+        username = url.username or 'default'
+        password = url.password or ''
 
         secure = url.query.get('secure')
         if secure is not None:
@@ -37,7 +39,7 @@ class ClickHouseDialect_native(ClickHouseDialect):
 
         kwargs.update(url.query)
 
-        return (url.host, port, db_name, url.username, url.password), kwargs
+        return (url.host, port, db_name, username, password), kwargs
 
     def _execute(self, connection, sql):
         return connection.execute(sql)
