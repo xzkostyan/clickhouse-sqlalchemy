@@ -54,5 +54,9 @@ class ClickHouseDialect_native(ClickHouseDialect):
     def _execute(self, connection, sql):
         return connection.execute(sql)
 
+    def _get_server_version_info(self, connection):
+        version = connection.scalar('select version()')
+        return tuple(int(x) for x in version.split('.'))
+
 
 dialect = ClickHouseDialect_native

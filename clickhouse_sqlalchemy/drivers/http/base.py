@@ -39,5 +39,11 @@ class ClickHouseDialect_http(ClickHouseDialect):
         sql += ' FORMAT TabSeparatedWithNamesAndTypes'
         return connection.execute(sql)
 
+    def _get_server_version_info(self, connection):
+        version = connection.scalar(
+            'select version() format TabSeparatedWithNamesAndTypes'
+        )
+        return tuple(int(x) for x in version.split('.'))
+
 
 dialect = ClickHouseDialect_http

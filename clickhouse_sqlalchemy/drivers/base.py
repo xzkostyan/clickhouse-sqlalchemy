@@ -733,9 +733,3 @@ class ClickHouseDialect(default.DefaultDialect):
 
     def _check_unicode_description(self, connection):
         return True
-
-    def _get_server_version_info(self, connection):
-        version = connection.scalar(
-            'select version() format TabSeparatedWithNamesAndTypes'
-        )
-        return tuple(int(x) for x in version.split('.'))
