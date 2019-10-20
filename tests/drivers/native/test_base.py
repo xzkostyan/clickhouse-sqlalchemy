@@ -7,50 +7,42 @@ from tests.testcase import BaseTestCase
 class TestConnectArgs(BaseTestCase):
     def setUp(self):
         self.dialect = ClickHouseDialect_native()
-        self.url = URL(
+
+    def test_simple_url(self):
+        url = URL(
+            drivername='clickhouse+native',
+            host='localhost',
+            database='default',
+        )
+        connect_args = self.dialect.create_connect_args(url)
+        self.assertEqual(
+            str(connect_args[0][0]), 'clickhouse://localhost/default'
+        )
+
+    def test_secure_false(self):
+        url = URL(
             drivername='clickhouse+native',
             username='default',
             password='default',
             host='localhost',
             port='9001',
             database='default',
+            query={'secure': False}
         )
-
-    def test_secure_false(self):
-        self.url.query = {'secure': 'false'}
-        connect_args = self.dialect.create_connect_args(self.url)
-        self.assertEqual(connect_args[1], {'secure': False})
-
-    def test_secure_true(self):
-        self.url.query = {'secure': 'true'}
-        connect_args = self.dialect.create_connect_args(self.url)
-        self.assertEqual(connect_args[1], {'secure': True})
-
-    def test_secure_not_specified(self):
-        self.url.query = {}
-        connect_args = self.dialect.create_connect_args(self.url)
-        self.assertEqual(connect_args[1], {})
+        connect_args = self.dialect.create_connect_args(url)
+        self.assertEqual(
+            str(connect_args[0][0]),
+            'clickhouse://default:default@localhost:9001/default?secure=False'
+        )
 
     def test_no_auth(self):
-        self.url.username = None
-        self.url.password = None
-        connect_args = self.dialect.create_connect_args(self.url)
-        self.assertEqual(
-            connect_args[0],
-            ('localhost', 9001, 'default', 'default', '')
+        url = URL(
+            drivername='clickhouse+native',
+            host='localhost',
+            port='9001',
+            database='default',
         )
-
-    def test_default_ports(self):
-        self.url.port = None
-        connect_args = self.dialect.create_connect_args(self.url)
+        connect_args = self.dialect.create_connect_args(url)
         self.assertEqual(
-            connect_args[0],
-            ('localhost', 9000, 'default', 'default', 'default')
-        )
-
-        self.url.query = {'secure': 'true'}
-        connect_args = self.dialect.create_connect_args(self.url)
-        self.assertEqual(
-            connect_args[0],
-            ('localhost', 9440, 'default', 'default', 'default')
+            str(connect_args[0][0]), 'clickhouse://localhost:9001/default'
         )

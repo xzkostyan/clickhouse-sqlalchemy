@@ -32,7 +32,8 @@ class Connection(object):
     transport_cls = Client
 
     def __init__(self, *args, **kwargs):
-        self.transport = self.transport_cls(*args, **kwargs)
+        url = args[0]
+        self.transport = self.transport_cls.from_url(url)
         super(Connection, self).__init__()
 
     def close(self):

@@ -1,5 +1,3 @@
-from clickhouse_driver import defines
-from sqlalchemy.util import asbool
 
 from . import connector
 from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
@@ -24,32 +22,9 @@ class ClickHouseDialect_native(ClickHouseDialect):
         return connector
 
     def create_connect_args(self, url):
-        kwargs = {}
-        query = url.query
+        url.drivername = 'clickhouse'
 
-        secure = query.get('secure')
-        if secure is not None:
-            query['secure'] = asbool(secure)
-
-        verify = query.get('verify')
-        if verify is not None:
-            query['verify'] = asbool(verify)
-
-        kwargs.update(query)
-
-        if url.port:
-            port = url.port
-        else:
-            if query.get('secure'):
-                port = defines.DEFAULT_SECURE_PORT
-            else:
-                port = defines.DEFAULT_PORT
-
-        db_name = url.database or 'default'
-        username = url.username or 'default'
-        password = url.password or ''
-
-        return (url.host, port, db_name, username, password), kwargs
+        return (str(url), ), {}
 
     def _execute(self, connection, sql):
         return connection.execute(sql)
