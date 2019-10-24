@@ -92,7 +92,7 @@ Connection string to database `test` in default ClickHouse installation:
          'clickhouse+native://default:@localhost/test'
 
 All connection string parameters are proxied to `clickhouse-driver`.
-See it's `parameters <https://github.com/mymarilyn/clickhouse-driver#connection-parameters>`_.
+See it's `parameters <https://clickhouse-driver.readthedocs.io/en/latest/api.html#clickhouse_driver.connection.Connection>`_.
 
 
 Features
