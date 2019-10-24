@@ -27,4 +27,6 @@ before_script:
 script:
   coverage run --source=clickhouse_sqlalchemy setup.py test
 after_success:
-  coveralls
+  COVERALLS_PARALLEL=true coveralls
+notifications:
+  webhooks: https://coveralls.io/webhook
