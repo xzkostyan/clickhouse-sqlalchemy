@@ -107,17 +107,21 @@ class DateTime(types.Date):
     __visit_name__ = 'datetime'
 
 
-class Enum8(types.Enum):
-    __visit_name__ = 'enum8'
+class Enum(types.Enum):
+    __visit_name__ = 'enum'
 
     def __init__(self, *enums, **kw):
         if not enums:
             enums = kw.get('_enums', ())  # passed as keyword
 
-        super(Enum8, self).__init__(*enums, **kw)
+        super(Enum, self).__init__(*enums, **kw)
 
 
-class Enum16(Enum8):
+class Enum8(Enum):
+    __visit_name__ = 'enum8'
+
+
+class Enum16(Enum):
     __visit_name__ = 'enum16'
 
 

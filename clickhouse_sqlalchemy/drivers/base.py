@@ -498,6 +498,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         )
         return '%s(%s)' % (db_type, ', '.join(choices))
 
+    def visit_enum(self, type_, **kw):
+        return self._render_enum('Enum', type_, **kw)
+
     def visit_enum8(self, type_, **kw):
         return self._render_enum('Enum8', type_, **kw)
 

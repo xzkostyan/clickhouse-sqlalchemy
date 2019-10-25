@@ -28,6 +28,11 @@ class VisitTestCase(BaseTestCase):
             bar = 500
 
         self.assertEqual(
+            self.compile(types.Enum(MyEnum)),
+            "Enum('foo' = 100, 'bar' = 500)"
+        )
+
+        self.assertEqual(
             self.compile(types.Enum16(MyEnum)),
             "Enum16('foo' = 100, 'bar' = 500)"
         )
