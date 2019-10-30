@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.0.11] - 2019-10-31
+## [0.1.0] - 2019-10-31
 ### Added
 - Enum without explicit size. Pull request [#69](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/69) by [ei-grad](https://github.com/ei-grad).
 - [Native] Passing all parameters to `clickhouse-driver` by using querystring in DSN.
@@ -10,7 +10,6 @@
 - Assorted fixes and improvements from a downstream internal fork. Pull request [#62](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/62) by [hhell](https://github.com/hhell).
 - LowCardinality type modifier. Pull request [#59](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/59) by [hhell](https://github.com/hhell).
 - [Native] IPv4 and IPv6 types. Pull request [#52](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/52) by [AchilleAsh](https://github.com/AchilleAsh).
-- Ability to use custom partition key and primary keys differs from sorting keys for *MergeTree. Pull request [#48](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/48) by [aCLr](https://github.com/aCLr).
 - Nested types. Pull request [#49](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/49) by [aCLr](https://github.com/aCLr).
 - Support for `FULL` parameter in `JOIN` rendering. Pull request [#50](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/50) by [PiwikPRO](https://github.com/PiwikPRO).
 - `ARRAY JOIN` clause. Pull request [#44](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/44) by [aCLr](https://github.com/aCLr).
@@ -22,6 +21,7 @@
 - [HTTP] `UnicodeDecodeError`. Pull request [#51](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/51) by [aminought](https://github.com/aminought).
 
 ### Changed
+- Ability to use custom partition key and primary keys differs from sorting keys for *MergeTree. Pull request [#48](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/48) by [aCLr](https://github.com/aCLr).
 - Cursor performance increased in`fetchmany` and `fetchall`.
 - Add dependencies environment markers in setup.py. Pull request [#58](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/58) by [nitoqq](https://github.com/nitoqq).
 - Joins support refactor. Added `strictness` (`ANY`/`ALL`), `distribution` (`GLOBAL`) parameters. Pull request [#53](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/53) by [aCLr](https://github.com/aCLr).
@@ -131,8 +131,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.11...HEAD
-[0.0.11]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.10...0.0.11
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.10...0.1.0
 [0.0.10]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.9...0.0.10
 [0.0.9]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.8...0.0.9
 [0.0.8]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.7...0.0.8
