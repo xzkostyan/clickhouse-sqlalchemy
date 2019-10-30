@@ -86,12 +86,6 @@ class _ORMJoin(_StandardORMJoin):
 
     def __init__(self, left, right, onclause=None, type=None, strictness=None,
                  distribution=None):
-        if type is None:
-            raise ValueError(
-                'JOIN type must be specified, '
-                'expected one of: '
-                'INNER, RIGHT OUTER, LEFT OUTER, FULL OUTER, CROSS'
-            )
         super(_ORMJoin, self).__init__(left, right, onclause, False, False,
                                        None, None)
         self.distribution = distribution

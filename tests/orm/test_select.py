@@ -135,6 +135,18 @@ class JoinTestCase(BaseTestCase):
             .join(
             t2,
             t1.c.x == t1.c.y,
+            strictness='any')
+
+        self.assertEqual(
+            self.compile(query),
+            "SELECT x AS t0_x, x AS t1_x FROM t0 "
+            "ANY INNER JOIN t1 ON x = y"
+        )
+
+        query = session.query(t1.c.x, t2.c.x) \
+            .join(
+            t2,
+            t1.c.x == t1.c.y,
             type='inner',
             strictness='any')
 
