@@ -337,7 +337,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         if engine.partition_by:
             text += ' PARTITION BY {0}\n'.format(
                 self._compile_param(
-                    engine.partition_by.get_column()
+                    engine.partition_by.get_expressions_or_columns()[0]
                 )
             )
         if engine.order_by:
