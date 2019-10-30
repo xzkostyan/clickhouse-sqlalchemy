@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.1] - 2019-10-31
+### Fixed
+- Set default strictness to `INNER` for join.
+- MergeTree `PARTITION BY` clause now accepts functions.
+
 ## [0.1.0] - 2019-10-31
 ### Added
 - Enum without explicit size. Pull request [#69](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/69) by [ei-grad](https://github.com/ei-grad).
@@ -131,7 +136,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.1...HEAD
+[0.1.1]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.10...0.1.0
 [0.0.10]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.9...0.0.10
 [0.0.9]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.8...0.0.9
