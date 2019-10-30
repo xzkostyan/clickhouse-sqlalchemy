@@ -3,10 +3,10 @@ from sqlalchemy import Column, func
 from clickhouse_sqlalchemy import engines, types, Table
 from clickhouse_sqlalchemy.exceptions import DatabaseException
 from tests.session import native_session
-from tests.testcase import BaseTestCase
+from tests.testcase import NativeSessionTestCase
 
 
-class NativeInsertTestCase(BaseTestCase):
+class NativeInsertTestCase(NativeSessionTestCase):
     session = native_session
 
     def test_rowcount_return(self):
@@ -23,6 +23,11 @@ class NativeInsertTestCase(BaseTestCase):
         self.assertEqual(
             self.session.query(func.count()).select_from(table).scalar(), 5
         )
+
+        rv = self.session.execute(
+            'INSERT INTO test SELECT * FROM system.numbers LIMIT 5'
+        )
+        self.assertEqual(rv.rowcount, -1)
 
     def test_types_check(self):
         table = Table(
