@@ -29,7 +29,7 @@ class Table(TableBase):
         return Select([self], whereclause, **params)
 
     @classmethod
-    def _make_from_standard(cls, std_table):
+    def _make_from_standard(cls, std_table, _extend_on=None):
         ch_table = cls(std_table.name, std_table.metadata)
         ch_table.schema = std_table.schema
         ch_table.fullname = std_table.fullname
@@ -38,4 +38,8 @@ class Table(TableBase):
         ch_table.info = std_table.info
         ch_table._prefixes = std_table._prefixes
         ch_table.dialect_options = std_table.dialect_options
+
+        if _extend_on is None:
+            ch_table._columns = std_table._columns
+
         return ch_table

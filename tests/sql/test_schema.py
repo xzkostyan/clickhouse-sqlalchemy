@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, text
+from sqlalchemy import Column, text, Table
 
 from clickhouse_sqlalchemy import types, Table as CHTable, engines
 from tests.testcase import NativeSessionTestCase
@@ -35,14 +35,14 @@ class SchemaTestCase(NativeSessionTestCase):
         self.assertFalse(metadata.tables)
         metadata.reflect(only=[table.name])
         table2 = metadata.tables.get(table.name)
-        assert table2 is not None
-        assert list(table2.columns)
+        self.assertIsNotNone(table2)
+        self.assertListEqual([c.name for c in table2.columns], ['x'])
         self.assertTrue(isinstance(table2, CHTable))
 
         # Sub-test: ensure `CHTable(..., autoload=True)` works too
         metadata.clear()
         table3 = CHTable('test_reflect', metadata, autoload=True)
-        assert list(table3.columns)
+        self.assertListEqual([c.name for c in table3.columns], ['x'])
 
         # Sub-test: check that they all reflected the same.
         for table_x in [table, table2, table3]:
@@ -59,3 +59,26 @@ class SchemaTestCase(NativeSessionTestCase):
                 "GLOBAL ALL INNER JOIN another_table "
                 "ON x = %(x_1)s"
             )
+
+    def test_reflect_generic_table(self):
+        """
+        checking, that generic table columns are reflected properly
+        """
+        metadata = self.metadata()
+
+        table = Table(
+            'test_reflect',
+            metadata,
+            Column('x', types.Int32),
+            engines.Log()
+        )
+
+        self.session.execute('DROP TABLE IF EXISTS test_reflect')
+        table.create(self.session.bind)
+
+        # Sub-test: ensure the `metadata.reflect` makes a CHTable
+        metadata.clear()  # reflect from clean state
+        self.assertFalse(metadata.tables)
+
+        table = Table('test_reflect', metadata, autoload=True)
+        self.assertListEqual([c.name for c in table.columns], ['x'])

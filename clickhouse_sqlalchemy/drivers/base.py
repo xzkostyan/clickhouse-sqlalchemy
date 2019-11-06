@@ -587,7 +587,9 @@ class ClickHouseDialect(default.DefaultDialect):
         # `clickhouse_sqlalchemy.Table` and then reflection of it.
         if not isinstance(table, Table):
             table.metadata.remove(table)
-            ch_table = Table._make_from_standard(table)
+            ch_table = Table._make_from_standard(
+                table, _extend_on=opts.get('_extend_on')
+            )
         else:
             ch_table = table
         return super(ClickHouseDialect, self).reflecttable(
