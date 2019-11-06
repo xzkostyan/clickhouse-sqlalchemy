@@ -31,8 +31,8 @@ The package can be installed using ``pip``:
 Interfaces support
 ------------------
 
+- **native** [recommended] (TCP) via `clickhouse-driver <https://github.com/mymarilyn/clickhouse-driver>`_
 - **http** via requests
-- **native** (TCP) via `clickhouse-driver <https://github.com/mymarilyn/clickhouse-driver>`_
 
 
 Connection Parameters
