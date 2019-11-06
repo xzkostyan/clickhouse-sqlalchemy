@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Generic `Table` reflection in case of `autoload=True`.
+- [HTTP] Fix `get_schema_names`.
+
 ## [0.1.1] - 2019-10-31
 ### Fixed
 - Set default strictness to `INNER` for join.

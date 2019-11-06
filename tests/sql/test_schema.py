@@ -1,11 +1,11 @@
 
-from sqlalchemy import Column, text, Table
+from sqlalchemy import Column, text, Table, inspect
 
 from clickhouse_sqlalchemy import types, Table as CHTable, engines
-from tests.testcase import NativeSessionTestCase
+from tests.testcase import NativeSessionTestCase, BaseTestCase
 
 
-class SchemaTestCase(NativeSessionTestCase):
+class NativeSchemaTestCase(NativeSessionTestCase):
     def test_reflect(self):
         """
         checking, that after call metadata.reflect()
@@ -82,3 +82,23 @@ class SchemaTestCase(NativeSessionTestCase):
 
         table = Table('test_reflect', metadata, autoload=True)
         self.assertListEqual([c.name for c in table.columns], ['x'])
+
+
+class HTTPSchemaTestCase(BaseTestCase):
+    def test_get_schema_names(self):
+        insp = inspect(self.session.bind)
+        schema_names = insp.get_schema_names()
+        self.assertGreater(len(schema_names), 0)
+
+    def test_get_table_names(self):
+        table = Table(
+            'test_reflect',
+            self.metadata(),
+            Column('x', types.Int32),
+            engines.Log()
+        )
+
+        table.create(self.session.bind)
+
+        insp = inspect(self.session.bind)
+        self.assertListEqual(insp.get_table_names(), ['test_reflect'])

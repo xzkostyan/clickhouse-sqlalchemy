@@ -702,7 +702,8 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @reflection.cache
     def get_schema_names(self, connection, **kw):
-        return [row.name for row in connection.execute('SHOW DATABASES')]
+        rows = self._execute(connection, 'SHOW DATABASES')
+        return [row.name for row in rows]
 
     @reflection.cache
     def get_foreign_keys(self, connection, table_name, schema=None, **kw):
@@ -721,7 +722,8 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @reflection.cache
     def get_table_names(self, connection, schema=None, **kw):
-        return [row.name for row in self._execute(connection, 'SHOW TABLES')]
+        rows = self._execute(connection, 'SHOW TABLES')
+        return [row.name for row in rows]
 
     def do_rollback(self, dbapi_connection):
         # No support for transactions.

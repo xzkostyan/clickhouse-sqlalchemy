@@ -6,12 +6,14 @@ from . import connector
 # Export connector version
 VERSION = (0, 0, 2, None)
 
+FORMAT_SUFFIX = 'FORMAT TabSeparatedWithNamesAndTypes'
+
 
 class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
     def pre_exec(self):
         # TODO: refactor
         if not self.isinsert and not self.isddl:
-            self.statement += ' FORMAT TabSeparatedWithNamesAndTypes'
+            self.statement += ' ' + FORMAT_SUFFIX
 
 
 class ClickHouseDialect_http(ClickHouseDialect):
@@ -36,12 +38,12 @@ class ClickHouseDialect_http(ClickHouseDialect):
         return (db_url, db_name, url.username, url.password), kwargs
 
     def _execute(self, connection, sql):
-        sql += ' FORMAT TabSeparatedWithNamesAndTypes'
+        sql += ' ' + FORMAT_SUFFIX
         return connection.execute(sql)
 
     def _get_server_version_info(self, connection):
         version = connection.scalar(
-            'select version() format TabSeparatedWithNamesAndTypes'
+            'select version() {}'.format(FORMAT_SUFFIX)
         )
         return tuple(int(x) for x in version.split('.'))
 

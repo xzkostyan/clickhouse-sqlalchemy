@@ -17,9 +17,6 @@ registry.register(
     "clickhouse.native", "clickhouse_sqlalchemy.drivers.native.base", "dialect"
 )
 
-# Http protocol is obsolete.
-uri = 'clickhouse://default:@localhost:8123/default'
-
 file_config = configparser.ConfigParser()
 file_config.read(['setup.cfg'])
 
@@ -27,11 +24,18 @@ log.configure(file_config.get('log', 'level'))
 
 host = file_config.get('db', 'host')
 port = file_config.getint('db', 'port')
+http_port = file_config.getint('db', 'http_port')
 database = file_config.get('db', 'database')
 user = file_config.get('db', 'user')
 password = file_config.get('db', 'password')
 
 uri_template = '{schema}://{user}:{password}@{host}:{port}/{database}'
+
+# Http protocol is obsolete.
+uri = uri_template.format(
+    schema='clickhouse+http', user=user, password=password, host=host,
+    port=http_port, database=database
+)
 native_uri = uri_template.format(
     schema='clickhouse+native', user=user, password=password, host=host,
     port=port, database=database

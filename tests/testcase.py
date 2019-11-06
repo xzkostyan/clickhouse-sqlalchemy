@@ -5,11 +5,17 @@ from unittest import TestCase
 from sqlalchemy import MetaData
 from sqlalchemy.orm import Query
 
-from tests.config import database as test_database
+from tests.config import database, host, port, http_port, user, password
 from tests.session import session, native_session, system_native_session
 
 
 class BaseTestCase(TestCase):
+    host = host
+    port = http_port
+    database = database
+    user = user
+    password = password
+
     strip_spaces = re.compile(r'[\n\t]')
     session = session
 
@@ -40,16 +46,18 @@ class BaseTestCase(TestCase):
 
 
 class NativeSessionTestCase(BaseTestCase):
+    port = port
+
     session = native_session
 
     @classmethod
     def setUpClass(cls):
         # System database is always present.
         system_native_session.execute(
-            'DROP DATABASE IF EXISTS {}'.format(test_database)
+            'DROP DATABASE IF EXISTS {}'.format(cls.database)
         )
         system_native_session.execute(
-            'CREATE DATABASE {}'.format(test_database)
+            'CREATE DATABASE {}'.format(cls.database)
         )
 
         super(BaseTestCase, cls).setUpClass()

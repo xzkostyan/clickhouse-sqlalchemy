@@ -11,10 +11,14 @@ from tests.testcase import BaseTestCase
 
 
 class TransportCase(BaseTestCase):
+    @property
+    def url(self):
+        return 'http://{host}:{port}'.format(host=self.host, port=self.port)
+
     @mock.activate
     def test_parse_func_count(self):
         mock.add(
-            mock.POST, 'http://localhost:8123', status=200,
+            mock.POST, self.url, status=200,
             body='count_1\nUInt64\n42\n'
         )
 
@@ -35,7 +39,7 @@ class TransportCase(BaseTestCase):
         columns = [chr(i + ord('a')) for i in range(len(types_))]
 
         mock.add(
-            mock.POST, 'http://localhost:8123', status=200,
+            mock.POST, self.url, status=200,
             body=(
                 '\t'.join(columns) + '\n' +
                 '\t'.join(types_) + '\n' +
@@ -57,7 +61,7 @@ class TransportCase(BaseTestCase):
         columns = ['a', 'b']
 
         mock.add(
-            mock.POST, 'http://localhost:8123', status=200,
+            mock.POST, self.url, status=200,
             body=(
                 '\t'.join(columns) + '\n' +
                 '\t'.join(types_) + '\n' +
@@ -78,7 +82,7 @@ class TransportCase(BaseTestCase):
     @mock.activate
     def test_parse_date_types(self, patched_server_info):
         mock.add(
-            mock.POST, 'http://localhost:8123', status=200,
+            mock.POST, self.url, status=200,
             body=(
                 'a\n' +
                 'Date\n' +
@@ -97,7 +101,7 @@ class TransportCase(BaseTestCase):
     @mock.activate
     def test_parse_nullable_type(self):
         mock.add(
-            mock.POST, 'http://localhost:8123', status=200,
+            mock.POST, self.url, status=200,
             body=(
                 'a\n' +
                 'String\n' +

@@ -13,7 +13,7 @@ cache: pip
 services:
   - docker
 before_install:
-  - docker run -d -p 127.0.0.1:9000:9000 --name test-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:$VERSION
+  - docker run -d -p 127.0.0.1:9000:9000 -p 127.0.0.1:8123:8123 --name test-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:$VERSION
   - docker ps -a
   # Overriding setup.cfg. Set host=clickhouse-server
   - sed -i 's/^host=localhost$/host=clickhouse-server/' setup.cfg
