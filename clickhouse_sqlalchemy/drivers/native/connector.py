@@ -70,8 +70,6 @@ class Cursor(object):
         self._connection = connection
         self._reset_state()
         self._arraysize = 1
-        self._stream_results = False
-        self._rowcount = -1
         super(Cursor, self).__init__()
 
     @property
@@ -185,8 +183,6 @@ class Cursor(object):
 
     def fetchone(self):
         self.check_query_started()
-        if self._state == self._states.NONE:
-            raise RuntimeError("No query yet")
 
         if self._stream_results:
             return next(self._rows, None)
@@ -272,6 +268,8 @@ class Cursor(object):
         self._types = None
         self._rows = None
         self._rowcount = -1
+
+        self._stream_results = False
 
     def _begin_query(self):
         self._state = self._states.RUNNING
