@@ -330,10 +330,10 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
 
     def visit_merge_tree(self, engine):
 
-        text = '{0}{1}\n'.format(engine.name, self._compile_param(
-            to_list(
-                engine.get_parameters())
-        ) or '()')
+        text = '{0}{1}\n'.format(
+            engine.name,
+            self._compile_param(to_list(engine.get_parameters())) or '()'
+        )
         if engine.partition_by:
             text += ' PARTITION BY {0}\n'.format(
                 self._compile_param(

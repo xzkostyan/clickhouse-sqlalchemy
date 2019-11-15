@@ -214,11 +214,8 @@ class ReplicatedEngineMixin(object):
 
 
 class ReplicatedMergeTree(ReplicatedEngineMixin, MergeTree):
-    def __init__(self,
-                 table_path,
-                 replica_name,
-                 *args,
-                 **kwargs):
+    def __init__(self, table_path, replica_name,
+                 *args, **kwargs):
         ReplicatedEngineMixin.__init__(self, table_path, replica_name)
         MergeTree.__init__(self, *args, **kwargs)
 
@@ -232,13 +229,26 @@ class ReplicatedCollapsingMergeTree(ReplicatedEngineMixin,
     def __init__(self, table_path, replica_name,
                  *args, **kwargs):
         ReplicatedEngineMixin.__init__(self, table_path, replica_name)
-        CollapsingMergeTree.__init__(
-            self, *args, **kwargs
-        )
+        CollapsingMergeTree.__init__(self, *args, **kwargs)
 
     def get_parameters(self):
         return ReplicatedEngineMixin.get_parameters(self) + \
             CollapsingMergeTree.get_parameters(self)
+
+
+class ReplicatedReplacingMergeTree(ReplicatedEngineMixin,
+                                   ReplacingMergeTree):
+    def __init__(self, table_path, replica_name,
+                 *args, **kwargs):
+        ReplicatedEngineMixin.__init__(self, table_path, replica_name)
+        ReplacingMergeTree.__init__(self, *args, **kwargs)
+
+    def get_parameters(self):
+        rv = ReplicatedEngineMixin.get_parameters(self)
+        replacing = ReplacingMergeTree.get_parameters(self)
+        if replacing is not None:
+            rv.append(replacing)
+        return rv
 
 
 class ReplicatedAggregatingMergeTree(ReplicatedEngineMixin,
@@ -246,9 +256,7 @@ class ReplicatedAggregatingMergeTree(ReplicatedEngineMixin,
     def __init__(self, table_path, replica_name,
                  *args, **kwargs):
         ReplicatedEngineMixin.__init__(self, table_path, replica_name)
-        AggregatingMergeTree.__init__(
-            self, *args, **kwargs
-        )
+        AggregatingMergeTree.__init__(self, *args, **kwargs)
 
     def get_parameters(self):
         return ReplicatedEngineMixin.get_parameters(self) + \
@@ -262,13 +270,14 @@ class ReplicatedSummingMergeTree(ReplicatedEngineMixin, SummingMergeTree):
                  *args,
                  **kwargs):
         ReplicatedEngineMixin.__init__(self, table_path, replica_name)
-        SummingMergeTree.__init__(
-            self, *args, **kwargs
-        )
+        SummingMergeTree.__init__(self, *args, **kwargs)
 
     def get_parameters(self):
-        return ReplicatedEngineMixin.get_parameters(self) + \
-            SummingMergeTree.get_parameters(self)
+        rv = ReplicatedEngineMixin.get_parameters(self)
+        summing = SummingMergeTree.get_parameters(self)
+        if summing is not None:
+            rv.append(summing)
+        return rv
 
 
 class Buffer(Engine):
