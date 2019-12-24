@@ -329,7 +329,8 @@ class EnginesDeclarativeTestCase(BaseTestCase):
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
-            "CREATE TABLE test_table (date Date, x Int32, y String) ENGINE = File(JSONEachRow)"
+            "CREATE TABLE test_table (date Date, x Int32, y String)"
+            " ENGINE = File(JSONEachRow)"
         )
 
     def test_file_raises(self):
@@ -344,6 +345,3 @@ class EnginesDeclarativeTestCase(BaseTestCase):
                         'unsupported_format'
                     ),
                 )
-
-
-
