@@ -350,9 +350,6 @@ class Null(_NoParamsEngine):
 
 
 class File(Engine):
-
-    __visit_name__ = 'file'
-
     def __init__(
             self,
             data_format,
