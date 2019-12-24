@@ -314,3 +314,34 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             "PARTITION BY toYYYYMM(date) "
             "ORDER BY (date, x)"
         )
+
+    def test_file(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+
+            __table_args__ = (
+                engines.File(
+                    'JSONEachRow'
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            "CREATE TABLE test_table (date Date, x Int32, y String)"
+            " ENGINE = File(JSONEachRow)"
+        )
+
+    def test_file_raises(self):
+        with self.assertRaises(Exception):
+            class TestTable(self.base):
+                date = Column(types.Date, primary_key=True)
+                x = Column(types.Int32)
+                y = Column(types.String)
+
+                __table_args__ = (
+                    engines.File(
+                        'unsupported_format'
+                    ),
+                )

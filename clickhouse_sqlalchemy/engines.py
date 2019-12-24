@@ -8,6 +8,25 @@ from sqlalchemy.sql.visitors import Visitable
 from sqlalchemy.util import to_list
 
 
+supported_data_formats = {
+    'tabseparated': 'TabSeparated',
+    'tabseparatedwithnames': 'TabSeparatedWithNames',
+    'tabseparatedwithnamesandtypes': 'TabSeparatedWithNamesAndTypes',
+    'template': 'Template',
+    'csv': 'CSV',
+    'csvwithnames': 'CSVWithNames',
+    'customseparated': 'CustomSeparated',
+    'values': 'Values',
+    'jsoneachrow': 'JSONEachRow',
+    'tskv': 'TSKV',
+    'protobuf': 'Protobuf',
+    'parquet': 'Parquet',
+    'rowbinary': 'RowBinary',
+    'rowbinarywithnamesandtypes': 'RowBinaryWithNamesAndTypes',
+    'native': 'Native'
+}
+
+
 class Engine(SchemaEventTarget, Visitable):
     __visit_name__ = 'engine'
 
@@ -328,3 +347,23 @@ class Memory(_NoParamsEngine):
 
 class Null(_NoParamsEngine):
     pass
+
+
+class File(Engine):
+    def __init__(
+            self,
+            data_format,
+    ):
+        if data_format.lower() not in supported_data_formats:
+            raise Exception(
+                'Format {0} not supproted for File engine'.format(
+                    data_format
+                )
+            )
+        self.data_format = supported_data_formats[
+            data_format.lower()
+        ]
+        super(File, self).__init__()
+
+    def get_parameters(self):
+        return (self.data_format, )
