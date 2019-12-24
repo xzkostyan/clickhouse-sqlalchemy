@@ -368,6 +368,14 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             )
         return text
 
+    def visit_file(self, engine):
+
+        text = '{0}{1}\n'.format(
+            engine.name,
+            self._compile_param(engine.get_parameters())
+        )
+        return text
+
     def visit_engine(self, engine):
         engine_params = engine.get_parameters()
         text = engine.name
