@@ -1,7 +1,7 @@
 import enum
-from sqlalchemy import sql
+from sqlalchemy import sql, Column
 
-from clickhouse_sqlalchemy import types
+from clickhouse_sqlalchemy import types, Table, engines
 from clickhouse_sqlalchemy.util import compat
 from tests.testcase import BaseTestCase
 
@@ -48,4 +48,15 @@ class VisitTestCase(BaseTestCase):
         self.assertEqual(
             self.compile(types.Enum8(MyEnum)),
             "Enum8(' \\' t = ' = 1, 'test' = 2)"
+        )
+
+    def test_insert_no_templates_after_value(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32),
+            engines.Memory()
+        )
+        self.assertEqual(
+            self.compile(table.insert()),
+            'INSERT INTO t1 (x) VALUES'
         )
