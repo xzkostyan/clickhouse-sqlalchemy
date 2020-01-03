@@ -87,10 +87,12 @@ setup(
 
     packages=find_packages('.', exclude=["tests*"]),
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
+    # TODO: breaking changes. No more DatabaseException
+    # TODO: add http protocol deprecation warning
     install_requires=[
         'sqlalchemy>=1.2',
         'requests',
-        'clickhouse-driver>=0.1.2',
+        'clickhouse-driver>=0.1.2', # TODO: 0.1.3
         'ipaddress; python_version<"3.4"',
     ],
     # Registering `clickhouse` as dialect.

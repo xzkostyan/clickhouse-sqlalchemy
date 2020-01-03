@@ -5,10 +5,10 @@ from decimal import Decimal
 from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network
 
 from sqlalchemy import Column, Numeric, and_
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
-from clickhouse_sqlalchemy.exceptions import DatabaseException
 
 from tests.testcase import TypesTestCase
 from tests.util import require_server_version
@@ -68,7 +68,7 @@ class NumericTypeTestCase(TypesTestCase):
         value = Decimal('12345678901234567890.1234567890')
 
         with self.create_table(self.table):
-            with self.assertRaises(DatabaseException) as ex:
+            with self.assertRaises(OperationalError) as ex:
                 self.session.execute(self.table.insert(), [{'x': value}])
 
             self.assertIn('out of range', str(ex.exception))

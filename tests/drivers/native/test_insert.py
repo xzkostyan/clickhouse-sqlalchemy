@@ -1,7 +1,7 @@
 from sqlalchemy import Column, func
+from sqlalchemy.exc import OperationalError
 
 from clickhouse_sqlalchemy import engines, types, Table
-from clickhouse_sqlalchemy.exceptions import DatabaseException
 from tests.session import native_session
 from tests.testcase import NativeSessionTestCase
 
@@ -38,14 +38,14 @@ class NativeInsertTestCase(NativeSessionTestCase):
         table.drop(if_exists=True)
         table.create()
 
-        with self.assertRaises(DatabaseException) as ex:
+        with self.assertRaises(OperationalError) as ex:
             self.session.execute(
                 table.insert().execution_options(types_check=True),
                 [{'x': -1}]
             )
         self.assertIn('-1 for column "x"', str(ex.exception.orig))
 
-        with self.assertRaises(DatabaseException) as ex:
+        with self.assertRaises(OperationalError) as ex:
             self.session.execute(table.insert(), [{'x': -1}])
         self.assertIn(
             'Repeat query with types_check=True for detailed info',

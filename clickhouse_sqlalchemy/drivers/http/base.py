@@ -3,9 +3,6 @@ from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
 from . import connector
 
 
-# Export connector version
-VERSION = (0, 0, 2, None)
-
 FORMAT_SUFFIX = 'FORMAT TabSeparatedWithNamesAndTypes'
 
 
