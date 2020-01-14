@@ -30,6 +30,9 @@ class Connection(object):
     transport_cls = RequestsTransport
 
     def __init__(self, *args, **kwargs):
+
+        self._prefetch = bool(kwargs.pop('stream', None))
+
         self.transport = self.transport_cls(*args, **kwargs)
         super(Connection, self).__init__()
 
@@ -126,24 +129,43 @@ class Cursor(object):
     def fetchone(self):
         self.check_query_started()
 
-        if not self._rows:
-            return None
-
-        return self._rows.pop()
+        if self._rows is not None:
+            if not self._rows:
+                return None
+            return self._rows.pop()
+        return next(self._response, None)
 
     def fetchmany(self, size=1):
         self.check_query_started()
 
-        rv = self._rows[:size]
-        self._rows = self._rows[size:]
-        return rv
+        if self._rows is not None:
+            rv = self._rows[:size]
+            self._rows = self._rows[size:]
+            return rv
+
+        rows = []
+        for _ in range(size):
+            row = self.fetchone()
+            if row is None:
+                break
+            rows.append(row)
+        return rows
 
     def fetchall(self):
         self.check_query_started()
 
-        rv = self._rows
-        self._rows = []
-        return rv
+        if self._rows is not None:
+            rv = self._rows
+            self._rows = []
+            return rv
+
+        rows = []
+        while True:
+            row = self.fetchone()
+            if row is None:
+                break
+            rows.append(row)
+        return rows
 
     @property
     def arraysize(self):
@@ -183,6 +205,10 @@ class Cursor(object):
         self._end_query()
         self._query_id = None
         self._rows = None
+
+    @property
+    def _prefetch(self):
+        return self._connection._prefetch
 
     def _process_response(self, response):
         response = iter(response)

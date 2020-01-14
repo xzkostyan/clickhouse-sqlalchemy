@@ -1,11 +1,10 @@
 from sqlalchemy import Column, func
 
 from clickhouse_sqlalchemy import types, Table
-from tests.session import session
-from tests.testcase import BaseTestCase
+from tests.testcase import BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase
 
 
-class CountTestCase(BaseTestCase):
+class CountTestCaseBase(BaseAbstractTestCase):
     def create_table(self):
         metadata = self.metadata()
 
@@ -18,7 +17,7 @@ class CountTestCase(BaseTestCase):
         table = self.create_table()
 
         self.assertEqual(
-            self.compile(session.query(func.count(table.c.x))),
+            self.compile(self.session.query(func.count(table.c.x))),
             'SELECT count(x) AS count_1 FROM t1'
         )
 
@@ -26,7 +25,7 @@ class CountTestCase(BaseTestCase):
         table = self.create_table()
 
         self.assertEqual(
-            self.compile(session.query(func.count(func.distinct(table.c.x)))),
+            self.compile(self.session.query(func.count(func.distinct(table.c.x)))),
             'SELECT count(distinct(x)) AS count_1 FROM t1'
         )
 
@@ -34,6 +33,15 @@ class CountTestCase(BaseTestCase):
         table = self.create_table()
 
         self.assertEqual(
-            self.compile(session.query(func.count()).select_from(table)),
+            self.compile(self.session.query(func.count()).select_from(table)),
             'SELECT count(*) AS count_1 FROM t1'
         )
+
+
+
+class CountHttpTestCase(CountTestCaseBase, HttpSessionTestCase):
+    """ ... """
+
+
+class CountNativeTestCase(CountTestCaseBase, NativeSessionTestCase):
+    """ ... """

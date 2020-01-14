@@ -10,7 +10,7 @@ from sqlalchemy.sql.ddl import CreateTable
 from clickhouse_sqlalchemy import types, engines, Table
 from clickhouse_sqlalchemy.exceptions import DatabaseException
 
-from tests.testcase import TypesTestCase
+from tests.testcase import TypesTestCase, HttpSessionTestCase, NativeSessionTestCase
 from tests.util import require_server_version
 
 
@@ -35,6 +35,14 @@ class DateTimeTypeTestCase(TypesTestCase):
         )
 
 
+class DateTimeTypeHttpTestCase(DateTimeTypeTestCase, HttpSessionTestCase):
+    """ DateTimeType over a HTTP session """
+
+
+class DateTimeTypeNativeTestCase(DateTimeTypeTestCase, NativeSessionTestCase):
+    """ DateTimeType over a native protocol session """
+
+
 class NumericTypeTestCase(TypesTestCase):
     table = Table(
         'test', TypesTestCase.metadata(),
@@ -49,7 +57,7 @@ class NumericTypeTestCase(TypesTestCase):
         )
 
     def test_select_insert(self):
-        x = Decimal('123456789.12')
+        x = Decimal('12345678.12')
 
         with self.create_table(self.table):
             self.session.execute(self.table.insert(), [{'x': x}])
@@ -71,7 +79,9 @@ class NumericTypeTestCase(TypesTestCase):
             with self.assertRaises(DatabaseException) as ex:
                 self.session.execute(self.table.insert(), [{'x': value}])
 
-            self.assertIn('out of range', str(ex.exception))
+            self.assertTrue(
+                'out of range' in str(ex.exception) or
+                'Too many digits' in str(ex.exception))
 
     def test_create_table_decimal_symlink(self):
         table = Table(
@@ -84,6 +94,23 @@ class NumericTypeTestCase(TypesTestCase):
             self.compile(CreateTable(table)),
             'CREATE TABLE test (x Decimal(10, 2)) ENGINE = Memory'
         )
+
+
+class NumericTypeHttpTestCase(NumericTypeTestCase, HttpSessionTestCase):
+    """ NumericType over a HTTP session """
+
+    def test_insert_truncate(self):
+        value = Decimal('123.129999')
+        expected = Decimal('123.12')
+
+        with self.create_table(self.table):
+            with self.assertRaises(DatabaseException) as ex:
+                self.session.execute(self.table.insert(), [{'x': value}])
+            self.assertIn('value is too small', str(ex.exception))
+
+
+class NumericTypeNativeTestCase(NumericTypeTestCase, NativeSessionTestCase):
+    """ NumericType over a native protocol session """
 
 
 class IPv4TestCase(TypesTestCase):
@@ -232,6 +259,14 @@ class IPv4TestCase(TypesTestCase):
                 ])
 
 
+class IPv4HttpTestCase(IPv4TestCase, HttpSessionTestCase):
+    """ IPv4 over a HTTP session """
+
+
+class IPv4NativeTestCase(IPv4TestCase, NativeSessionTestCase):
+    """ IPv4 over a native protocol session """
+
+
 class IPv6TestCase(TypesTestCase):
     table = Table(
         'test', TypesTestCase.metadata(),
@@ -377,3 +412,11 @@ class IPv6TestCase(TypesTestCase):
                     ~self.table.c.x.in_('42e::/64')).all(), [
                     (IPv6Address('f42e::ffff'),)
                 ])
+
+
+class IPv6HttpTestCase(IPv6TestCase, HttpSessionTestCase):
+    """ IPv6 over a HTTP session """
+
+
+class IPv6NativeTestCase(IPv6TestCase, NativeSessionTestCase):
+    """ IPv6 over a native protocol session """

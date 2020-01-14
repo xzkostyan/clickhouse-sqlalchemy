@@ -1,6 +1,6 @@
 from itertools import islice
 
-from clickhouse_driver.client import Client
+from clickhouse_driver.client import Client as DriverClient
 from clickhouse_driver.errors import Error as DriverError
 
 from ...exceptions import DatabaseException
@@ -29,7 +29,7 @@ def connect(*args, **kwargs):
 
 
 class Connection(object):
-    transport_cls = Client
+    transport_cls = DriverClient
 
     def __init__(self, *args, **kwargs):
         url = args[0]

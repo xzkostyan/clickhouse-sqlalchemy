@@ -6,10 +6,12 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm import Query
 
 from tests.config import database, host, port, http_port, user, password
-from tests.session import session, native_session, system_native_session
+from tests.session import http_session, native_session, system_native_session
 
 
-class BaseTestCase(TestCase):
+class BaseAbstractTestCase(object):
+    """ Supporting code for tests """
+
     host = host
     port = http_port
     database = database
@@ -17,13 +19,17 @@ class BaseTestCase(TestCase):
     password = password
 
     strip_spaces = re.compile(r'[\n\t]')
-    session = session
+    session = http_session
 
     @classmethod
-    def metadata(cls):
-        return MetaData(bind=cls.session.bind)
+    def metadata(cls, session=None):
+        if session is None:
+            session = cls.session
+        return MetaData(bind=session.bind)
 
-    def _compile(self, clause, bind=session.bind, literal_binds=False):
+    def _compile(self, clause, bind=None, literal_binds=False):
+        if bind is None:
+            bind = self.session.bind
         if isinstance(clause, Query):
             context = clause._compile_context()
             context.statement.use_labels = True
@@ -37,7 +43,7 @@ class BaseTestCase(TestCase):
         if compile_kwargs:
             kw['compile_kwargs'] = compile_kwargs
 
-        return clause.compile(dialect=session.bind.dialect, **kw)
+        return clause.compile(dialect=bind.dialect, **kw)
 
     def compile(self, clause, **kwargs):
         return self.strip_spaces.sub(
@@ -45,7 +51,17 @@ class BaseTestCase(TestCase):
         )
 
 
+class BaseTestCase(BaseAbstractTestCase, TestCase):
+    """ Actually tests """
+
+
+class HttpSessionTestCase(BaseTestCase):
+    """ Explicitly HTTP-based session Test Case """
+
+
 class NativeSessionTestCase(BaseTestCase):
+    """ Explicitly Native-protocol-based session Test Case """
+
     port = port
 
     session = native_session
@@ -63,7 +79,8 @@ class NativeSessionTestCase(BaseTestCase):
         super(BaseTestCase, cls).setUpClass()
 
 
-class TypesTestCase(NativeSessionTestCase):
+class TypesTestCase(BaseAbstractTestCase):
+
     @contextmanager
     def create_table(self, table):
         table.drop(bind=self.session.bind, if_exists=True)

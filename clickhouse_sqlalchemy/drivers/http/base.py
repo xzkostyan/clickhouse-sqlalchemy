@@ -41,11 +41,9 @@ class ClickHouseDialect_http(ClickHouseDialect):
         sql += ' ' + FORMAT_SUFFIX
         return connection.execute(sql)
 
-    def _get_server_version_info(self, connection):
-        version = connection.scalar(
-            'select version() {}'.format(FORMAT_SUFFIX)
-        )
-        return tuple(int(x) for x in version.split('.'))
+    def _query_server_version_string(self, connection):
+        query = 'select version() {}'.format(FORMAT_SUFFIX)
+        return connection.scalar(query)
 
 
 dialect = ClickHouseDialect_http

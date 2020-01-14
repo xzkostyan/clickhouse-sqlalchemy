@@ -11,8 +11,8 @@ class HttpUtilsTestCase(BaseTestCase):
     def test_parse_tsv(self):
         test_values = [b'', b'a\tb\tc', b'a\tb\t\xff']
         try:
-            for v in test_values:
-                parse_tsv(v)
+            for value in test_values:
+                parse_tsv(value)
         except IndexError:
             self.fail('"parse_tsv" raised IndexError exception!')
         except TypeError:

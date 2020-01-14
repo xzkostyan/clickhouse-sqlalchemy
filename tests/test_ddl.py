@@ -138,20 +138,22 @@ class DDLTestCase(BaseTestCase):
         )
 
     def test_table_create_on_cluster(self):
-        table = Table(
-            't1', self.metadata(),
-            Column('x', types.Int32, primary_key=True),
-            engines.Memory(),
-            clickhouse_cluster='test_cluster'
-        )
         create_sql = (
             'CREATE TABLE t1 ON CLUSTER test_cluster '
             '(x Int32) ENGINE = Memory'
         )
 
-        with mocked_engine() as engine:
+        mock = mocked_engine()
+        with mock as session:
+            table = Table(
+                't1', self.metadata(session=session),
+                Column('x', types.Int32, primary_key=True),
+                engines.Memory(),
+                clickhouse_cluster='test_cluster'
+            )
+
             table.create()
-            engine.assert_sql([create_sql])
+            self.assertEqual(mock.history, [create_sql])
 
         self.assertEqual(
             self.compile(CreateTable(table)),
@@ -174,26 +176,28 @@ class DDLTestCase(BaseTestCase):
         )
 
     def test_table_drop(self):
-        table = Table(
-            't1', self.metadata(),
-            Column('x', types.Int32, primary_key=True)
-        )
 
-        with mocked_engine() as engine:
+        mock = mocked_engine()
+        with mock as session:
+            table = Table(
+                't1', self.metadata(session=session),
+                Column('x', types.Int32, primary_key=True)
+            )
             table.drop(if_exists=True)
-            engine.assert_sql(['DROP TABLE IF EXISTS t1'])
+            self.assertEqual(mock.history, ['DROP TABLE IF EXISTS t1'])
 
     def test_table_drop_on_cluster(self):
-        table = Table(
-            't1', self.metadata(),
-            Column('x', types.Int32, primary_key=True),
-            clickhouse_cluster='test_cluster'
-        )
         drop_sql = 'DROP TABLE IF EXISTS t1 ON CLUSTER test_cluster'
 
-        with mocked_engine() as engine:
+        mock = mocked_engine()
+        with mock as session:
+            table = Table(
+                't1', self.metadata(session=session),
+                Column('x', types.Int32, primary_key=True),
+                clickhouse_cluster='test_cluster'
+            )
             table.drop(if_exists=True)
-            engine.assert_sql([drop_sql])
+            self.assertEqual(mock.history, [drop_sql])
 
         self.assertEqual(
             self.compile(DropTable(table, if_exists=True)),

@@ -8,10 +8,15 @@ def require_server_version(*version_required):
             self = args[0]
             conn = self.session.bind.raw_connection()
 
-            i = conn.transport.connection.server_info
-            current = (i.version_major, i.version_minor, i.version_patch)
+            # This only works for native transport, not for http transport.
+            transport_conn = getattr(conn.transport, 'connection', None)
+            current = None
+            if transport_conn is not None:
+                info = transport_conn.server_info
+                current = (info.version_major, info.version_minor, info.version_patch)
+
             conn.close()
-            if version_required <= current:
+            if current is None or version_required <= current:
                 return f(*args, **kwargs)
             else:
                 self.skipTest(

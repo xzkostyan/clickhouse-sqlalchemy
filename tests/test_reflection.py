@@ -3,7 +3,7 @@ import enum
 from sqlalchemy import Column, inspect
 
 from clickhouse_sqlalchemy import types, engines, Table
-from tests.testcase import TypesTestCase
+from tests.testcase import TypesTestCase, HttpSessionTestCase, NativeSessionTestCase
 from tests.util import require_server_version
 
 
@@ -85,3 +85,11 @@ class ReflectionTestCase(TypesTestCase):
         self.assertIsInstance(coltype, types.Decimal)
         self.assertEqual(coltype.precision, 38)
         self.assertEqual(coltype.scale, 38)
+
+
+class ReflectionHttpTestCase(ReflectionTestCase, HttpSessionTestCase):
+    """ Reflection over a HTTP session """
+
+
+class ReflectionNativeTestCase(ReflectionTestCase, NativeSessionTestCase):
+    """ Reflection over a native protocol session """

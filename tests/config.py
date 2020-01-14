@@ -31,8 +31,7 @@ password = file_config.get('db', 'password')
 
 uri_template = '{schema}://{user}:{password}@{host}:{port}/{database}'
 
-# Http protocol is obsolete.
-uri = uri_template.format(
+http_uri = uri_template.format(
     schema='clickhouse+http', user=user, password=password, host=host,
     port=http_port, database=database
 )

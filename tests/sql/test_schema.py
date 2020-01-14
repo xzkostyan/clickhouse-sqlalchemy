@@ -98,6 +98,7 @@ class HTTPSchemaTestCase(BaseTestCase):
             engines.Log()
         )
 
+        self.session.execute('DROP TABLE IF EXISTS test_reflect')
         table.create(self.session.bind)
 
         insp = inspect(self.session.bind)
