@@ -37,9 +37,11 @@ class MockedEngine(object):
     def __enter__(self):
         self.prev_do_execute = self.dialect_cls.do_execute
         self.prev_do_executemany = self.dialect_cls.do_executemany
-        self.prev_query_server_version_string = self.dialect_cls._query_server_version_string
+        self.prev_query_server_version_string = \
+            self.dialect_cls._query_server_version_string
 
-        def do_executemany(instance, cursor, statement, parameters, context=None):
+        def do_executemany(
+                instance, cursor, statement, parameters, context=None):
             self._buffer.append(statement)
 
         def do_execute(instance, cursor, statement, parameters, context=None):
@@ -50,14 +52,16 @@ class MockedEngine(object):
 
         self.dialect_cls.do_execute = do_execute
         self.dialect_cls.do_executemany = do_executemany
-        self.dialect_cls._query_server_version_string = query_server_version_string
+        self.dialect_cls._query_server_version_string = \
+            query_server_version_string
 
         return self.engine_session
 
     def __exit__(self, *exc_info):
         self.dialect_cls.do_execute = self.prev_do_execute
         self.dialect_cls.do_executemany = self.prev_do_executemany
-        self.dialect_cls._query_server_version_string = self.prev_query_server_version_string
+        self.dialect_cls._query_server_version_string = \
+            self.prev_query_server_version_string
 
 
 mocked_engine = MockedEngine

@@ -13,7 +13,11 @@ def require_server_version(*version_required):
             current = None
             if transport_conn is not None:
                 info = transport_conn.server_info
-                current = (info.version_major, info.version_minor, info.version_patch)
+                current = (
+                    info.version_major,
+                    info.version_minor,
+                    info.version_patch,
+                )
 
             conn.close()
             if current is None or version_required <= current:

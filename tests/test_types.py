@@ -10,7 +10,9 @@ from sqlalchemy.sql.ddl import CreateTable
 from clickhouse_sqlalchemy import types, engines, Table
 from clickhouse_sqlalchemy.exceptions import DatabaseException
 
-from tests.testcase import TypesTestCase, HttpSessionTestCase, NativeSessionTestCase
+from tests.testcase import (
+    TypesTestCase, HttpSessionTestCase, NativeSessionTestCase,
+)
 from tests.util import require_server_version
 
 
@@ -101,7 +103,6 @@ class NumericTypeHttpTestCase(NumericTypeTestCase, HttpSessionTestCase):
 
     def test_insert_truncate(self):
         value = Decimal('123.129999')
-        expected = Decimal('123.12')
 
         with self.create_table(self.table):
             with self.assertRaises(DatabaseException) as ex:

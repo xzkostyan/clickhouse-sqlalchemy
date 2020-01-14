@@ -12,7 +12,7 @@ class FormatSectionTestCase(HttpSessionTestCase):
 
     def _compile(self, clause, bind=None, **kwargs):
         if bind is None:
-            bid = self.session.bind
+            bind = self.session.bind
         statement = super(FormatSectionTestCase, self)._compile(
             clause, bind=bind, **kwargs
         )

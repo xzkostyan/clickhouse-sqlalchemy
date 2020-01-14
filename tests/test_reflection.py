@@ -3,7 +3,9 @@ import enum
 from sqlalchemy import Column, inspect
 
 from clickhouse_sqlalchemy import types, engines, Table
-from tests.testcase import TypesTestCase, HttpSessionTestCase, NativeSessionTestCase
+from tests.testcase import (
+    TypesTestCase, HttpSessionTestCase, NativeSessionTestCase,
+)
 from tests.util import require_server_version
 
 

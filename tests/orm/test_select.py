@@ -10,7 +10,9 @@ from sqlalchemy import tuple_
 
 from clickhouse_sqlalchemy import types, Table
 from clickhouse_sqlalchemy.ext.clauses import Lambda
-from tests.testcase import BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase
+from tests.testcase import (
+    BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase,
+)
 
 
 class SelectTestCase(BaseAbstractTestCase):

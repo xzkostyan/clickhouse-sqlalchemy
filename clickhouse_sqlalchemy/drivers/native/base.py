@@ -1,6 +1,8 @@
 
 from . import connector
-from ..base import ClickHouseDialect, ClickHouseExecutionContextBase, ClickHouseCompiler
+from ..base import (
+    ClickHouseDialect, ClickHouseExecutionContextBase, ClickHouseCompiler,
+)
 
 # Export connector version
 VERSION = (0, 0, 2, None)

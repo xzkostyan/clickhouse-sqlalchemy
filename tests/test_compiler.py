@@ -3,7 +3,9 @@ from sqlalchemy import sql, Column
 
 from clickhouse_sqlalchemy import types, Table, engines
 from clickhouse_sqlalchemy.util import compat
-from tests.testcase import BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase
+from tests.testcase import (
+    BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase,
+)
 
 
 class VisitTestCase(BaseAbstractTestCase):

@@ -1,7 +1,9 @@
 from sqlalchemy import Column, exc
 
 from clickhouse_sqlalchemy import types, Table
-from tests.testcase import BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase
+from tests.testcase import (
+    BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase,
+)
 
 
 class LimitTestCase(BaseAbstractTestCase):
