@@ -20,7 +20,7 @@ def require_server_version(*version_required):
                 )
 
             conn.close()
-            if current is None or version_required <= current:
+            if current is not None and version_required <= current:
                 return f(*args, **kwargs)
             else:
                 self.skipTest(
