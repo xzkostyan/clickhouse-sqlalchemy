@@ -31,8 +31,10 @@ class Connection(object):
 
     def __init__(self, *args, **kwargs):
 
-        self._prefetch = bool(kwargs.pop('stream', None))
+        stream = bool(kwargs.pop('stream', None))
+        self._prefetch = not stream
 
+        # TODO: support `stream` argument in the transport.
         self.transport = self.transport_cls(*args, **kwargs)
         super(Connection, self).__init__()
 
@@ -217,7 +219,8 @@ class Cursor(object):
         self._types = next(response, None)
         self._response = response
 
-        self._rows = list(response)
+        if self._prefetch:
+            self._rows = list(response)
 
     def _reset_state(self):
         """
