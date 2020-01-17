@@ -6,7 +6,9 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm import Query
 
 from tests.config import database, host, port, http_port, user, password
-from tests.session import http_session, native_session, system_native_session
+from tests.session import (
+    http_session, native_session, system_http_session, system_native_session,
+)
 
 
 class BaseAbstractTestCase(object):
@@ -58,6 +60,15 @@ class BaseTestCase(BaseAbstractTestCase, TestCase):
 class HttpSessionTestCase(BaseTestCase):
     """ Explicitly HTTP-based session Test Case """
 
+    @classmethod
+    def setUpClass(cls):
+        system_http_session.execute(
+            'DROP DATABASE IF EXISTS {}'.format(cls.database))
+        system_http_session.execute(
+            'CREATE DATABASE {}'.format(cls.database))
+
+        super(HttpSessionTestCase, cls).setUpClass()
+
 
 class NativeSessionTestCase(BaseTestCase):
     """ Explicitly Native-protocol-based session Test Case """
@@ -76,7 +87,7 @@ class NativeSessionTestCase(BaseTestCase):
             'CREATE DATABASE {}'.format(cls.database)
         )
 
-        super(BaseTestCase, cls).setUpClass()
+        super(NativeSessionTestCase, cls).setUpClass()
 
 
 class TypesTestCase(BaseAbstractTestCase):
