@@ -292,6 +292,20 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         return text
 
+    def visit_insert(self, insert_stmt, asfrom=False, **kw):
+        rv = super(ClickHouseCompiler, self).visit_insert(
+            insert_stmt, asfrom=asfrom, **kw
+        )
+
+        pos = rv.rfind('VALUES (')
+        # Remove (%s)-templates from VALUES clause if exists.
+        # ClickHouse server since version 19.3.3 parse query after VALUES and
+        # allows inplace parameters.
+        # Example: INSERT INTO test (x) VALUES (1), (2).
+        if pos != -1:
+            rv = rv[:pos + 6]
+        return rv
+
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def visit_create_column(self, create, **kw):
