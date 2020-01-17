@@ -666,7 +666,7 @@ class ClickHouseDialect(default.DefaultDialect):
 
         elif spec.lower().startswith('decimal'):
             coltype = self.ischema_names['Decimal']
-            return coltype(self._parse_decimal_params(spec))
+            return coltype(*self._parse_decimal_params(spec))
         else:
             try:
                 return self.ischema_names[spec]
@@ -680,9 +680,8 @@ class ClickHouseDialect(default.DefaultDialect):
         ints = spec.split('(')[-1].split(')')[0]  # get all data in brackets
         if ',' in ints:
             precision, scale = ints.split(',', maxsplit=1)
-            if precision.isnumeric() and scale.isnumeric():
-                precision = int(precision)
-                scale = int(scale)
+            precision = int(precision.strip())
+            scale = int(scale.strip())
         else:
             precision = scale = int(ints)
         return precision, scale

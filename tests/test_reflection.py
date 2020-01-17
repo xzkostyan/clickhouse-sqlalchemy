@@ -78,3 +78,10 @@ class ReflectionTestCase(TypesTestCase):
         self.assertEqual(
             {o.name: o.value for o in coltype.enum_class}, enum_options
         )
+
+    def test_decimal(self):
+        coltype = self._type_round_trip(types.Decimal(38, 38))[0]
+
+        self.assertIsInstance(coltype, types.Decimal)
+        self.assertEqual(coltype.precision, 38)
+        self.assertEqual(coltype.scale, 38)
