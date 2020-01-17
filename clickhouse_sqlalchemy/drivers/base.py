@@ -678,13 +678,8 @@ class ClickHouseDialect(default.DefaultDialect):
     @staticmethod
     def _parse_decimal_params(spec):
         ints = spec.split('(')[-1].split(')')[0]  # get all data in brackets
-        if ',' in ints:
-            precision, scale = ints.split(',', maxsplit=1)
-            precision = int(precision.strip())
-            scale = int(scale.strip())
-        else:
-            precision = scale = int(ints)
-        return precision, scale
+        precision, scale = ints.split(',')
+        return int(precision.strip()), int(scale.strip())
 
     @staticmethod
     def _parse_options(option_string):
