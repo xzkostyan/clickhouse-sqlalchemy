@@ -46,11 +46,12 @@ def _get_type(type_str):
 
 class RequestsTransport(object):
     def __init__(self, db_url, db_name, username, password, timeout=None,
-                 **kwargs):
+                 verify=None, **kwargs):
         self.db_url = db_url
         self.db_name = db_name
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
+        self.verify = verify
         self.headers = {
             k.replace('header__', ''): v for k, v in kwargs.items()
             if k.startswith('header__')
@@ -107,6 +108,7 @@ class RequestsTransport(object):
         r = requests.post(
             self.db_url, auth=self.auth, params=params, data=data,
             stream=stream, timeout=self.timeout, headers=self.headers,
+            verify=self.verify
         )
         if r.status_code != 200:
             orig = HTTPException(r.text)
