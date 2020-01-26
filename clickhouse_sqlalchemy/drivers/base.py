@@ -35,6 +35,7 @@ ischema_names = {
     'DateTime': DATETIME,
     'Float64': FLOAT,
     'Float32': FLOAT,
+    'Decimal': types.Decimal,
     'String': types.String,
     'UUID': types.UUID,
     'IPv4': types.IPv4,
@@ -663,6 +664,9 @@ class ClickHouseDialect(default.DefaultDialect):
             type_enum = enum.Enum('%s_enum' % name, options)
             return lambda: coltype(type_enum)
 
+        elif spec.lower().startswith('decimal'):
+            coltype = self.ischema_names['Decimal']
+            return coltype(*self._parse_decimal_params(spec))
         else:
             try:
                 return self.ischema_names[spec]
@@ -670,6 +674,12 @@ class ClickHouseDialect(default.DefaultDialect):
                 warn("Did not recognize type '%s' of column '%s'" %
                      (spec, name))
                 return sqltypes.NullType
+
+    @staticmethod
+    def _parse_decimal_params(spec):
+        ints = spec.split('(')[-1].split(')')[0]  # get all data in brackets
+        precision, scale = ints.split(',')
+        return int(precision.strip()), int(scale.strip())
 
     @staticmethod
     def _parse_options(option_string):
