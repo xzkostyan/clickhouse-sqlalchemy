@@ -14,13 +14,16 @@ class DDLTestCase(BaseTestCase):
             Column('x', types.Int32, primary_key=True),
             Column('y', types.String),
             Column('z', types.String(10)),
+            # Must be quoted:
+            Column('index', types.String),
             engines.Memory()
         )
 
         # No NOT NULL. And any PKS.
         self.assertEqual(
             self.compile(CreateTable(table)),
-            'CREATE TABLE t1 (x Int32, y String, z FixedString(10)) '
+            'CREATE TABLE t1 ('
+            'x Int32, y String, z FixedString(10), "index" String) '
             'ENGINE = Memory'
         )
 
