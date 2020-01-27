@@ -72,7 +72,9 @@ class Cursor(object):
 
     _columns = None
     _types = None
+    # Result data iterable:
     _response = None
+    # Result data prefetch cache:
     _rows = None
 
     def __init__(self, connection):
@@ -131,15 +133,18 @@ class Cursor(object):
     def fetchone(self):
         self.check_query_started()
 
+        # `self._prefetch` case:
         if self._rows is not None:
             if not self._rows:
                 return None
             return self._rows.pop()
+
         return next(self._response, None)
 
     def fetchmany(self, size=1):
         self.check_query_started()
 
+        # `self._prefetch` case:
         if self._rows is not None:
             rv = self._rows[:size]
             self._rows = self._rows[size:]
@@ -156,6 +161,7 @@ class Cursor(object):
     def fetchall(self):
         self.check_query_started()
 
+        # `self._prefetch` case:
         if self._rows is not None:
             rv = self._rows
             self._rows = []
