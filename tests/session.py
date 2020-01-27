@@ -25,10 +25,7 @@ class MockedEngine(object):
         self._buffer = []
 
         if engine_session is None:
-            uri = http_uri
-            engine_session = make_session(create_engine(
-                uri,
-                connect_args=dict(server_version='19.16.2.2')))
+            engine_session = make_session(create_engine(http_uri))
 
         self.engine_session = engine_session
         self.dialect_cls = engine_session.bind.dialect.__class__

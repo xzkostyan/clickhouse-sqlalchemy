@@ -46,7 +46,9 @@ class StreamingHttpTestCase(HttpSessionTestCase):
     def test_fetchall(self):
         power = self.power - 2
         if power < 1:
-            raise Exception("Misconfigured test case: `power` should be at least 3")
+            raise Exception(
+                "Misconfigured test case:"
+                " `power` should be at least 3.")
         query = self.make_query(power=power)
         res = self.session.execute(query)
 
