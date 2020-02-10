@@ -177,8 +177,8 @@ class SummingMergeTree(MergeTree):
 
 class ReplacingMergeTree(MergeTree):
     def __init__(self,
-                 version_col=None,
                  *args,
+                 version_col=None,
                  **kwargs):
         super(ReplacingMergeTree, self).__init__(
             *args, **kwargs
