@@ -251,6 +251,11 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         if sample_clause is not None:
             text += self.sample_clause(select, **kwargs)
 
+        final_clause = getattr(select, '_final_clause', None)
+
+        if final_clause is not None:
+            text += self.final_clause()
+
         if select._whereclause is not None:
             t = select._whereclause._compiler_dispatch(self, **kwargs)
             if t:
@@ -278,6 +283,9 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
     def sample_clause(self, select, **kw):
         return " \nSAMPLE " + self.process(select._sample_clause, **kw)
+
+    def final_clause(self):
+        return " \nFINAL"
 
     def group_by_clause(self, select, **kw):
         text = ""

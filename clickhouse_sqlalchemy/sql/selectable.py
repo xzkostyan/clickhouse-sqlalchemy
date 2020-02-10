@@ -28,11 +28,16 @@ class Join(StandardJoin):
 
 class Select(StandardSelect):
     _with_totals = False
+    _final_clause = None
     _sample_clause = None
     _array_join = None
 
     def with_totals(self):
         self._with_totals = True
+        return self
+
+    def final(self):
+        self._final_clause = True
         return self
 
     def sample(self, sample):
