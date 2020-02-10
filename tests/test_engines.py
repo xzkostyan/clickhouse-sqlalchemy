@@ -248,9 +248,9 @@ class EnginesDeclarativeTestCase(BaseTestCase):
 
             __table_args__ = (
                 engines.ReplacingMergeTree(
-                    'version',
                     'date',
                     ('date', 'x'),
+                    version_col='version',
                 ),
             )
 
@@ -274,7 +274,8 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             __table_args__ = (
                 engines.ReplicatedReplacingMergeTree(
                     '/table/path', 'name',
-                    'version', 'date', ('date', 'x'),
+                    'date', ('date', 'x'),
+                    version_col='version',
                 ),
             )
 
@@ -299,7 +300,7 @@ class EnginesDeclarativeTestCase(BaseTestCase):
 
             __table_args__ = (
                 engines.ReplacingMergeTree(
-                    version,
+                    version_col=version,
                     partition_by=func.toYYYYMM(date),
                     order_by=(date, x),
                 ),
