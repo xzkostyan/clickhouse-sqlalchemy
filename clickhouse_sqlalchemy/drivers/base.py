@@ -308,10 +308,6 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         return rv
 
     def visit_delete(self, delete_stmt, asfrom=False, **kw):
-        toplevel = not self.stack
-
-        # crud._setup_crud_params(self, delete_stmt, crud.ISDELETE, **kw)
-
         extra_froms = delete_stmt._extra_froms
 
         correlate_froms = {delete_stmt.table}.union(extra_froms)
@@ -325,61 +321,20 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         text = "ALTER TABLE "
 
-        if delete_stmt._prefixes:
-            text += self._generate_prefixes(
-                delete_stmt, delete_stmt._prefixes, **kw
-            )
-
         table_text = self.delete_table_clause(
             delete_stmt, delete_stmt.table, extra_froms
         )
 
-        if delete_stmt._hints:
-            dialect_hints, table_text = self._setup_crud_hints(
-                delete_stmt, table_text
-            )
-        else:
-            dialect_hints = None
-
-        text += table_text
-        text += " DELETE"
-
-        if delete_stmt._returning:
-            if self.returning_precedes_values:
-                text += " " + self.returning_clause(
-                    delete_stmt, delete_stmt._returning
-                )
-
-        if extra_froms:
-            extra_from_text = self.delete_extra_from_clause(
-                delete_stmt,
-                delete_stmt.table,
-                extra_froms,
-                dialect_hints,
-                **kw
-            )
-            if extra_from_text:
-                text += " " + extra_from_text
+        text += table_text + " DELETE"
 
         if delete_stmt._whereclause is not None:
             t = delete_stmt._whereclause._compiler_dispatch(self, **kw)
             if t:
                 text += " WHERE " + t
 
-        if delete_stmt._returning and not self.returning_precedes_values:
-            text += " " + self.returning_clause(
-                delete_stmt, delete_stmt._returning
-            )
-
-        if self.ctes and toplevel:
-            text = self._render_cte_clause() + text
-
         self.stack.pop(-1)
 
-        if asfrom:
-            return "(" + text + ")"
-        else:
-            return text
+        return text
 
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
