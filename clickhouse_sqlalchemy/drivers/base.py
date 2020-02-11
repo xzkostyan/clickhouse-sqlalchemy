@@ -553,7 +553,7 @@ class ClickHouseDialect(default.DefaultDialect):
     returns_unicode_strings = True
     description_encoding = None
     postfetch_lastrowid = False
-    cached_server_version_string = None
+    forced_server_version_string = None
 
     preparer = ClickHouseIdentifierPreparer
     type_compiler = ClickHouseTypeCompiler
@@ -766,12 +766,11 @@ class ClickHouseDialect(default.DefaultDialect):
         return True
 
     def _get_server_version_info(self, connection):
-        version = self.cached_server_version_string
+        version = self.forced_server_version_string
 
         if version is None:
             version = self._query_server_version_string(connection)
             assert version
-            self.cached_server_version_string = version
 
         return tuple(int(part) for part in version.split('.'))
 
@@ -779,6 +778,6 @@ class ClickHouseDialect(default.DefaultDialect):
         raise NotImplementedError
 
     def connect(self, *cargs, **cparams):
-        self.cached_server_version_string = cparams.pop(
-            'server_version', self.cached_server_version_string)
+        self.forced_server_version_string = cparams.pop(
+            'server_version', self.forced_server_version_string)
         return super(ClickHouseDialect, self).connect(*cargs, **cparams)
