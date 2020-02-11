@@ -301,6 +301,46 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         return text
 
+    def visit_delete(self, delete_stmt, asfrom=False, **kw):
+        if not self.dialect.supports_delete:
+            raise exc.CompileError(
+                'ALTER DELETE is not supported by this server version'
+            )
+
+        extra_froms = delete_stmt._extra_froms
+
+        correlate_froms = {delete_stmt.table}.union(extra_froms)
+        self.stack.append(
+            {
+                "correlate_froms": correlate_froms,
+                "asfrom_froms": correlate_froms,
+                "selectable": delete_stmt,
+            }
+        )
+
+        text = "ALTER TABLE "
+
+        table_text = self.delete_table_clause(
+            delete_stmt, delete_stmt.table, extra_froms
+        )
+
+        text += table_text + " DELETE"
+
+        if delete_stmt._whereclause is not None:
+            # Do not include table name.
+            # ClickHouse doesn't expect tablename in where.
+            t = delete_stmt._whereclause._compiler_dispatch(
+                self, include_table=False, **kw
+            )
+            if t:
+                text += " WHERE " + t
+        else:
+            raise exc.CompileError('WHERE clause is required')
+
+        self.stack.pop(-1)
+
+        return text
+
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def get_column_specification(self, column, **kw):
@@ -561,6 +601,9 @@ class ClickHouseDialect(default.DefaultDialect):
     supports_native_enum = True  # Do not render check constraints on enums.
     supports_multivalues_insert = True
 
+    # Dialect related-features
+    supports_delete = True
+
     max_identifier_length = 127
     default_paramstyle = 'pyformat'
     colspecs = colspecs
@@ -585,6 +628,11 @@ class ClickHouseDialect(default.DefaultDialect):
             'codec': None,
         }),
     ]
+
+    def initialize(self, connection):
+        super(ClickHouseDialect, self).initialize(connection)
+
+        self.supports_delete = self.server_version_info >= (1, 1, 54388)
 
     def _execute(self, connection, sql):
         raise NotImplementedError

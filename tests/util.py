@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from functools import wraps
 
 
@@ -33,3 +34,14 @@ def require_server_version(*version_required):
         return wrapper
 
     return check
+
+
+@contextmanager
+def mock_object_attr(dialect, attr, new_value):
+    old_value = getattr(dialect, attr)
+    setattr(dialect, attr, new_value)
+
+    try:
+        yield
+    finally:
+        setattr(dialect, attr, old_value)
