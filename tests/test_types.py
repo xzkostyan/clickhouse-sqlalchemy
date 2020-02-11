@@ -81,6 +81,10 @@ class NumericTypeTestCase(TypesTestCase):
             with self.assertRaises(DatabaseException) as ex:
                 self.session.execute(self.table.insert(), [{'x': value}])
 
+            # 'Too many digits' is written in the CH response;
+            # 'out of range' is raised from `struct` within
+            # `clickhouse_driver`,
+            # before the query is sent to CH.
             self.assertTrue(
                 'out of range' in str(ex.exception) or
                 'Too many digits' in str(ex.exception))
