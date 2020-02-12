@@ -14,7 +14,6 @@ from sqlalchemy.util import (
 )
 
 from sqlalchemy.sql.compiler import crud
-from sqlalchemy.sql.compiler import selectable
 
 from clickhouse_sqlalchemy import Table
 from .. import types
