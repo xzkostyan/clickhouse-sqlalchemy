@@ -253,6 +253,11 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         if sample_clause is not None:
             text += self.sample_clause(select, **kwargs)
 
+        final_clause = getattr(select, '_final_clause', None)
+
+        if final_clause is not None:
+            text += self.final_clause()
+
         if select._whereclause is not None:
             t = select._whereclause._compiler_dispatch(self, **kwargs)
             if t:
@@ -280,6 +285,9 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
     def sample_clause(self, select, **kw):
         return " \nSAMPLE " + self.process(select._sample_clause, **kw)
+
+    def final_clause(self):
+        return " \nFINAL"
 
     def group_by_clause(self, select, **kw):
         text = ""
@@ -315,7 +323,6 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         render_extra_froms = []
         correlate_froms = {update_stmt.table}
-
         self.stack.append(
             {
                 "correlate_froms": correlate_froms,
@@ -325,7 +332,7 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         )
 
         text = "ALTER TABLE "
-
+ 
         table_text = self.update_tables_clause(
             update_stmt, update_stmt.table, render_extra_froms, **kw
         )
@@ -348,6 +355,35 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         if update_stmt._whereclause is not None:
             t = self.process(update_stmt._whereclause, **kw)
+            if t:
+                text += " WHERE " + t
+
+        self.stack.pop(-1)
+
+        return text
+
+    def visit_delete(self, delete_stmt, asfrom=False, **kw):
+        extra_froms = delete_stmt._extra_froms
+
+        correlate_froms = {delete_stmt.table}.union(extra_froms)
+        self.stack.append(
+            {
+                "correlate_froms": correlate_froms,
+                "asfrom_froms": correlate_froms,
+                "selectable": delete_stmt,
+            }
+        )
+
+        text = "ALTER TABLE "
+
+        table_text = self.delete_table_clause(
+            delete_stmt, delete_stmt.table, extra_froms
+        )
+
+        text += table_text + " DELETE"
+
+        if delete_stmt._whereclause is not None:
+            t = delete_stmt._whereclause._compiler_dispatch(self, **kw)
             if t:
                 text += " WHERE " + t
 
