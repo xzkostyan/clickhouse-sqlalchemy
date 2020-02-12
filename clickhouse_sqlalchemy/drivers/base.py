@@ -315,6 +315,35 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             rv = rv[:pos + 6]
         return rv
 
+    def visit_delete(self, delete_stmt, asfrom=False, **kw):
+        extra_froms = delete_stmt._extra_froms
+
+        correlate_froms = {delete_stmt.table}.union(extra_froms)
+        self.stack.append(
+            {
+                "correlate_froms": correlate_froms,
+                "asfrom_froms": correlate_froms,
+                "selectable": delete_stmt,
+            }
+        )
+
+        text = "ALTER TABLE "
+
+        table_text = self.delete_table_clause(
+            delete_stmt, delete_stmt.table, extra_froms
+        )
+
+        text += table_text + " DELETE"
+
+        if delete_stmt._whereclause is not None:
+            t = delete_stmt._whereclause._compiler_dispatch(self, **kw)
+            if t:
+                text += " WHERE " + t
+
+        self.stack.pop(-1)
+
+        return text
+
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def visit_create_column(self, create, **kw):
