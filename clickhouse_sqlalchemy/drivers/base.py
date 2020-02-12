@@ -13,6 +13,9 @@ from sqlalchemy.util import (
     to_list,
 )
 
+from sqlalchemy.sql.compiler import crud
+from sqlalchemy.sql.compiler import selectable
+
 from clickhouse_sqlalchemy import Table
 from .. import types
 from ..util import compat
@@ -306,6 +309,108 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         if pos != -1:
             rv = rv[:pos + 6]
         return rv
+
+    def visit_update(self, update_stmt, asfrom=False, **kw):
+        toplevel = not self.stack
+
+        extra_froms = update_stmt._extra_froms
+        is_multitable = bool(extra_froms)
+
+        if is_multitable:
+            # main table might be a JOIN
+            main_froms = set(selectable._from_objects(update_stmt.table))
+            render_extra_froms = [
+                f for f in extra_froms if f not in main_froms
+            ]
+            correlate_froms = main_froms.union(extra_froms)
+        else:
+            render_extra_froms = []
+            correlate_froms = {update_stmt.table}
+
+        self.stack.append(
+            {
+                "correlate_froms": correlate_froms,
+                "asfrom_froms": correlate_froms,
+                "selectable": update_stmt,
+            }
+        )
+
+        text = "ALTER TABLE "
+
+        if update_stmt._prefixes:
+            text += self._generate_prefixes(
+                update_stmt, update_stmt._prefixes, **kw
+            )
+
+        table_text = self.update_tables_clause(
+            update_stmt, update_stmt.table, render_extra_froms, **kw
+        )
+        crud_params = crud._setup_crud_params(
+            self, update_stmt, crud.ISUPDATE, **kw
+        )
+
+        if update_stmt._hints:
+            dialect_hints, table_text = self._setup_crud_hints(
+                update_stmt, table_text
+            )
+        else:
+            dialect_hints = None
+
+        text += table_text
+        text += " UPDATE "
+
+        include_table = (
+            is_multitable and self.render_table_with_column_in_update_from
+        )
+        text += ", ".join(
+            c[0]._compiler_dispatch(self, include_table=include_table)
+            + "="
+            + c[1]
+            for c in crud_params
+        )
+
+        if self.returning or update_stmt._returning:
+            if self.returning_precedes_values:
+                text += " " + self.returning_clause(
+                    update_stmt, self.returning or update_stmt._returning
+                )
+
+        if extra_froms:
+            extra_from_text = self.update_from_clause(
+                update_stmt,
+                update_stmt.table,
+                render_extra_froms,
+                dialect_hints,
+                **kw
+            )
+            if extra_from_text:
+                text += " " + extra_from_text
+
+        if update_stmt._whereclause is not None:
+            t = self.process(update_stmt._whereclause, **kw)
+            if t:
+                text += " WHERE " + t
+
+        limit_clause = self.update_limit_clause(update_stmt)
+        if limit_clause:
+            text += " " + limit_clause
+
+        if (
+            self.returning or update_stmt._returning
+        ) and not self.returning_precedes_values:
+            text += " " + self.returning_clause(
+                update_stmt, self.returning or update_stmt._returning
+            )
+
+        if self.ctes and toplevel:
+            text = self._render_cte_clause() + text
+
+        self.stack.pop(-1)
+
+        if asfrom:
+            return "(" + text + ")"
+        else:
+            return text
 
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
