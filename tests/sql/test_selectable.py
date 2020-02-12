@@ -46,15 +46,6 @@ class SelectTestCase(BaseTestCase):
             'SELECT x FROM t1 SAMPLE 0.1 GROUP BY x'
         )
 
-    def test_final(self):
-        table = self.create_table()
-
-        query = select([table.c.x]).final().group_by(table.c.x)
-        self.assertEqual(
-            self.compile(query),
-            'SELECT x FROM t1 FINAL GROUP BY x'
-        )
-
     def test_nested_type(self):
         table = self.create_table(
             't1',

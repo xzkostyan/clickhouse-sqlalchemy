@@ -177,10 +177,9 @@ class SummingMergeTree(MergeTree):
 
 class ReplacingMergeTree(MergeTree):
     def __init__(self,
+                 version_col=None,
                  *args,
                  **kwargs):
-
-        version_col = kwargs.pop('version_col', None)
         super(ReplacingMergeTree, self).__init__(
             *args, **kwargs
         )

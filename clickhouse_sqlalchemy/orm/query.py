@@ -13,7 +13,6 @@ from ..ext.clauses import (
 
 class Query(BaseQuery):
     _with_totals = False
-    _final = None
     _sample = None
     _array_join = None
 
@@ -22,7 +21,6 @@ class Query(BaseQuery):
         statement = context.statement
 
         statement._with_totals = self._with_totals
-        statement._final_clause = self._final
         statement._sample_clause = sample_clause(self._sample)
         statement._array_join = self._array_join
 
@@ -41,11 +39,6 @@ class Query(BaseQuery):
 
     def array_join(self, *columns):
         self._array_join = ArrayJoin(*columns)
-        return self
-
-    def final(self):
-        self._final = True
-
         return self
 
     def sample(self, sample):
