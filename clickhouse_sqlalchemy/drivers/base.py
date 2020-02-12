@@ -13,6 +13,8 @@ from sqlalchemy.util import (
     to_list,
 )
 
+from sqlalchemy.sql.compiler import crud
+
 from clickhouse_sqlalchemy import Table
 from .. import types
 from ..util import compat
@@ -341,6 +343,55 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         return text
 
+    def visit_update(self, update_stmt, asfrom=False, **kw):
+        if not self.dialect.supports_update:
+            raise exc.CompileError(
+                'ALTER UPDATE is not supported by this server version'
+            )
+
+        render_extra_froms = []
+        correlate_froms = {update_stmt.table}
+
+        self.stack.append(
+            {
+                "correlate_froms": correlate_froms,
+                "asfrom_froms": correlate_froms,
+                "selectable": update_stmt,
+            }
+        )
+
+        text = "ALTER TABLE "
+
+        table_text = self.update_tables_clause(
+            update_stmt, update_stmt.table, render_extra_froms, **kw
+        )
+        crud_params = crud._setup_crud_params(
+            self, update_stmt, crud.ISUPDATE, **kw
+        )
+
+        text += table_text
+        text += " UPDATE "
+
+        text += ", ".join(
+            c[0]._compiler_dispatch(self, include_table=False) +
+            "=" + c[1]
+            for c in crud_params
+        )
+
+        if update_stmt._whereclause is not None:
+            # Do not include table name.
+            # ClickHouse doesn't expect tablename in where.
+            t = self.process(update_stmt._whereclause, include_table=False,
+                             **kw)
+            if t:
+                text += " WHERE " + t
+        else:
+            raise exc.CompileError('WHERE clause is required')
+
+        self.stack.pop(-1)
+
+        return text
+
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def get_column_specification(self, column, **kw):
@@ -603,6 +654,7 @@ class ClickHouseDialect(default.DefaultDialect):
 
     # Dialect related-features
     supports_delete = True
+    supports_update = True
 
     max_identifier_length = 127
     default_paramstyle = 'pyformat'
@@ -633,6 +685,7 @@ class ClickHouseDialect(default.DefaultDialect):
         super(ClickHouseDialect, self).initialize(connection)
 
         self.supports_delete = self.server_version_info >= (1, 1, 54388)
+        self.supports_update = self.server_version_info >= (18, 12, 14)
 
     def _execute(self, connection, sql):
         raise NotImplementedError
