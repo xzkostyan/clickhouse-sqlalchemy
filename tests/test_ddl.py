@@ -146,17 +146,16 @@ class DDLTestCase(BaseTestCase):
             '(x Int32) ENGINE = Memory'
         )
 
-        mock = mocked_engine()
-        with mock as session:
+        with mocked_engine() as engine:
             table = Table(
-                't1', self.metadata(session=session),
+                't1', self.metadata(session=engine.session),
                 Column('x', types.Int32, primary_key=True),
                 engines.Memory(),
                 clickhouse_cluster='test_cluster'
             )
 
             table.create()
-            self.assertEqual(mock.history, [create_sql])
+            self.assertEqual(engine.history, [create_sql])
 
         self.assertEqual(
             self.compile(CreateTable(table)),
@@ -179,28 +178,25 @@ class DDLTestCase(BaseTestCase):
         )
 
     def test_table_drop(self):
-
-        mock = mocked_engine()
-        with mock as session:
+        with mocked_engine() as engine:
             table = Table(
-                't1', self.metadata(session=session),
+                't1', self.metadata(session=engine.session),
                 Column('x', types.Int32, primary_key=True)
             )
             table.drop(if_exists=True)
-            self.assertEqual(mock.history, ['DROP TABLE IF EXISTS t1'])
+            self.assertEqual(engine.history, ['DROP TABLE IF EXISTS t1'])
 
     def test_table_drop_on_cluster(self):
         drop_sql = 'DROP TABLE IF EXISTS t1 ON CLUSTER test_cluster'
 
-        mock = mocked_engine()
-        with mock as session:
+        with mocked_engine() as engine:
             table = Table(
-                't1', self.metadata(session=session),
+                't1', self.metadata(session=engine.session),
                 Column('x', types.Int32, primary_key=True),
                 clickhouse_cluster='test_cluster'
             )
             table.drop(if_exists=True)
-            self.assertEqual(mock.history, [drop_sql])
+            self.assertEqual(engine.history, [drop_sql])
 
         self.assertEqual(
             self.compile(DropTable(table, if_exists=True)),

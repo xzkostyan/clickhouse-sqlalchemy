@@ -21,14 +21,14 @@ class MockedEngine(object):
     prev_do_executemany = None
     prev_query_server_version_string = None
 
-    def __init__(self, engine_session=None):
+    def __init__(self, session=None):
         self._buffer = []
 
-        if engine_session is None:
-            engine_session = make_session(create_engine(http_uri))
+        if session is None:
+            session = make_session(create_engine(http_uri))
 
-        self.engine_session = engine_session
-        self.dialect_cls = engine_session.bind.dialect.__class__
+        self.session = session
+        self.dialect_cls = session.bind.dialect.__class__
 
     @property
     def history(self):
@@ -55,7 +55,7 @@ class MockedEngine(object):
         self.dialect_cls._query_server_version_string = \
             query_server_version_string
 
-        return self.engine_session
+        return self
 
     def __exit__(self, *exc_info):
         self.dialect_cls.do_execute = self.prev_do_execute

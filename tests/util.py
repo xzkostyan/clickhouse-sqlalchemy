@@ -8,19 +8,20 @@ def require_server_version(*version_required):
             self = args[0]
             conn = self.session.bind.raw_connection()
 
-            # This only works for native transport, not for http transport.
-            transport_conn = getattr(conn.transport, 'connection', None)
-            current = None
-            if transport_conn is not None:
-                info = transport_conn.server_info
-                current = (
-                    info.version_major,
-                    info.version_minor,
-                    info.version_patch,
+            dialect = self.session.bind.dialect.name
+            if dialect == 'clickhouse+native':
+                i = conn.transport.connection.server_info
+                current = (i.version_major, i.version_minor, i.version_patch)
+            else:
+                cursor = conn.cursor()
+                cursor.execute(
+                    'SELECT version() FORMAT TabSeparatedWithNamesAndTypes'
                 )
+                version = cursor.fetchall()[0][0].split('.')
+                current = tuple(int(x) for x in version[:3])
 
             conn.close()
-            if current is not None and version_required <= current:
+            if version_required <= current:
                 return f(*args, **kwargs)
             else:
                 self.skipTest(

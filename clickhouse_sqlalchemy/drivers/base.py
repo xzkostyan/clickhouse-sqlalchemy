@@ -1,6 +1,5 @@
 import enum
 
-import sqlalchemy as sa
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
@@ -607,7 +606,7 @@ class ClickHouseDialect(default.DefaultDialect):
 
     def _quote_table_name(self, table_name):
         # Use case: `describe table (select ...)`, over a TextClause.
-        if isinstance(table_name, sa.sql.elements.TextClause):
+        if isinstance(table_name, elements.TextClause):
             return str(table_name)
         return self.identifier_preparer.quote_identifier(table_name)
 
