@@ -8,25 +8,6 @@ from sqlalchemy.sql.visitors import Visitable
 from sqlalchemy.util import to_list
 
 
-supported_data_formats = {
-    'tabseparated': 'TabSeparated',
-    'tabseparatedwithnames': 'TabSeparatedWithNames',
-    'tabseparatedwithnamesandtypes': 'TabSeparatedWithNamesAndTypes',
-    'template': 'Template',
-    'csv': 'CSV',
-    'csvwithnames': 'CSVWithNames',
-    'customseparated': 'CustomSeparated',
-    'values': 'Values',
-    'jsoneachrow': 'JSONEachRow',
-    'tskv': 'TSKV',
-    'protobuf': 'Protobuf',
-    'parquet': 'Parquet',
-    'rowbinary': 'RowBinary',
-    'rowbinarywithnamesandtypes': 'RowBinaryWithNamesAndTypes',
-    'native': 'Native'
-}
-
-
 class Engine(SchemaEventTarget, Visitable):
     __visit_name__ = 'engine'
 
@@ -152,10 +133,8 @@ class CollapsingMergeTree(MergeTree):
 
 
 class SummingMergeTree(MergeTree):
-    def __init__(self,
-                 summing_cols=None,
-                 *args,
-                 **kwargs):
+    def __init__(self, *args, **kwargs):
+        summing_cols = kwargs.pop('columns', None)
         super(SummingMergeTree, self).__init__(
             *args, **kwargs
         )
@@ -176,11 +155,8 @@ class SummingMergeTree(MergeTree):
 
 
 class ReplacingMergeTree(MergeTree):
-    def __init__(self,
-                 *args,
-                 **kwargs):
-
-        version_col = kwargs.pop('version_col', None)
+    def __init__(self, *args, **kwargs):
+        version_col = kwargs.pop('ver', None)
         super(ReplacingMergeTree, self).__init__(
             *args, **kwargs
         )
@@ -351,19 +327,33 @@ class Null(_NoParamsEngine):
 
 
 class File(Engine):
-    def __init__(
-            self,
-            data_format,
-    ):
-        if data_format.lower() not in supported_data_formats:
-            raise Exception(
+    supported_data_formats = {
+        'tabseparated': 'TabSeparated',
+        'tabseparatedwithnames': 'TabSeparatedWithNames',
+        'tabseparatedwithnamesandtypes': 'TabSeparatedWithNamesAndTypes',
+        'template': 'Template',
+        'csv': 'CSV',
+        'csvwithnames': 'CSVWithNames',
+        'customseparated': 'CustomSeparated',
+        'values': 'Values',
+        'jsoneachrow': 'JSONEachRow',
+        'tskv': 'TSKV',
+        'protobuf': 'Protobuf',
+        'parquet': 'Parquet',
+        'rowbinary': 'RowBinary',
+        'rowbinarywithnamesandtypes': 'RowBinaryWithNamesAndTypes',
+        'native': 'Native'
+    }
+
+    def __init__(self, data_format):
+        fmt = self.supported_data_formats.get(data_format.lower())
+        if not fmt:
+            raise ValueError(
                 'Format {0} not supproted for File engine'.format(
                     data_format
                 )
             )
-        self.data_format = supported_data_formats[
-            data_format.lower()
-        ]
+        self.data_format = fmt
         super(File, self).__init__()
 
     def get_parameters(self):

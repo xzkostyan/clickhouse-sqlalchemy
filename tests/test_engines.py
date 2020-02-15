@@ -141,7 +141,7 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             y = Column(types.Int32)
 
             __table_args__ = (
-                engines.SummingMergeTree((y, ), date, (date, x)),
+                engines.SummingMergeTree(date, (date, x), columns=(y, )),
             )
 
         self.assertEqual(
@@ -250,7 +250,7 @@ class EnginesDeclarativeTestCase(BaseTestCase):
                 engines.ReplacingMergeTree(
                     'date',
                     ('date', 'x'),
-                    version_col='version',
+                    ver='version',
                 ),
             )
 
@@ -275,7 +275,7 @@ class EnginesDeclarativeTestCase(BaseTestCase):
                 engines.ReplicatedReplacingMergeTree(
                     '/table/path', 'name',
                     'date', ('date', 'x'),
-                    version_col='version',
+                    ver='version',
                 ),
             )
 
@@ -300,7 +300,7 @@ class EnginesDeclarativeTestCase(BaseTestCase):
 
             __table_args__ = (
                 engines.ReplacingMergeTree(
-                    version_col=version,
+                    ver=version,
                     partition_by=func.toYYYYMM(date),
                     order_by=(date, x),
                 ),
