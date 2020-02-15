@@ -1,6 +1,8 @@
 
 from . import connector
-from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
+from ..base import (
+    ClickHouseDialect, ClickHouseExecutionContextBase, ClickHouseCompiler,
+)
 
 # Export connector version
 VERSION = (0, 0, 2, None)
@@ -13,9 +15,26 @@ class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
             self.executemany = True
 
 
+class ClickHouseNativeCompiler(ClickHouseCompiler):
+
+    def visit_insert(self, insert_stmt, asfrom=False, **kw):
+        rv = super(ClickHouseNativeCompiler, self).visit_insert(
+            insert_stmt, asfrom=asfrom, **kw)
+
+        pos = rv.rfind('VALUES (')
+        # Remove (%s)-templates from VALUES clause if exists.
+        # ClickHouse server since version 19.3.3 parse query after VALUES and
+        # allows inplace parameters.
+        # Example: INSERT INTO test (x) VALUES (1), (2).
+        if pos != -1:
+            rv = rv[:pos + 6]
+        return rv
+
+
 class ClickHouseDialect_native(ClickHouseDialect):
     driver = 'native'
     execution_ctx_cls = ClickHouseExecutionContext
+    statement_compiler = ClickHouseNativeCompiler
 
     @classmethod
     def dbapi(cls):
@@ -29,9 +48,8 @@ class ClickHouseDialect_native(ClickHouseDialect):
     def _execute(self, connection, sql):
         return connection.execute(sql)
 
-    def _get_server_version_info(self, connection):
-        version = connection.scalar('select version()')
-        return tuple(int(x) for x in version.split('.'))
+    def _query_server_version_string(self, connection):
+        return connection.scalar('select version()')
 
 
 dialect = ClickHouseDialect_native

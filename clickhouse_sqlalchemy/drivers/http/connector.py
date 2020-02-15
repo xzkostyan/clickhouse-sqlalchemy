@@ -30,6 +30,11 @@ class Connection(object):
     transport_cls = RequestsTransport
 
     def __init__(self, *args, **kwargs):
+
+        stream = bool(kwargs.pop('stream', None))
+        self._prefetch = not stream
+
+        # TODO: support `stream` argument in the transport.
         self.transport = self.transport_cls(*args, **kwargs)
         super(Connection, self).__init__()
 
@@ -67,7 +72,9 @@ class Cursor(object):
 
     _columns = None
     _types = None
+    # Result data iterable:
     _response = None
+    # Result data prefetch cache:
     _rows = None
 
     def __init__(self, connection):
@@ -126,24 +133,47 @@ class Cursor(object):
     def fetchone(self):
         self.check_query_started()
 
-        if not self._rows:
-            return None
+        # `self._prefetch` case:
+        if self._rows is not None:
+            if not self._rows:
+                return None
+            return self._rows.pop()
 
-        return self._rows.pop()
+        return next(self._response, None)
 
     def fetchmany(self, size=1):
         self.check_query_started()
 
-        rv = self._rows[:size]
-        self._rows = self._rows[size:]
-        return rv
+        # `self._prefetch` case:
+        if self._rows is not None:
+            rv = self._rows[:size]
+            self._rows = self._rows[size:]
+            return rv
+
+        rows = []
+        for _ in range(size):
+            row = self.fetchone()
+            if row is None:
+                break
+            rows.append(row)
+        return rows
 
     def fetchall(self):
         self.check_query_started()
 
-        rv = self._rows
-        self._rows = []
-        return rv
+        # `self._prefetch` case:
+        if self._rows is not None:
+            rv = self._rows
+            self._rows = []
+            return rv
+
+        rows = []
+        while True:
+            row = self.fetchone()
+            if row is None:
+                break
+            rows.append(row)
+        return rows
 
     @property
     def arraysize(self):
@@ -184,6 +214,10 @@ class Cursor(object):
         self._query_id = None
         self._rows = None
 
+    @property
+    def _prefetch(self):
+        return self._connection._prefetch
+
     def _process_response(self, response):
         response = iter(response)
 
@@ -191,7 +225,8 @@ class Cursor(object):
         self._types = next(response, None)
         self._response = response
 
-        self._rows = list(response)
+        if self._prefetch:
+            self._rows = list(response)
 
     def _reset_state(self):
         """

@@ -1,11 +1,15 @@
 
 from sqlalchemy import Column, text, Table, inspect
+from sqlalchemy.sql.elements import TextClause
 
 from clickhouse_sqlalchemy import types, Table as CHTable, engines
-from tests.testcase import NativeSessionTestCase, BaseTestCase
+from tests.testcase import (
+    BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase,
+)
 
 
-class NativeSchemaTestCase(NativeSessionTestCase):
+class SchemaTestCase(BaseAbstractTestCase):
+
     def test_reflect(self):
         """
         checking, that after call metadata.reflect()
@@ -83,8 +87,18 @@ class NativeSchemaTestCase(NativeSessionTestCase):
         table = Table('test_reflect', metadata, autoload=True)
         self.assertListEqual([c.name for c in table.columns], ['x'])
 
+    def test_reflect_subquery(self):
+        table_node_sql = (
+            '(select arrayJoin([1, 2]) as a, arrayJoin([3, 4]) as b)')
+        table_node = TextClause(table_node_sql)
 
-class HTTPSchemaTestCase(BaseTestCase):
+        metadata = self.metadata()
+        # Cannot use `Table` as it only works with a simple string.
+        columns = inspect(metadata.bind).get_columns(table_node)
+        self.assertListEqual(
+            sorted([col['name'] for col in columns]),
+            ['a', 'b'])
+
     def test_get_schema_names(self):
         insp = inspect(self.session.bind)
         schema_names = insp.get_schema_names()
@@ -98,7 +112,16 @@ class HTTPSchemaTestCase(BaseTestCase):
             engines.Log()
         )
 
+        self.session.execute('DROP TABLE IF EXISTS test_reflect')
         table.create(self.session.bind)
 
         insp = inspect(self.session.bind)
         self.assertListEqual(insp.get_table_names(), ['test_reflect'])
+
+
+class SchemaHttpTestCase(SchemaTestCase, HttpSessionTestCase):
+    """ Schema over a HTTP session """
+
+
+class SchemaNativeTestCase(SchemaTestCase, NativeSessionTestCase):
+    """ Schema over a native protocol session """

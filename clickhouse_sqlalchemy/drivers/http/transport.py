@@ -1,4 +1,7 @@
 from datetime import datetime
+from decimal import Decimal
+
+from ipaddress import IPv4Address, IPv6Address
 
 import requests
 
@@ -35,31 +38,49 @@ converters = {
     'UInt64': int,
     'Float32': float,
     'Float64': float,
+    'Decimal': Decimal,
     'Date': date_converter,
     'DateTime': datetime_converter,
+    'IPv4': IPv4Address,
+    'IPv6': IPv6Address,
 }
 
 
 def _get_type(type_str):
-    return converters.get(type_str)
+    result = converters.get(type_str)
+    if result is not None:
+        return result
+    if type_str.startswith('Decimal('):
+        return converters['Decimal']
+    return None
 
 
 class RequestsTransport(object):
-    def __init__(self, db_url, db_name, username, password, timeout=None,
-                 verify=None, **kwargs):
+
+    def __init__(
+            self,
+            db_url, db_name, username, password,
+            timeout=None, ch_settings=None, verify=None,
+            **kwargs):
+
         self.db_url = db_url
         self.db_name = db_name
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
         self.verify = verify
         self.headers = {
-            k.replace('header__', ''): v for k, v in kwargs.items()
-            if k.startswith('header__')
+            key[8:]: value
+            for key, value in kwargs.items()
+            if key.startswith('header__')
         }
+
+        ch_settings = dict(ch_settings or {})
+        self.ch_settings = ch_settings
+
         ddl_timeout = kwargs.pop('ddl_timeout', DEFAULT_DDL_TIMEOUT)
         if ddl_timeout is not None:
-            ddl_timeout = int(ddl_timeout)
-        self.ddl_timeout = ddl_timeout
+            self.ch_settings['distributed_ddl_task_timeout'] = int(ddl_timeout)
+
         super(RequestsTransport, self).__init__()
 
     def execute(self, query, params=None):
@@ -73,6 +94,7 @@ class RequestsTransport(object):
             names = parse_tsv(next(lines))
             types = parse_tsv(next(lines))
         except StopIteration:
+            # Empty result; e.g. a DDL request.
             return
 
         convs = [_get_type(type_) for type_ in types]
@@ -101,14 +123,13 @@ class RequestsTransport(object):
         data = data.encode('utf-8')
         params = params or {}
         params['database'] = self.db_name
-        if self.ddl_timeout:
-            params['distributed_ddl_task_timeout'] = self.ddl_timeout
+        params.update(self.ch_settings)
 
         # TODO: retries, prepared requests
         r = requests.post(
             self.db_url, auth=self.auth, params=params, data=data,
             stream=stream, timeout=self.timeout, headers=self.headers,
-            verify=self.verify
+            verify=self.verify,
         )
         if r.status_code != 200:
             orig = HTTPException(r.text)

@@ -10,11 +10,13 @@ from sqlalchemy import tuple_
 
 from clickhouse_sqlalchemy import types, Table
 from clickhouse_sqlalchemy.ext.clauses import Lambda
-from tests.session import session
-from tests.testcase import BaseTestCase, NativeSessionTestCase
+from tests.testcase import (
+    BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase,
+)
 
 
-class SelectTestCase(BaseTestCase):
+class SelectTestCase(BaseAbstractTestCase):
+
     def create_table(self, *columns):
         metadata = self.metadata()
 
@@ -27,7 +29,7 @@ class SelectTestCase(BaseTestCase):
     def test_select(self):
         table = self.create_table()
 
-        query = session.query(table.c.x)\
+        query = self.session.query(table.c.x)\
             .filter(table.c.x.in_([1, 2]))\
             .having(func.count() > 0)\
             .order_by(table.c.x.desc())
@@ -53,20 +55,20 @@ class SelectTestCase(BaseTestCase):
     def test_group_by_query(self):
         table = self.create_table()
 
-        query = session.query(table.c.x).group_by(table.c.x)
+        query = self.session.query(table.c.x).group_by(table.c.x)
         self.assertEqual(
             self.compile(query),
             'SELECT x AS t1_x FROM t1 GROUP BY x'
         )
 
-        query = session.query(table.c.x).group_by(table.c.x).with_totals()
+        query = self.session.query(table.c.x).group_by(table.c.x).with_totals()
         self.assertEqual(
             self.compile(query),
             'SELECT x AS t1_x FROM t1 GROUP BY x WITH TOTALS'
         )
 
         with self.assertRaises(exc.InvalidRequestError) as ex:
-            session.query(table.c.x).with_totals()
+            self.session.query(table.c.x).with_totals()
 
         self.assertIn('with_totals', str(ex.exception))
 
@@ -77,7 +79,7 @@ class SelectTestCase(BaseTestCase):
         )
         first_label = table.c['nested.array_column'].label('from_array')
         second_not_label = table.c['nested.another_array_column']
-        query = session.query(first_label, second_not_label)\
+        query = self.session.query(first_label, second_not_label)\
             .array_join(first_label, second_not_label)
         self.assertEqual(
             self.compile(query),
@@ -93,7 +95,7 @@ class SelectTestCase(BaseTestCase):
     def test_sample(self):
         table = self.create_table()
 
-        query = session.query(table.c.x).sample(0.1).group_by(table.c.x)
+        query = self.session.query(table.c.x).sample(0.1).group_by(table.c.x)
         self.assertEqual(
             self.compile(query),
             'SELECT x AS t1_x FROM t1 SAMPLE %(param_1)s GROUP BY x'
@@ -104,7 +106,7 @@ class SelectTestCase(BaseTestCase):
         )
 
     def test_lambda_functions(self):
-        query = session.query(
+        query = self.session.query(
             func.arrayFilter(
                 Lambda(lambda x: x.like('%World%')),
                 literal(['Hello', 'abc World'], types.Array(types.String))
@@ -118,7 +120,15 @@ class SelectTestCase(BaseTestCase):
         )
 
 
-class JoinTestCase(BaseTestCase):
+class SelectHttpTestCase(SelectTestCase, HttpSessionTestCase):
+    """ ... """
+
+
+class SelectNativeTestCase(SelectTestCase, NativeSessionTestCase):
+    """ ... """
+
+
+class JoinTestCase(BaseAbstractTestCase):
     def create_tables(self, num):
         metadata = self.metadata()
 
@@ -131,7 +141,7 @@ class JoinTestCase(BaseTestCase):
     def test_joins(self):
         t1, t2 = self.create_tables(2)
 
-        query = session.query(t1.c.x, t2.c.x) \
+        query = self.session.query(t1.c.x, t2.c.x) \
             .join(
             t2,
             t1.c.x == t1.c.y,
@@ -143,7 +153,7 @@ class JoinTestCase(BaseTestCase):
             "ANY INNER JOIN t1 ON x = y"
         )
 
-        query = session.query(t1.c.x, t2.c.x) \
+        query = self.session.query(t1.c.x, t2.c.x) \
             .join(
             t2,
             t1.c.x == t1.c.y,
@@ -156,7 +166,7 @@ class JoinTestCase(BaseTestCase):
             "ANY INNER JOIN t1 ON x = y"
         )
 
-        query = session.query(t1.c.x, t2.c.x) \
+        query = self.session.query(t1.c.x, t2.c.x) \
             .join(
             t2,
             tuple_(t1.c.x, t1.c.y),
@@ -170,7 +180,7 @@ class JoinTestCase(BaseTestCase):
             "ALL INNER JOIN t1 USING x, y"
         )
 
-        query = session.query(t1.c.x, t2.c.x) \
+        query = self.session.query(t1.c.x, t2.c.x) \
             .join(t2,
                   tuple_(t1.c.x, t1.c.y),
                   type='inner',
@@ -183,7 +193,7 @@ class JoinTestCase(BaseTestCase):
             "GLOBAL ALL INNER JOIN t1 USING x, y"
         )
 
-        query = session.query(t1.c.x, t2.c.x) \
+        query = self.session.query(t1.c.x, t2.c.x) \
             .outerjoin(
             t2,
             tuple_(t1.c.x, t1.c.y),
@@ -198,7 +208,7 @@ class JoinTestCase(BaseTestCase):
             "GLOBAL ALL LEFT OUTER JOIN t1 USING x, y"
         )
 
-        query = session.query(t1.c.x, t2.c.x) \
+        query = self.session.query(t1.c.x, t2.c.x) \
             .outerjoin(
             t2,
             tuple_(t1.c.x, t1.c.y),
@@ -213,7 +223,7 @@ class JoinTestCase(BaseTestCase):
             "GLOBAL ALL LEFT OUTER JOIN t1 USING x, y"
         )
 
-        query = session.query(t1.c.x, t2.c.x) \
+        query = self.session.query(t1.c.x, t2.c.x) \
             .outerjoin(t2,
                        tuple_(t1.c.x, t1.c.y),
                        strictness='ALL',
@@ -224,6 +234,14 @@ class JoinTestCase(BaseTestCase):
             "SELECT x AS t0_x, x AS t1_x FROM t0 "
             "ALL FULL OUTER JOIN t1 USING x, y"
         )
+
+
+class JoinHttpTestCase(JoinTestCase, HttpSessionTestCase):
+    """ Join over a HTTP session """
+
+
+class JoinNativeTestCase(JoinTestCase, NativeSessionTestCase):
+    """ Join over a native protocol session """
 
 
 class YieldTest(NativeSessionTestCase):

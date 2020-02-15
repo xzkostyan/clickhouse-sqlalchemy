@@ -3,44 +3,65 @@ import re
 from sqlalchemy import create_engine
 
 from clickhouse_sqlalchemy import make_session
-from tests.config import uri, native_uri, system_native_uri
+from tests.config import (
+    http_uri, native_uri, system_native_uri, system_http_uri,
+)
 
-session = make_session(create_engine(uri))
-
+http_session = make_session(create_engine(http_uri))
+http_stream_session = make_session(create_engine(http_uri + '?stream=1'))
 native_session = make_session(create_engine(native_uri))
 
 system_native_session = make_session(create_engine(system_native_uri))
+system_http_session = make_session(create_engine(system_http_uri))
 
 
 class MockedEngine(object):
+
+    prev_do_execute = None
+    prev_do_executemany = None
+    prev_query_server_version_string = None
+
     def __init__(self, engine_session=None):
-        self.buffer = buffer = []
+        self._buffer = []
 
-        engine_session = engine_session or session
+        if engine_session is None:
+            engine_session = make_session(create_engine(http_uri))
 
-        self.dialect_cls = engine_session.bind.dialect
+        self.engine_session = engine_session
+        self.dialect_cls = engine_session.bind.dialect.__class__
+
+    @property
+    def history(self):
+        return [re.sub(r'[\n\t]', '', str(ssql)) for ssql in self._buffer]
+
+    def __enter__(self):
         self.prev_do_execute = self.dialect_cls.do_execute
         self.prev_do_executemany = self.dialect_cls.do_executemany
+        self.prev_query_server_version_string = \
+            self.dialect_cls._query_server_version_string
 
-        def do_executemany(cursor, statement, parameters, context=None):
-            buffer.append(statement)
+        def do_executemany(
+                instance, cursor, statement, parameters, context=None):
+            self._buffer.append(statement)
 
-        def do_execute(cursor, statement, parameters, context=None):
-            buffer.append(statement)
+        def do_execute(instance, cursor, statement, parameters, context=None):
+            self._buffer.append(statement)
+
+        def query_server_version_string(*args, **kwargs):
+            return '19.16.2.2'
 
         self.dialect_cls.do_execute = do_execute
         self.dialect_cls.do_executemany = do_executemany
+        self.dialect_cls._query_server_version_string = \
+            query_server_version_string
 
-    def assert_sql(self, stmts):
-        recv = [re.sub(r'[\n\t]', '', str(s)) for s in self.buffer]
-        assert recv == stmts, recv
-
-    def __enter__(self):
-        return self
+        return self.engine_session
 
     def __exit__(self, *exc_info):
         self.dialect_cls.do_execute = self.prev_do_execute
         self.dialect_cls.do_executemany = self.prev_do_executemany
+        self.dialect_cls._query_server_version_string = \
+            self.prev_query_server_version_string
 
 
 mocked_engine = MockedEngine

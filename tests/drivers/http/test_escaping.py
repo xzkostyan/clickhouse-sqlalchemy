@@ -5,16 +5,15 @@ from sqlalchemy import Column, literal
 
 from clickhouse_sqlalchemy import types, engines, Table
 from clickhouse_sqlalchemy.drivers.http.escaper import Escaper
-from tests.session import session
-from tests.testcase import BaseTestCase
+from tests.testcase import HttpSessionTestCase
 
 
-class EscapingTestCase(BaseTestCase):
+class EscapingTestCase(HttpSessionTestCase):
     def escaped_compile(self, clause, **kwargs):
         return str(self._compile(clause, **kwargs))
 
     def test_select_escaping(self):
-        query = session.query(literal('\t'))
+        query = self.session.query(literal('\t'))
         self.assertEqual(
             self.escaped_compile(query, literal_binds=True),
             "SELECT '\t' AS param_1"
@@ -41,7 +40,7 @@ class EscapingTestCase(BaseTestCase):
         self.assertIn('Unsupported param format', str(ex.exception))
 
     def test_escape_binary_mod(self):
-        query = session.query(literal(1) % literal(2))
+        query = self.session.query(literal(1) % literal(2))
         self.assertEqual(
             self.compile(query, literal_binds=True),
             'SELECT 1 %% 2 AS anon_1'
@@ -53,7 +52,7 @@ class EscapingTestCase(BaseTestCase):
             engines.Memory()
         )
 
-        query = session.query(table.c.x % table.c.x)
+        query = self.session.query(table.c.x % table.c.x)
         self.assertEqual(
             self.compile(query, literal_binds=True),
             'SELECT x %% x AS anon_1 FROM t'

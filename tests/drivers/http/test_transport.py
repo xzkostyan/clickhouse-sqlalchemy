@@ -6,11 +6,10 @@ from sqlalchemy import Column, func
 
 from clickhouse_sqlalchemy import types, Table
 from clickhouse_sqlalchemy.drivers.http.base import ClickHouseDialect_http
-from tests.session import session
-from tests.testcase import BaseTestCase
+from tests.testcase import HttpSessionTestCase
 
 
-class TransportCase(BaseTestCase):
+class TransportCase(HttpSessionTestCase):
     @property
     def url(self):
         return 'http://{host}:{port}'.format(host=self.host, port=self.port)
@@ -27,7 +26,7 @@ class TransportCase(BaseTestCase):
             Column('x', types.Int32, primary_key=True)
         )
 
-        rv = session.query(func.count()).select_from(table).scalar()
+        rv = self.session.query(func.count()).select_from(table).scalar()
         self.assertEqual(rv, 42)
 
     @mock.activate
@@ -52,7 +51,7 @@ class TransportCase(BaseTestCase):
             *[Column(col, types.Int) for col in columns]
         )
 
-        rv = session.query(*table.c).first()
+        rv = self.session.query(*table.c).first()
         self.assertEqual(rv, tuple([42] * len(columns)))
 
     @mock.activate
@@ -74,7 +73,7 @@ class TransportCase(BaseTestCase):
             *[Column(col, types.Float) for col in columns]
         )
 
-        rv = session.query(*table.c).first()
+        rv = self.session.query(*table.c).first()
         self.assertEqual(rv, tuple([42.0] * len(columns)))
 
     # do not call that method
@@ -95,7 +94,7 @@ class TransportCase(BaseTestCase):
             Column('a', types.Date)
         )
 
-        rv = session.query(*table.c).first()
+        rv = self.session.query(*table.c).first()
         self.assertEqual(rv, (date(2012, 10, 25), ))
 
     @mock.activate
@@ -116,5 +115,5 @@ class TransportCase(BaseTestCase):
             Column('a', types.String)
         )
 
-        rv = session.query(*table.c).all()
+        rv = self.session.query(*table.c).all()
         self.assertEqual(rv, [(None, ), ('\\N', ), ('', )])

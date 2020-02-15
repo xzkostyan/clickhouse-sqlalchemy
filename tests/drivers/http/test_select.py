@@ -1,14 +1,18 @@
 from sqlalchemy import Column
 
 from clickhouse_sqlalchemy import types, Table
-from tests.session import session
-from tests.testcase import BaseTestCase
+from tests.testcase import HttpSessionTestCase
 
 
-class FormatSectionTestCase(BaseTestCase):
-    execution_ctx_cls = session.bind.dialect.execution_ctx_cls
+class FormatSectionTestCase(HttpSessionTestCase):
 
-    def _compile(self, clause, bind=session.bind, **kwargs):
+    @property
+    def execution_ctx_cls(self):
+        return self.session.bind.dialect.execution_ctx_cls
+
+    def _compile(self, clause, bind=None, **kwargs):
+        if bind is None:
+            bind = self.session.bind
         statement = super(FormatSectionTestCase, self)._compile(
             clause, bind=bind, **kwargs
         )
@@ -23,7 +27,7 @@ class FormatSectionTestCase(BaseTestCase):
     def test_select_format_clause(self):
         metadata = self.metadata()
 
-        bind = session.bind
+        bind = self.session.bind
         bind.cursor = lambda: None
 
         table = Table(
@@ -31,7 +35,7 @@ class FormatSectionTestCase(BaseTestCase):
             Column('x', types.Int32, primary_key=True)
         )
 
-        statement = self.compile(session.query(table.c.x), bind=bind)
+        statement = self.compile(self.session.query(table.c.x), bind=bind)
         self.assertEqual(
             statement,
             'SELECT x AS t1_x FROM t1 FORMAT TabSeparatedWithNamesAndTypes'
@@ -40,7 +44,7 @@ class FormatSectionTestCase(BaseTestCase):
     def test_insert_from_select_no_format_clause(self):
         metadata = self.metadata()
 
-        bind = session.bind
+        bind = self.session.bind
         bind.cursor = lambda: None
 
         t1 = Table(
@@ -54,6 +58,6 @@ class FormatSectionTestCase(BaseTestCase):
         )
 
         query = t2.insert() \
-            .from_select(['x'], session.query(t1.c.x).subquery())
+            .from_select(['x'], self.session.query(t1.c.x).subquery())
         statement = self.compile(query, bind=bind)
         self.assertEqual(statement, 'INSERT INTO t2 (x) SELECT x FROM t1')

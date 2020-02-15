@@ -31,17 +31,16 @@ password = file_config.get('db', 'password')
 
 uri_template = '{schema}://{user}:{password}@{host}:{port}/{database}'
 
-# Http protocol is obsolete.
-uri = uri_template.format(
+http_uri = uri_template.format(
     schema='clickhouse+http', user=user, password=password, host=host,
-    port=http_port, database=database
-)
+    port=http_port, database=database)
 native_uri = uri_template.format(
     schema='clickhouse+native', user=user, password=password, host=host,
-    port=port, database=database
-)
+    port=port, database=database)
 
+system_http_uri = uri_template.format(
+    schema='clickhouse+http', user=user, password=password, host=host,
+    port=http_port, database='system')
 system_native_uri = uri_template.format(
     schema='clickhouse+native', user=user, password=password, host=host,
-    port=port, database='system'
-)
+    port=port, database='system')

@@ -1,5 +1,6 @@
 import enum
 
+import sqlalchemy as sa
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
@@ -50,6 +51,12 @@ ischema_names = {
 
 
 class ClickHouseIdentifierPreparer(compiler.IdentifierPreparer):
+
+    reserved_words = compiler.IdentifierPreparer.reserved_words | set((
+        'index',  # reserved in the 'create table' syntax, at least.
+    ))
+    # Alternatively, use `_requires_quotes = lambda self, value: True`
+
     def _escape_identifier(self, value):
         value = value.replace(self.escape_quote, self.escape_to_quote)
         return value.replace('%', '%%')
@@ -292,20 +299,6 @@ class ClickHouseCompiler(compiler.SQLCompiler):
                 text += " WITH TOTALS"
 
         return text
-
-    def visit_insert(self, insert_stmt, asfrom=False, **kw):
-        rv = super(ClickHouseCompiler, self).visit_insert(
-            insert_stmt, asfrom=asfrom, **kw
-        )
-
-        pos = rv.rfind('VALUES (')
-        # Remove (%s)-templates from VALUES clause if exists.
-        # ClickHouse server since version 19.3.3 parse query after VALUES and
-        # allows inplace parameters.
-        # Example: INSERT INTO test (x) VALUES (1), (2).
-        if pos != -1:
-            rv = rv[:pos + 6]
-        return rv
 
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
@@ -560,6 +553,7 @@ class ClickHouseDialect(default.DefaultDialect):
     returns_unicode_strings = True
     description_encoding = None
     postfetch_lastrowid = False
+    forced_server_version_string = None
 
     preparer = ClickHouseIdentifierPreparer
     type_compiler = ClickHouseTypeCompiler
@@ -581,7 +575,7 @@ class ClickHouseDialect(default.DefaultDialect):
         return self.get_table_names(connection, schema, **kw)
 
     def has_table(self, connection, table_name, schema=None):
-        query = 'EXISTS TABLE {}'.format(table_name)
+        query = 'EXISTS TABLE {}'.format(self._quote_table_name(table_name))
         for r in self._execute(connection, query):
             if r.result == 1:
                 return True
@@ -611,9 +605,15 @@ class ClickHouseDialect(default.DefaultDialect):
             connection, ch_table, include_columns, exclude_columns,
             *args, **opts)
 
+    def _quote_table_name(self, table_name):
+        # Use case: `describe table (select ...)`, over a TextClause.
+        if isinstance(table_name, sa.sql.elements.TextClause):
+            return str(table_name)
+        return self.identifier_preparer.quote_identifier(table_name)
+
     @reflection.cache
     def get_columns(self, connection, table_name, schema=None, **kw):
-        query = 'DESCRIBE TABLE {}'.format(table_name)
+        query = 'DESCRIBE TABLE {}'.format(self._quote_table_name(table_name))
         rows = self._execute(connection, query)
 
         return [self._get_column_info(row.name, row.type) for row in rows]
@@ -764,3 +764,20 @@ class ClickHouseDialect(default.DefaultDialect):
 
     def _check_unicode_description(self, connection):
         return True
+
+    def _get_server_version_info(self, connection):
+        version = self.forced_server_version_string
+
+        if version is None:
+            version = self._query_server_version_string(connection)
+            assert version
+
+        return tuple(int(part) for part in version.split('.'))
+
+    def _query_server_version_string(self, connection):
+        raise NotImplementedError
+
+    def connect(self, *cargs, **cparams):
+        self.forced_server_version_string = cparams.pop(
+            'server_version', self.forced_server_version_string)
+        return super(ClickHouseDialect, self).connect(*cargs, **cparams)

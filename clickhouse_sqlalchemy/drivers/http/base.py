@@ -1,4 +1,6 @@
 
+import sqlalchemy as sa
+from ...util.compat import string_types
 from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
 from . import connector
 
@@ -38,14 +40,15 @@ class ClickHouseDialect_http(ClickHouseDialect):
         return (db_url, db_name, url.username, url.password), kwargs
 
     def _execute(self, connection, sql):
-        sql += ' ' + FORMAT_SUFFIX
+        if isinstance(sql, string_types):
+            # Makes sure the query will go through the
+            # `ClickHouseExecutionContext` logic.
+            sql = sa.sql.elements.TextClause(sql)
         return connection.execute(sql)
 
-    def _get_server_version_info(self, connection):
-        version = connection.scalar(
-            'select version() {}'.format(FORMAT_SUFFIX)
-        )
-        return tuple(int(x) for x in version.split('.'))
+    def _query_server_version_string(self, connection):
+        query = 'select version() {}'.format(FORMAT_SUFFIX)
+        return connection.scalar(query)
 
 
 dialect = ClickHouseDialect_http
