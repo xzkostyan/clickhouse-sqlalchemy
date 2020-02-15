@@ -227,14 +227,6 @@ class Cursor(object):
     def setoutputsize(self, size, column=None):
         pass
 
-    # Iteration support.
-    def __iter__(self):
-        while True:
-            one = self.fetchone()
-            if one is None:
-                return
-            yield one
-
     def _process_response(self, response, executemany=False):
         if executemany:
             self._rowcount = response

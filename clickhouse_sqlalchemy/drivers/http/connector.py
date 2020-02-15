@@ -137,7 +137,7 @@ class Cursor(object):
         if self._rows is not None:
             if not self._rows:
                 return None
-            return self._rows.pop()
+            return self._rows.pop(0)
 
         return next(self._response, None)
 
@@ -188,14 +188,6 @@ class Cursor(object):
 
     def setoutputsize(self, size, column=None):
         pass
-
-    # Iteration support.
-    def __iter__(self):
-        while True:
-            one = self.fetchone()
-            if one is None:
-                return
-            yield one
 
     # Private and non-standard methods.
     def cancel(self):
