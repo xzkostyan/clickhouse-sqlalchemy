@@ -286,7 +286,7 @@ class YieldTest(NativeSessionTestCase):
         ret.append(next(q))
         try:
             next(q)
-            assert False
+            self.assertTrue(False)
         except StopIteration:
             pass
 

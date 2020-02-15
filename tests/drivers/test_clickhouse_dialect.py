@@ -46,11 +46,11 @@ class ClickHouseDialectTestCase(BaseAbstractTestCase):
     def test_get_table_names(self):
         self.table.create(self.session.bind)
         db_tables = self.dialect.get_table_names(self.session)
-        assert self.table.name in db_tables
+        self.assertIn(self.table.name, db_tables)
 
     def test_get_schema_names(self):
         schemas = self.dialect.get_schema_names(self.session)
-        assert test_database in schemas
+        self.assertIn(test_database, schemas)
 
 
 class ClickHouseDialectHttpTestCase(

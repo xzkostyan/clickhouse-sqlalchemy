@@ -8,9 +8,9 @@ class CursorTestCase(NativeSessionTestCase):
 
         cur.execute("SELECT * FROM system.numbers LIMIT 1")
         rv = cur.fetchall()
-        assert len(rv) == 1
+        self.assertEqual(len(rv), 1)
 
     def test_execute_with_context(self):
         rv = self.session.execute("SELECT * FROM system.numbers LIMIT 1")
 
-        assert len(rv.fetchall()) == 1
+        self.assertEqual(len(rv.fetchall()), 1)
