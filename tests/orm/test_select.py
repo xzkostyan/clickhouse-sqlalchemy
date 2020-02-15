@@ -108,7 +108,7 @@ class SelectTestCase(BaseAbstractTestCase):
     def test_final(self):
         table = self.create_table()
 
-        query = session.query(table.c.x).final().group_by(table.c.x)
+        query = self.session.query(table.c.x).final().group_by(table.c.x)
         self.assertEqual(
             self.compile(query),
             'SELECT x AS t1_x FROM t1 FINAL GROUP BY x'
