@@ -264,6 +264,30 @@ class EnginesDeclarativeTestCase(BaseTestCase):
             "ORDER BY (date, x)"
         )
 
+    def test_replacing_merge_tree_no_version(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+            version = Column(types.Int32)
+
+            __table_args__ = (
+                engines.ReplacingMergeTree(
+                    'date',
+                    ('date', 'x'),
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            "CREATE TABLE test_table ("
+            "date Date, x Int32, y String, version Int32"
+            ") "
+            "ENGINE = ReplacingMergeTree() "
+            "PARTITION BY date "
+            "ORDER BY (date, x)"
+        )
+
     def test_replicated_replacing_merge_tree(self):
         class TestTable(self.base):
             date = Column(types.Date, primary_key=True)
