@@ -20,7 +20,7 @@ class CountTestCaseBase(BaseAbstractTestCase):
 
         self.assertEqual(
             self.compile(self.session.query(func.count(table.c.x))),
-            'SELECT count(x) AS count_1 FROM t1'
+            'SELECT count(t1.x) AS count_1 FROM t1'
         )
 
     def test_count_distinct(self):
@@ -28,7 +28,7 @@ class CountTestCaseBase(BaseAbstractTestCase):
         query = self.session.query(func.count(func.distinct(table.c.x)))
         self.assertEqual(
             self.compile(query),
-            'SELECT count(distinct(x)) AS count_1 FROM t1'
+            'SELECT count(distinct(t1.x)) AS count_1 FROM t1'
         )
 
     def test_count_no_column_specified(self):

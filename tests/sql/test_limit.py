@@ -21,7 +21,7 @@ class LimitTestCase(BaseAbstractTestCase):
         query = self.session.query(table.c.x).limit(10)
         self.assertEqual(
             self.compile(query, literal_binds=True),
-            'SELECT x AS t1_x FROM t1  LIMIT 10'
+            'SELECT t1.x AS t1_x FROM t1  LIMIT 10'
         )
 
     def test_limit_with_offset(self):
@@ -30,13 +30,13 @@ class LimitTestCase(BaseAbstractTestCase):
         query = self.session.query(table.c.x).limit(10).offset(5)
         self.assertEqual(
             self.compile(query, literal_binds=True),
-            'SELECT x AS t1_x FROM t1  LIMIT 5, 10'
+            'SELECT t1.x AS t1_x FROM t1  LIMIT 5, 10'
         )
 
         query = self.session.query(table.c.x).offset(5).limit(10)
         self.assertEqual(
             self.compile(query, literal_binds=True),
-            'SELECT x AS t1_x FROM t1  LIMIT 5, 10'
+            'SELECT t1.x AS t1_x FROM t1  LIMIT 5, 10'
         )
 
     def test_offset_without_limit(self):

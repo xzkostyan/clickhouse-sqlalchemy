@@ -55,5 +55,5 @@ class EscapingTestCase(HttpSessionTestCase):
         query = self.session.query(table.c.x % table.c.x)
         self.assertEqual(
             self.compile(query, literal_binds=True),
-            'SELECT x %% x AS anon_1 FROM t'
+            'SELECT t.x %% t.x AS anon_1 FROM t'
         )

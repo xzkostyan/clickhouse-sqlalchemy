@@ -23,13 +23,13 @@ class SelectTestCase(BaseTestCase):
         query = select([table.c.x]).group_by(table.c.x)
         self.assertEqual(
             self.compile(query),
-            'SELECT x FROM t1 GROUP BY x'
+            'SELECT t1.x FROM t1 GROUP BY t1.x'
         )
 
         query = select([table.c.x]).group_by(table.c.x).with_totals()
         self.assertEqual(
             self.compile(query),
-            'SELECT x FROM t1 GROUP BY x WITH TOTALS'
+            'SELECT t1.x FROM t1 GROUP BY t1.x WITH TOTALS'
         )
 
     def test_sample(self):
@@ -38,12 +38,12 @@ class SelectTestCase(BaseTestCase):
         query = select([table.c.x]).sample(0.1).group_by(table.c.x)
         self.assertEqual(
             self.compile(query),
-            'SELECT x FROM t1 SAMPLE %(param_1)s GROUP BY x'
+            'SELECT t1.x FROM t1 SAMPLE %(param_1)s GROUP BY t1.x'
         )
 
         self.assertEqual(
             self.compile(query, literal_binds=True),
-            'SELECT x FROM t1 SAMPLE 0.1 GROUP BY x'
+            'SELECT t1.x FROM t1 SAMPLE 0.1 GROUP BY t1.x'
         )
 
     def test_final(self):
@@ -52,7 +52,7 @@ class SelectTestCase(BaseTestCase):
         query = select([table.c.x]).final().group_by(table.c.x)
         self.assertEqual(
             self.compile(query),
-            'SELECT x FROM t1 FINAL GROUP BY x'
+            'SELECT t1.x FROM t1 FINAL GROUP BY t1.x'
         )
 
     def test_nested_type(self):
@@ -75,9 +75,9 @@ class SelectTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.compile(query, literal_binds=True),
-            'SELECT parent.child1 FROM t1 '
-            'WHERE parent.child1 = [1, 2] '
-            'AND parent.child2 = [\'foo\', \'bar\']'
+            'SELECT t1.parent.child1 FROM t1 '
+            'WHERE t1.parent.child1 = [1, 2] '
+            'AND t1.parent.child2 = [\'foo\', \'bar\']'
         )
 
     def test_nested_array_join(self):
@@ -99,9 +99,9 @@ class SelectTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.compile(query),
-            'SELECT parent.child1, parent.child2 '
+            'SELECT t1.parent.child1, t1.parent.child2 '
             'FROM t1 '
-            'ARRAY JOIN parent'
+            'ARRAY JOIN t1.parent'
         )
 
         query = select(
@@ -114,9 +114,9 @@ class SelectTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.compile(query),
-            'SELECT parent.child1, parent.child2 '
+            'SELECT t1.parent.child1, t1.parent.child2 '
             'FROM t1 '
-            'ARRAY JOIN parent.child1'
+            'ARRAY JOIN t1.parent.child1'
         )
 
         query = select(
@@ -130,9 +130,9 @@ class SelectTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.compile(query),
-            'SELECT parent.child1, parent.child2 '
+            'SELECT t1.parent.child1, t1.parent.child2 '
             'FROM t1 '
-            'ARRAY JOIN parent.child1, parent.child2'
+            'ARRAY JOIN t1.parent.child1, t1.parent.child2'
         )
 
         parent_labeled = table.c.parent.label('p')
@@ -147,9 +147,9 @@ class SelectTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.compile(query),
-            'SELECT parent.child1, parent.child2 '
+            'SELECT t1.parent.child1, t1.parent.child2 '
             'FROM t1 '
-            'ARRAY JOIN parent AS p'
+            'ARRAY JOIN t1.parent AS p'
         )
 
         query = select(
@@ -163,9 +163,9 @@ class SelectTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.compile(query),
-            'SELECT p.child1, p.child2, parent.child1 '
+            'SELECT p.child1, p.child2, t1.parent.child1 '
             'FROM t1 '
-            'ARRAY JOIN parent AS p'
+            'ARRAY JOIN t1.parent AS p'
         )
 
     def test_join(self):
@@ -196,8 +196,8 @@ class SelectTestCase(BaseTestCase):
             self.compile(make_statement(
                 type='INNER'
             )),
-            'SELECT x FROM table_1 '
-            'INNER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'INNER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -205,8 +205,8 @@ class SelectTestCase(BaseTestCase):
                 type='INNER',
                 strictness='all'
             )),
-            'SELECT x FROM table_1 '
-            'ALL INNER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'ALL INNER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -214,8 +214,8 @@ class SelectTestCase(BaseTestCase):
                 type='INNER',
                 strictness='any'
             )),
-            'SELECT x FROM table_1 '
-            'ANY INNER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'ANY INNER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -223,8 +223,8 @@ class SelectTestCase(BaseTestCase):
                 type='INNER',
                 distribution='global'
             )),
-            'SELECT x FROM table_1 '
-            'GLOBAL INNER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'GLOBAL INNER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -233,8 +233,8 @@ class SelectTestCase(BaseTestCase):
                 distribution='global',
                 strictness='any'
             )),
-            'SELECT x FROM table_1 '
-            'GLOBAL ANY INNER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'GLOBAL ANY INNER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -243,8 +243,8 @@ class SelectTestCase(BaseTestCase):
                 distribution='global',
                 strictness='all'
             )),
-            'SELECT x FROM table_1 '
-            'GLOBAL ALL INNER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'GLOBAL ALL INNER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -252,8 +252,8 @@ class SelectTestCase(BaseTestCase):
                 type='LEFT OUTER',
                 distribution='global',
                 strictness='all')),
-            'SELECT x FROM table_1 '
-            'GLOBAL ALL LEFT OUTER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'GLOBAL ALL LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -261,8 +261,8 @@ class SelectTestCase(BaseTestCase):
                 type='RIGHT OUTER',
                 distribution='global',
                 strictness='all')),
-            'SELECT x FROM table_1 '
-            'GLOBAL ALL RIGHT OUTER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'GLOBAL ALL RIGHT OUTER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -270,42 +270,42 @@ class SelectTestCase(BaseTestCase):
                 type='CROSS',
                 distribution='global',
                 strictness='all')),
-            'SELECT x FROM table_1 '
-            'GLOBAL ALL CROSS JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'GLOBAL ALL CROSS JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
             self.compile(make_statement(type='FULL OUTER')),
-            'SELECT x FROM table_1 '
-            'FULL OUTER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
             self.compile(make_statement(isouter=False,
                                         full=False)),
-            'SELECT x FROM table_1 '
-            'INNER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'INNER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
             self.compile(make_statement(isouter=True,
                                         full=False)),
-            'SELECT x FROM table_1 '
-            'LEFT OUTER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
             self.compile(make_statement(isouter=True,
                                         full=True)),
-            'SELECT x FROM table_1 '
-            'FULL LEFT OUTER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'FULL LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
             self.compile(make_statement(isouter=False,
                                         full=True)),
-            'SELECT x FROM table_1 '
-            'FULL INNER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'FULL INNER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -313,8 +313,8 @@ class SelectTestCase(BaseTestCase):
                 isouter=False, full=False,
                 type='INNER'
             )),
-            'SELECT x FROM table_1 '
-            'INNER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'INNER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -322,8 +322,8 @@ class SelectTestCase(BaseTestCase):
                 isouter=False, full=False,
                 type='LEFT OUTER'
             )),
-            'SELECT x FROM table_1 '
-            'LEFT OUTER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -331,8 +331,8 @@ class SelectTestCase(BaseTestCase):
                 isouter=False, full=False,
                 type='LEFT', strictness='ALL'
             )),
-            'SELECT x FROM table_1'
-            ' ALL LEFT JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'ALL LEFT JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -340,8 +340,8 @@ class SelectTestCase(BaseTestCase):
                 isouter=False, full=False,
                 type='LEFT', strictness='ANY'
             )),
-            'SELECT x FROM table_1 '
-            'ANY LEFT JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'ANY LEFT JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -349,8 +349,8 @@ class SelectTestCase(BaseTestCase):
                 isouter=False, full=False,
                 type='LEFT', strictness='ANY', distribution='GLOBAL'
             )),
-            'SELECT x FROM table_1 '
-            'GLOBAL ANY LEFT JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'GLOBAL ANY LEFT JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertRaises(
@@ -366,8 +366,8 @@ class SelectTestCase(BaseTestCase):
                 isouter=True, full=True,
                 type='LEFT OUTER', strictness='ANY', distribution='GLOBAL'
             )),
-            'SELECT x FROM table_1 GLOBAL '
-            'ANY FULL LEFT OUTER JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 GLOBAL '
+            'ANY FULL LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -375,5 +375,22 @@ class SelectTestCase(BaseTestCase):
                 isouter=True, full=False,
                 type='CROSS',
             )),
-            'SELECT x FROM table_1 CROSS JOIN table_2 ON y = x'
+            'SELECT table_1.x FROM table_1 '
+            'CROSS JOIN table_2 ON table_2.y = table_1.x'
+        )
+
+    def test_join_same_column_name(self):
+        table_1 = self.create_table(
+            'table_1', Column('x', types.UInt32, primary_key=True)
+        )
+        table_2 = self.create_table(
+            'table_2', Column('x', types.UInt32, primary_key=True)
+        )
+
+        join = table_1.join(table_2, table_1.c.x == table_2.c.x, type='INNER')
+
+        self.assertEqual(
+            self.compile(select([table_1.c.x]).select_from(join)),
+            'SELECT table_1.x FROM table_1 '
+            'INNER JOIN table_2 ON table_1.x = table_2.x'
         )

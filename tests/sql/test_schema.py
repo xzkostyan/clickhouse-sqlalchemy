@@ -59,9 +59,9 @@ class SchemaTestCase(BaseAbstractTestCase):
             )
             self.assertEqual(
                 self.compile(query),
-                "SELECT x FROM test_reflect "
+                "SELECT test_reflect.x FROM test_reflect "
                 "GLOBAL ALL INNER JOIN another_table "
-                "ON x = %(x_1)s"
+                "ON test_reflect.x = %(x_1)s"
             )
 
     def test_reflect_generic_table(self):

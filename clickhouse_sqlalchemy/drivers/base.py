@@ -97,12 +97,6 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             self.process(func.clauses.clauses[2], **kw)
         )
 
-    def visit_column(self, column, include_table=True, **kwargs):
-        # Columns prefixed with table name are not supported
-        return super(ClickHouseCompiler, self).visit_column(
-            column, include_table=False, **kwargs
-        )
-
     def limit_clause(self, select, **kw):
         text = ''
         if select._limit_clause is not None:
