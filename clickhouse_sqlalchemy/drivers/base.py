@@ -1,8 +1,6 @@
 import enum
 
-from sqlalchemy import (
-    schema, Column, types as sqltypes, exc, util as sa_util
-)
+from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
     compiler, expression, type_api, literal_column, elements
