@@ -303,6 +303,19 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
+    def get_column_specification(self, column, **kw):
+        column_spec = super(
+            ClickHouseDDLCompiler, self
+        ).get_column_specification(column, **kw)
+
+        codec = column.dialect_options['clickhouse']['codec']
+        if codec:
+            if isinstance(codec, (list, tuple)):
+                codec = ', '.join(codec)
+            column_spec += " CODEC({0})".format(codec)
+
+        return column_spec
+
     def visit_create_column(self, create, **kw):
         column = create.element
         nullable = column.nullable
@@ -567,7 +580,10 @@ class ClickHouseDialect(default.DefaultDialect):
         (schema.Table, {
             'data': [],
             'cluster': None,
-        })
+        }),
+        (schema.Column, {
+            'codec': None,
+        }),
     ]
 
     def _execute(self, connection, sql):
