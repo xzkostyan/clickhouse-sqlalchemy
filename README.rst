@@ -120,6 +120,10 @@ Both declarative and constructor-style tables support:
         class Rate(Base):
             day = Column(types.Date, primary_key=True)
             value = Column(types.Int32)
+            other_value = Column(
+                types.DateTime,
+                clickhouse_codec=('DoubleDelta', 'ZSTD'),
+            )
 
             __table_args__ = (
                 engines.Memory(),
