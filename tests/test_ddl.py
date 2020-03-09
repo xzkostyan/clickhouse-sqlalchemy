@@ -140,6 +140,34 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    def test_create_table_with_codec(self):
+        table = Table(
+            't1', self.metadata(),
+            Column(
+                'list',
+                types.DateTime,
+                clickhouse_codec=['DoubleDelta', 'ZSTD'],
+            ),
+            Column(
+                'tuple',
+                types.UInt8,
+                clickhouse_codec=('T64', 'ZSTD(5)'),
+            ),
+            Column('explicit_none', types.UInt32, clickhouse_codec=None),
+            Column('str', types.Int8, clickhouse_codec='ZSTD'),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'list DateTime CODEC(DoubleDelta, ZSTD), '
+            'tuple UInt8 CODEC(T64, ZSTD(5)), '
+            'explicit_none UInt32, '
+            'str Int8 CODEC(ZSTD)) '
+            'ENGINE = Memory'
+        )
+
     def test_table_create_on_cluster(self):
         create_sql = (
             'CREATE TABLE t1 ON CLUSTER test_cluster '
