@@ -600,12 +600,8 @@ class ClickHouseDialect(default.DefaultDialect):
                 return True
         return False
 
-    def reflecttable(
-            self, connection, table, include_columns, exclude_columns,
-            # Temporary(-ish): `*args` because there's a `resolve_fks` argument
-            # added in sqlalchemy 1.3 but not present in sqlalchemy 1.2
-            *args,
-            **opts):
+    def reflecttable(self, connection, table, include_columns, exclude_columns,
+                     resolve_fks, **opts):
         """
         Hack to ensure the autoloaded table class is
         `clickhouse_sqlalchemy.Table`
@@ -622,7 +618,7 @@ class ClickHouseDialect(default.DefaultDialect):
             ch_table = table
         return super(ClickHouseDialect, self).reflecttable(
             connection, ch_table, include_columns, exclude_columns,
-            *args, **opts)
+            resolve_fks, **opts)
 
     def _quote_table_name(self, table_name):
         # Use case: `describe table (select ...)`, over a TextClause.

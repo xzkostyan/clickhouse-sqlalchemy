@@ -100,7 +100,7 @@ setup(
     test_suite='nose.collector',
     tests_require=[
         'nose',
-        'sqlalchemy>=1.2',
+        'sqlalchemy>=1.3,<1.4',
         'mock',
         'requests',
         'responses',
