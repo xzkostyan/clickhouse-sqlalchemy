@@ -305,14 +305,39 @@ class EnginesDeclarativeTestCase(BaseTestCase):
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
-            "CREATE TABLE test_table ("
-            "date Date, x Int32, y String, version Int32"
-            ") "
+            "CREATE TABLE test_table "
+            "(date Date, x Int32, y String, version Int32) "
             "ENGINE = ReplicatedReplacingMergeTree("
-            "'/table/path', 'name', version"
-            ") "
+            "'/table/path', 'name', version) "
             "PARTITION BY date "
             "ORDER BY (date, x)"
+        )
+
+    def test_replicated_collapsing_merge_tree(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+            sign = Column(types.Int8)
+
+            __table_args__ = (
+                engines.ReplicatedCollapsingMergeTree(
+                    '/table/path', 'name',
+                    sign,
+                    date,
+                    (date, x),
+                    (x, y)),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            "CREATE TABLE test_table "
+            "(date Date, x Int32, y String, sign Int8) "
+            "ENGINE = ReplicatedCollapsingMergeTree"
+            "('/table/path', 'name', sign) "
+            "PARTITION BY date "
+            "ORDER BY (date, x) "
+            "PRIMARY KEY (x, y)"
         )
 
     def test_partition_by_func(self):
