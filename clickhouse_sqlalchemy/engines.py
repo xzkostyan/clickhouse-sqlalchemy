@@ -1,7 +1,5 @@
 from sqlalchemy import util
-from sqlalchemy.sql import (
-    ClauseElement,
-)
+from sqlalchemy.sql import ClauseElement
 from sqlalchemy.sql.base import SchemaEventTarget
 from sqlalchemy.sql.schema import ColumnCollectionMixin, SchemaItem
 from sqlalchemy.sql.visitors import Visitable
