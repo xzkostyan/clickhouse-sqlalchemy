@@ -1,9 +1,10 @@
 from ipaddress import IPv4Network, IPv6Network
 
 from sqlalchemy.sql.type_api import to_instance, UserDefinedType
-from sqlalchemy import types, func, and_, or_
+from sqlalchemy import types, func
 from .ext.clauses import NestedColumn
 from .util.compat import text_type
+from clickhouse_sqlalchemy.util.comparators import BaseIPComparator
 
 
 class String(types.String):
@@ -178,24 +179,8 @@ class IPv4(types.UserDefinedType):
     def bind_expression(self, bindvalue):
         return func.toIPv4(bindvalue)
 
-    class comparator_factory(types.UserDefinedType.Comparator):
-        def in_(self, other):
-            if not isinstance(other, IPv4Network):
-                other = IPv4Network(other)
-
-            return and_(
-                self >= other[0],
-                self <= other[-1]
-            )
-
-        def notin_(self, other):
-            if not isinstance(other, IPv4Network):
-                other = IPv4Network(other)
-
-            return or_(
-                self < other[0],
-                self > other[-1]
-            )
+    class comparator_factory(BaseIPComparator):
+        network_class = IPv4Network
 
 
 class IPv6(types.UserDefinedType):
@@ -218,21 +203,5 @@ class IPv6(types.UserDefinedType):
     def bind_expression(self, bindvalue):
         return func.toIPv6(bindvalue)
 
-    class comparator_factory(types.UserDefinedType.Comparator):
-        def in_(self, other):
-            if not isinstance(other, IPv6Network):
-                other = IPv6Network(other)
-
-            return and_(
-                self >= other[0],
-                self <= other[-1]
-            )
-
-        def notin_(self, other):
-            if not isinstance(other, IPv6Network):
-                other = IPv6Network(other)
-
-            return or_(
-                self < other[0],
-                self > other[-1]
-            )
+    class comparator_factory(BaseIPComparator):
+        network_class = IPv6Network
