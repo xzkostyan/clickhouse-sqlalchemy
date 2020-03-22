@@ -179,9 +179,13 @@ class IPv4TestCase(TypesTestCase):
 
         with self.create_table(self.table):
             self.session.execute(self.table.insert(), [{'x': a}])
-            qs = self.session.query(self.table.c.x).filter(self.table.c.x == '10.0.0.1')
+            qs = self.session.query(self.table.c.x).filter(
+                self.table.c.x == '10.0.0.1'
+            )
             statement = self.compile(qs, literal_binds=True)
-            self.assertEqual(statement, """SELECT test.x AS test_x FROM test WHERE test.x = toIPv4('10.0.0.1')""")
+            self.assertEqual(statement,
+                             "SELECT test.x AS test_x FROM test "
+                             "WHERE test.x = toIPv4('10.0.0.1')")
 
     @require_server_version(19, 3, 3)
     def test_select_in_network(self):
@@ -219,7 +223,11 @@ class IPv4TestCase(TypesTestCase):
 
             self.assertEqual(
                 self.session.query(self.table.c.x).filter(
-                    self.table.c.x.in_([IPv4Address('10.0.0.1'), IPv4Address('10.0.0.2'), '10.0.0.3'])).all(), [
+                    self.table.c.x.in_([
+                        IPv4Address('10.0.0.1'),
+                        IPv4Address('10.0.0.2'),
+                        '10.0.0.3'
+                    ])).all(), [
                     (IPv4Address('10.0.0.1'),),
                     (IPv4Address('10.0.0.2'),),
                     (IPv4Address('10.0.0.3'),)
@@ -240,7 +248,8 @@ class IPv4TestCase(TypesTestCase):
 
             self.assertEqual(
                 self.session.query(self.table.c.x).filter(
-                    self.table.c.x.in_(['10.0.0.0/24', '10.1.0.0/24'])).all(), [
+                    self.table.c.x.in_(['10.0.0.0/24',
+                                        '10.1.0.0/24'])).all(), [
                     (IPv4Address('10.0.0.1'),),
                     (IPv4Address('10.0.0.2'),),
                     (IPv4Address('10.1.0.3'),)
@@ -394,12 +403,14 @@ class IPv4TestCase(TypesTestCase):
 
             self.assertEqual(
                 self.session.query(self.table.c.x).filter(
-                    self.table.c.x.notin_(['10.0.0.0/24', '10.1.0.0/24'])).all(), [
+                    self.table.c.x.notin_(['10.0.0.0/24',
+                                           '10.1.0.0/24'])).all(), [
                     (IPv4Address('192.168.0.1'),)
                 ])
             self.assertEqual(
                 self.session.query(self.table.c.x).filter(
-                    ~self.table.c.x.in_(['10.0.0.0/24', '10.1.0.0/24'])).all(), [
+                    ~self.table.c.x.in_(['10.0.0.0/24',
+                                         '10.1.0.0/24'])).all(), [
                     (IPv4Address('192.168.0.1'),)
                 ])
 
@@ -418,12 +429,14 @@ class IPv4TestCase(TypesTestCase):
 
             self.assertEqual(
                 self.session.query(self.table.c.x).filter(
-                    self.table.c.x.notin_(['10.0.0.0/24', '10.1.0.3'])).all(), [
+                    self.table.c.x.notin_(['10.0.0.0/24', '10.1.0.3'])).all(),
+                [
                     (IPv4Address('192.168.0.1'),)
                 ])
             self.assertEqual(
                 self.session.query(self.table.c.x).filter(
-                    ~self.table.c.x.in_(['10.0.0.0/24', '10.1.0.3'])).all(), [
+                    ~self.table.c.x.in_(['10.0.0.0/24', '10.1.0.3'])).all(),
+                [
                     (IPv4Address('192.168.0.1'),)
                 ])
 
@@ -531,9 +544,12 @@ class IPv6TestCase(TypesTestCase):
 
         with self.create_table(self.table):
             self.session.execute(self.table.insert(), [{'x': a}])
-            qs = self.session.query(self.table.c.x).filter(self.table.c.x == '42e::2')
+            qs = self.session.query(self.table.c.x).filter(
+                self.table.c.x == '42e::2')
             statement = self.compile(qs, literal_binds=True)
-            self.assertEqual(statement, """SELECT test.x AS test_x FROM test WHERE test.x = toIPv6('42e::2')""")
+            self.assertEqual(statement,
+                             "SELECT test.x AS test_x FROM test "
+                             "WHERE test.x = toIPv6('42e::2')")
 
     @require_server_version(19, 3, 3)
     def test_select_in_network(self):
@@ -571,7 +587,8 @@ class IPv6TestCase(TypesTestCase):
 
             self.assertEqual(
                 self.session.query(self.table.c.x).filter(
-                    self.table.c.x.in_(['42e::1', '42e::2', 'f42e::ffff'])).all(), [
+                    self.table.c.x.in_(['42e::1', '42e::2',
+                                        'f42e::ffff'])).all(), [
                     (IPv6Address('42e::1'),),
                     (IPv6Address('42e::2'),),
                     (IPv6Address('f42e::ffff'),)
@@ -592,7 +609,8 @@ class IPv6TestCase(TypesTestCase):
 
             self.assertEqual(
                 self.session.query(self.table.c.x).filter(
-                    self.table.c.x.in_([IPv6Network('42e::/64'), IPv6Network('a42e::/48')])).all(), [
+                    self.table.c.x.in_([IPv6Network('42e::/64'),
+                                        IPv6Network('a42e::/48')])).all(), [
                     (IPv6Address('42e::1'),),
                     (IPv6Address('42e::2'),),
                     (IPv6Address('a42e::3'),)

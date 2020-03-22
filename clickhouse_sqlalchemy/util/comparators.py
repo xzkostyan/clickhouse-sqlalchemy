@@ -8,7 +8,8 @@ class BaseIPComparator(UserDefinedType.Comparator):
     def _split_other(self, other):
         """
         Split values between addresses and networks
-        This allows to generate complex filters with both addresses and networks in the same IN
+        This allows to generate complex filters with both addresses
+        and networks in the same IN
         ie in_('10.0.0.0/24', '192.168.0.1')
         """
         addresses = []
