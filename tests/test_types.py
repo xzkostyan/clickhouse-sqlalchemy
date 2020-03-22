@@ -174,6 +174,16 @@ class IPv4TestCase(TypesTestCase):
                      self.table.c.x < '10.0.0.2')).scalar(), a)
 
     @require_server_version(19, 3, 3)
+    def test_select_where_literal(self):
+        a = IPv4Address('10.0.0.1')
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(), [{'x': a}])
+            qs = self.session.query(self.table.c.x).filter(self.table.c.x == '10.0.0.1')
+            statement = self.compile(qs, literal_binds=True)
+            self.assertEqual(statement, """SELECT test.x AS test_x FROM test WHERE test.x = toIPv4('10.0.0.1')""")
+
+    @require_server_version(19, 3, 3)
     def test_select_in_network(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -327,6 +337,16 @@ class IPv6TestCase(TypesTestCase):
             self.assertEqual(self.session.query(self.table.c.x).filter(
                 and_('42e::1' < self.table.c.x,
                      self.table.c.x < '42e::3')).scalar(), a)
+
+    @require_server_version(19, 3, 3)
+    def test_select_where_literal(self):
+        a = IPv6Address('42e::2')
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(), [{'x': a}])
+            qs = self.session.query(self.table.c.x).filter(self.table.c.x == '42e::2')
+            statement = self.compile(qs, literal_binds=True)
+            self.assertEqual(statement, """SELECT test.x AS test_x FROM test WHERE test.x = toIPv6('42e::2')""")
 
     @require_server_version(19, 3, 3)
     def test_select_in_network(self):

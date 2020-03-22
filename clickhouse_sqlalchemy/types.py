@@ -167,6 +167,14 @@ class IPv4(types.UserDefinedType):
 
         return process
 
+    def literal_processor(self, dialect):
+        bp = self.bind_processor(dialect)
+
+        def process(value):
+            return "'%s'" % bp(value)
+
+        return process
+
     def bind_expression(self, bindvalue):
         return func.toIPv4(bindvalue)
 
@@ -196,6 +204,14 @@ class IPv6(types.UserDefinedType):
     def bind_processor(self, dialect):
         def process(value):
             return text_type(value)
+
+        return process
+
+    def literal_processor(self, dialect):
+        bp = self.bind_processor(dialect)
+
+        def process(value):
+            return "'%s'" % bp(value)
 
         return process
 
