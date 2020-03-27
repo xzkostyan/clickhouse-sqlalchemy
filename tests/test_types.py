@@ -174,6 +174,20 @@ class IPv4TestCase(TypesTestCase):
                      self.table.c.x < '10.0.0.2')).scalar(), a)
 
     @require_server_version(19, 3, 3)
+    def test_select_where_literal(self):
+        a = IPv4Address('10.0.0.1')
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(), [{'x': a}])
+            qs = self.session.query(self.table.c.x).filter(
+                self.table.c.x == '10.0.0.1'
+            )
+            statement = self.compile(qs, literal_binds=True)
+            self.assertEqual(statement,
+                             "SELECT test.x AS test_x FROM test "
+                             "WHERE test.x = toIPv4('10.0.0.1')")
+
+    @require_server_version(19, 3, 3)
     def test_select_in_network(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -193,6 +207,91 @@ class IPv4TestCase(TypesTestCase):
                     (IPv4Address('10.0.0.2'),),
                     (IPv4Address('10.0.0.3'),)
                 ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_in_list_address(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.0.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.in_([
+                        IPv4Address('10.0.0.1'),
+                        IPv4Address('10.0.0.2'),
+                        '10.0.0.3'
+                    ])).all(), [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.0.0.3'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_in_list_network(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.in_(['10.0.0.0/24',
+                                        '10.1.0.0/24'])).all(), [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.1.0.3'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_in_list_network_and_address(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.in_(['10.0.0.0/24', '10.1.0.3'])).all(), [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.1.0.3'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_in_list_empty(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.in_([])).all(), [])
 
     @require_server_version(19, 3, 3)
     def test_select_in_string(self):
@@ -263,6 +362,114 @@ class IPv4TestCase(TypesTestCase):
                     (IPv4Address('192.168.0.1'),)
                 ])
 
+    @require_server_version(19, 3, 3)
+    def test_select_not_in_list_address(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.notin_(['10.0.0.2', '10.1.0.3'])).all(), [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('192.168.0.1'),)
+                ])
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    ~self.table.c.x.in_(['10.0.0.2', '10.1.0.3'])).all(), [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('192.168.0.1'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_not_in_list_network(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.notin_(['10.0.0.0/24',
+                                           '10.1.0.0/24'])).all(), [
+                    (IPv4Address('192.168.0.1'),)
+                ])
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    ~self.table.c.x.in_(['10.0.0.0/24',
+                                         '10.1.0.0/24'])).all(), [
+                    (IPv4Address('192.168.0.1'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_not_in_list_network_address(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.notin_(['10.0.0.0/24', '10.1.0.3'])).all(),
+                [
+                    (IPv4Address('192.168.0.1'),)
+                ])
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    ~self.table.c.x.in_(['10.0.0.0/24', '10.1.0.3'])).all(),
+                [
+                    (IPv4Address('192.168.0.1'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_not_in_list_empty(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.notin_([])).all(), [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.1.0.3'),),
+                    (IPv4Address('192.168.0.1'),)
+                ])
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    ~self.table.c.x.in_([])).all(), [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.1.0.3'),),
+                    (IPv4Address('192.168.0.1'),)
+                ])
+
 
 class IPv4HttpTestCase(IPv4TestCase, HttpSessionTestCase):
     """ IPv4 over a HTTP session """
@@ -325,8 +532,24 @@ class IPv6TestCase(TypesTestCase):
             self.session.execute(self.table.insert(), [{'x': a}])
 
             self.assertEqual(self.session.query(self.table.c.x).filter(
+                self.table.c.x == '42e::2').scalar(), a)
+
+            self.assertEqual(self.session.query(self.table.c.x).filter(
                 and_('42e::1' < self.table.c.x,
                      self.table.c.x < '42e::3')).scalar(), a)
+
+    @require_server_version(19, 3, 3)
+    def test_select_where_literal(self):
+        a = IPv6Address('42e::2')
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(), [{'x': a}])
+            qs = self.session.query(self.table.c.x).filter(
+                self.table.c.x == '42e::2')
+            statement = self.compile(qs, literal_binds=True)
+            self.assertEqual(statement,
+                             "SELECT test.x AS test_x FROM test "
+                             "WHERE test.x = toIPv6('42e::2')")
 
     @require_server_version(19, 3, 3)
     def test_select_in_network(self):
@@ -348,6 +571,88 @@ class IPv6TestCase(TypesTestCase):
                     (IPv6Address('42e::2'),),
                     (IPv6Address('42e::3'),)
                 ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_in_list_address(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('7::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.in_(['42e::1', '42e::2',
+                                        'f42e::ffff'])).all(), [
+                    (IPv6Address('42e::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('f42e::ffff'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_in_list_network(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('a42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.in_([IPv6Network('42e::/64'),
+                                        IPv6Network('a42e::/48')])).all(), [
+                    (IPv6Address('42e::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('a42e::3'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_in_list_network_address(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('a42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.in_(['42e::/64', 'a42e::3'])).all(), [
+                    (IPv6Address('42e::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('a42e::3'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_in_list_empty(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('a42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.in_([])).all(), [])
 
     @require_server_version(19, 3, 3)
     def test_select_in_string(self):
@@ -415,6 +720,114 @@ class IPv6TestCase(TypesTestCase):
             self.assertEqual(
                 self.session.query(self.table.c.x).filter(
                     ~self.table.c.x.in_('42e::/64')).all(), [
+                    (IPv6Address('f42e::ffff'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_not_in_list_address(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.notin_(['42e::1', '42e::3'])).all(), [
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('f42e::ffff'),),
+                ])
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    ~self.table.c.x.in_(['42e::1', '42e::3'])).all(), [
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('f42e::ffff'),),
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_not_in_list_network(self):
+        ips = [
+            IPv6Address('1234::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('beef::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.notin_(['42e::/64', 'beef::/64'])).all(), [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('f42e::ffff'),)
+                ])
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    ~self.table.c.x.in_(['42e::/64', 'beef::/64'])).all(), [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('f42e::ffff'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_not_in_list_network_address(self):
+        ips = [
+            IPv6Address('1234::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('beef::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.notin_(['42e::/64', 'beef::3'])).all(), [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('f42e::ffff'),)
+                ])
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    ~self.table.c.x.in_(['42e::/64', 'beef::3'])).all(), [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('f42e::ffff'),)
+                ])
+
+    @require_server_version(19, 3, 3)
+    def test_select_not_in_list_empty(self):
+        ips = [
+            IPv6Address('1234::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('beef::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        with self.create_table(self.table):
+            self.session.execute(self.table.insert(),
+                                 [{'x': ip} for ip in ips])
+
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    self.table.c.x.notin_([])).all(), [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('beef::3'),),
+                    (IPv6Address('f42e::ffff'),)
+                ])
+            self.assertEqual(
+                self.session.query(self.table.c.x).filter(
+                    ~self.table.c.x.in_([])).all(), [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('beef::3'),),
                     (IPv6Address('f42e::ffff'),)
                 ])
 
