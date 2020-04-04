@@ -2,6 +2,33 @@
 
 ## [Unreleased]
 
+## [0.1.3] - 2020-04-04
+### Added
+- Engines: ReplicatedReplacingMergeTree, VersionedCollapsingMergeTree, ReplicatedVersionedCollapsingMergeTree. Solves issue [#70](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/70).
+- File engine. Pull request [#72](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/72) by [armymaksim](https://github.com/armymaksim).
+- [HTTP] SSL certificates verification. Pull request [#75](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/75) by [NiyazNz](https://github.com/NiyazNz).
+- Decimal type reflection. Pull request [#74](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/74) by [armymaksim](https://github.com/armymaksim).
+- `ALTER DELETE`. Pull request [#81](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/81) by [sdrenn](https://github.com/sdrenn). Solves issue [#65](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/65).
+- `ALTER UPDATE`. Pull request [#82](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/82) by [sdrenn](https://github.com/sdrenn). Solves issue [#65](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/65).
+- [HTTP] Session tests, assorted fixes. Pull request [#73](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/73) by [hhell](https://github.com/hhell).
+- `FINAL` clause. Pull request [#79](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/79) by [sdrenn](https://github.com/sdrenn).
+- `CODEC` column option. Pull request [#89](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/89) by [athre0z](https://github.com/athre0z).
+- Add literal binds support to IP types. Improve IP types `IN` and `NOT IN` comparators. Pull request [#91](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/91) by [AchilleAsh](https://github.com/AchilleAsh).
+
+### Changed
+- Minimal SQLAlchemy version supported is 1.3 now.
+- Named arguments should go after positional in ReplacingMergeTree, SummingMergeTree. Pull request [#80](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/80) by [sdrenn](https://github.com/sdrenn).
+- `sample` keyword argument changed to `sample_by` in *MergeTree.
+- `version_col,` keyword argument changed to `version` in ReplacingMergeTree.
+
+### Fixed
+- [Native] Remove (%s)-templates from `VALUES` clause.
+- [HTTP] `fetchone` elements order. Solves issue [#77](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/77).
+- Fix ReplacingMergeTree creation with no version.
+- License file now included in the package. Solves issue [#86](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/86).
+- Columns are now prefixed with table name if necessary. Solves issue [#35](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/35) and issue [#87](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/87).
+- Generate pure DLL without literals on Replicated tables creation.
+
 ## [0.1.2] - 2019-11-06
 ### Fixed
 - Generic `Table` reflection in case of `autoload=True`.
@@ -143,7 +170,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.2...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.3...HEAD
+[0.1.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.2...0.1.3
 [0.1.2]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.1...0.1.2
 [0.1.1]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.0.10...0.1.0
