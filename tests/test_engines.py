@@ -312,7 +312,7 @@ class ReplacingMergeTreeTestCase(EngineTestCaseBase):
 
             __table_args__ = (
                 engines.ReplacingMergeTree(
-                    ver='version',
+                    version='version',
                     partition_by='date',
                     order_by=('date', 'x')
                 ),
@@ -360,7 +360,7 @@ class ReplacingMergeTreeTestCase(EngineTestCaseBase):
             __table_args__ = (
                 engines.ReplicatedReplacingMergeTree(
                     '/table/path', 'name',
-                    ver='version',
+                    version='version',
                     partition_by='date',
                     order_by=('date', 'x')
                 ),
@@ -387,7 +387,7 @@ class MergeTreeTestCase(EngineTestCaseBase):
 
             __table_args__ = (
                 engines.ReplacingMergeTree(
-                    ver=version,
+                    version=version,
                     partition_by=func.toYYYYMM(date),
                     order_by=(date, x),
                 ),
