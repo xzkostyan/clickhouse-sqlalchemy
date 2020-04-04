@@ -18,7 +18,12 @@ class GenericEngineTestCase(EngineTestCaseBase):
             x = Column(types.Int32)
             y = Column(types.String)
 
-            __table_args__ = (engines.MergeTree('date', ('date', 'x')), )
+            __table_args__ = (
+                engines.MergeTree(
+                    partition_by='date',
+                    order_by=('date', 'x')
+                ),
+            )
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
@@ -34,7 +39,10 @@ class GenericEngineTestCase(EngineTestCaseBase):
             Column('date', types.Date, primary_key=True),
             Column('x', types.Int32),
             Column('y', types.String),
-            engines.MergeTree('date', ('date', 'x')),
+            engines.MergeTree(
+                partition_by='date',
+                order_by=('date', 'x')
+            ),
         )
 
         self.assertEqual(
@@ -53,7 +61,8 @@ class GenericEngineTestCase(EngineTestCaseBase):
 
             __table_args__ = (
                 engines.MergeTree(
-                    'date', ('date', func.intHash32(x)),
+                    partition_by='date',
+                    order_by=('date', func.intHash32(x)),
                     sample=func.intHash32(x)
                 ),
             )
@@ -87,7 +96,10 @@ class AggregatingMergeTree(EngineTestCaseBase):
             y = Column(types.Int32)
 
             __table_args__ = (
-                engines.AggregatingMergeTree(date, (date, x)),
+                engines.AggregatingMergeTree(
+                    partition_by=date,
+                    order_by=(date, x)
+                ),
             )
 
         self.assertEqual(
@@ -107,8 +119,8 @@ class AggregatingMergeTree(EngineTestCaseBase):
             __table_args__ = (
                 engines.ReplicatedAggregatingMergeTree(
                     '/table/path', 'name',
-                    date,
-                    (date, x)
+                    partition_by=date,
+                    order_by=(date, x)
                 ),
             )
 
@@ -132,10 +144,10 @@ class CollapsingMergeTreeTestCase(EngineTestCaseBase):
             __table_args__ = (
                 engines.CollapsingMergeTree(
                     sign,
-                    date,
-                    (date, x),
-                    (x, y),
-                    func.random(),
+                    partition_by=date,
+                    order_by=(date, x),
+                    primary_key=(x, y),
+                    sample=func.random(),
                     key='value'
                 ),
             )
@@ -163,9 +175,9 @@ class CollapsingMergeTreeTestCase(EngineTestCaseBase):
                 engines.ReplicatedCollapsingMergeTree(
                     '/table/path', 'name',
                     sign,
-                    date,
-                    (date, x),
-                    (x, y)
+                    partition_by=date,
+                    order_by=(date, x),
+                    primary_key=(x, y)
                 ),
             )
 
@@ -193,10 +205,10 @@ class VersionedCollapsingMergeTreeTestCase(EngineTestCaseBase):
             __table_args__ = (
                 engines.VersionedCollapsingMergeTree(
                     sign, version,
-                    date,
-                    (date, x),
-                    (x, y),
-                    func.random(),
+                    partition_by=date,
+                    order_by=(date, x),
+                    primary_key=(x, y),
+                    sample=func.random(),
                     key='value'
                 ),
             )
@@ -225,9 +237,9 @@ class VersionedCollapsingMergeTreeTestCase(EngineTestCaseBase):
                 engines.ReplicatedVersionedCollapsingMergeTree(
                     '/table/path', 'name',
                     sign, version,
-                    date,
-                    (date, x),
-                    (x, y)
+                    partition_by=date,
+                    order_by=(date, x),
+                    primary_key=(x, y)
                 ),
             )
 
@@ -251,7 +263,11 @@ class SummingMergeTreeTestCase(EngineTestCaseBase):
             y = Column(types.Int32)
 
             __table_args__ = (
-                engines.SummingMergeTree(date, (date, x), columns=(y, )),
+                engines.SummingMergeTree(
+                    columns=(y, ),
+                    partition_by=date,
+                    order_by=(date, x)
+                ),
             )
 
         self.assertEqual(
@@ -271,9 +287,9 @@ class SummingMergeTreeTestCase(EngineTestCaseBase):
             __table_args__ = (
                 engines.ReplicatedSummingMergeTree(
                     '/table/path', 'name',
-                    date,
-                    (date, x),
-                    columns=(y, )
+                    columns=(y, ),
+                    partition_by=date,
+                    order_by=(date, x),
                 ),
             )
 
@@ -296,9 +312,9 @@ class ReplacingMergeTreeTestCase(EngineTestCaseBase):
 
             __table_args__ = (
                 engines.ReplacingMergeTree(
-                    'date',
-                    ('date', 'x'),
                     ver='version',
+                    partition_by='date',
+                    order_by=('date', 'x')
                 ),
             )
 
@@ -320,8 +336,8 @@ class ReplacingMergeTreeTestCase(EngineTestCaseBase):
 
             __table_args__ = (
                 engines.ReplacingMergeTree(
-                    'date',
-                    ('date', 'x'),
+                    partition_by='date',
+                    order_by=('date', 'x'),
                 ),
             )
 
@@ -344,8 +360,9 @@ class ReplacingMergeTreeTestCase(EngineTestCaseBase):
             __table_args__ = (
                 engines.ReplicatedReplacingMergeTree(
                     '/table/path', 'name',
-                    'date', ('date', 'x'),
                     ver='version',
+                    partition_by='date',
+                    order_by=('date', 'x')
                 ),
             )
 
@@ -422,7 +439,9 @@ class MergeTreeTestCase(EngineTestCaseBase):
 
             __table_args__ = (
                 engines.ReplicatedMergeTree(
-                    '/table/path', 'name', 'date', ('date', 'x')
+                    '/table/path', 'name',
+                    partition_by='date',
+                    order_by=('date', 'x')
                 ),
             )
 
@@ -502,7 +521,11 @@ class MiscEnginesTestCase(EngineTestCaseBase):
             x = Column(types.Int32)
 
             __table_args__ = (
-                engines.GraphiteMergeTree('config_section', date, (date, x)),
+                engines.GraphiteMergeTree(
+                    'config_section',
+                    partition_by=date,
+                    order_by=(date, x)
+                ),
             )
 
         self.assertEqual(
