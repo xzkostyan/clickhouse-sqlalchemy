@@ -63,7 +63,7 @@ class GenericEngineTestCase(EngineTestCaseBase):
                 engines.MergeTree(
                     partition_by='date',
                     order_by=('date', func.intHash32(x)),
-                    sample=func.intHash32(x)
+                    sample_by=func.intHash32(x)
                 ),
             )
 
@@ -147,7 +147,7 @@ class CollapsingMergeTreeTestCase(EngineTestCaseBase):
                     partition_by=date,
                     order_by=(date, x),
                     primary_key=(x, y),
-                    sample=func.random(),
+                    sample_by=func.random(),
                     key='value'
                 ),
             )
@@ -208,7 +208,7 @@ class VersionedCollapsingMergeTreeTestCase(EngineTestCaseBase):
                     partition_by=date,
                     order_by=(date, x),
                     primary_key=(x, y),
-                    sample=func.random(),
+                    sample_by=func.random(),
                     key='value'
                 ),
             )
@@ -413,7 +413,7 @@ class MergeTreeTestCase(EngineTestCaseBase):
                     partition_by=date,
                     order_by=(date, x),
                     primary_key=(x, y),
-                    sample=func.hashFunc(x),
+                    sample_by=func.hashFunc(x),
                     setting1=2,
                     setting2=5
                 ),

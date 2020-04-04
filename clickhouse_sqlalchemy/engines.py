@@ -70,7 +70,7 @@ class MergeTree(Engine):
             partition_by=None,
             order_by=None,
             primary_key=None,
-            sample=None,
+            sample_by=None,
             **settings
     ):
         self.partition_by = None
@@ -85,9 +85,9 @@ class MergeTree(Engine):
         if primary_key is not None:
             self.primary_key = KeysExpressionOrColumn(*to_list(primary_key))
 
-        self.sample = None
-        if sample is not None:
-            self.sample = KeysExpressionOrColumn(sample)
+        self.sample_by = None
+        if sample_by is not None:
+            self.sample_by = KeysExpressionOrColumn(sample_by)
         self.settings = settings
         super(MergeTree, self).__init__()
 
@@ -99,8 +99,8 @@ class MergeTree(Engine):
             self.order_by._set_parent(table)
         if self.primary_key is not None:
             self.primary_key._set_parent(table)
-        if self.sample is not None:
-            self.sample._set_parent(table)
+        if self.sample_by is not None:
+            self.sample_by._set_parent(table)
 
     def get_parameters(self):
         return []

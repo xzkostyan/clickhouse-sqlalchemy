@@ -467,10 +467,10 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
                     engine.primary_key.get_expressions_or_columns()
                 )
             )
-        if engine.sample:
+        if engine.sample_by:
             text += ' SAMPLE BY {0}\n'.format(
                 self._compile_param(
-                    engine.sample.get_expressions_or_columns()[0]
+                    engine.sample_by.get_expressions_or_columns()[0]
                 )
             )
         if engine.settings:
