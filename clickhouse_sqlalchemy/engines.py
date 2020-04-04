@@ -113,10 +113,7 @@ class AggregatingMergeTree(MergeTree):
 class GraphiteMergeTree(MergeTree):
 
     def __init__(self, config_name, *args, **kwargs):
-        super(GraphiteMergeTree, self).__init__(
-            *args,
-            **kwargs
-        )
+        super(GraphiteMergeTree, self).__init__(*args, **kwargs)
         self.config_name = config_name
 
     def get_parameters(self):
@@ -125,9 +122,7 @@ class GraphiteMergeTree(MergeTree):
 
 class CollapsingMergeTree(MergeTree):
     def __init__(self, sign_col, *args, **kwargs):
-        super(CollapsingMergeTree, self).__init__(
-            *args, **kwargs
-        )
+        super(CollapsingMergeTree, self).__init__(*args, **kwargs)
         self.sign_col = TableCol(sign_col)
 
     def get_parameters(self):
@@ -139,12 +134,27 @@ class CollapsingMergeTree(MergeTree):
         self.sign_col._set_parent(table)
 
 
+class VersionedCollapsingMergeTree(MergeTree):
+    def __init__(self, sign_col, version_col, *args, **kwargs):
+        super(VersionedCollapsingMergeTree, self).__init__(*args, **kwargs)
+
+        self.sign_col = TableCol(sign_col)
+        self.version_col = TableCol(version_col)
+
+    def get_parameters(self):
+        return [self.sign_col.get_column(), self.version_col.get_column()]
+
+    def _set_parent(self, table):
+        super(VersionedCollapsingMergeTree, self)._set_parent(table)
+
+        self.sign_col._set_parent(table)
+        self.version_col._set_parent(table)
+
+
 class SummingMergeTree(MergeTree):
     def __init__(self, *args, **kwargs):
         summing_cols = kwargs.pop('columns', None)
-        super(SummingMergeTree, self).__init__(
-            *args, **kwargs
-        )
+        super(SummingMergeTree, self).__init__(*args, **kwargs)
 
         self.summing_cols = None
         if summing_cols is not None:
@@ -164,9 +174,7 @@ class SummingMergeTree(MergeTree):
 class ReplacingMergeTree(MergeTree):
     def __init__(self, *args, **kwargs):
         version_col = kwargs.pop('ver', None)
-        super(ReplacingMergeTree, self).__init__(
-            *args, **kwargs
-        )
+        super(ReplacingMergeTree, self).__init__(*args, **kwargs)
 
         self.version_col = None
         if version_col is not None:
@@ -240,6 +248,20 @@ class ReplicatedCollapsingMergeTree(ReplicatedEngineMixin,
         return self.extend_parameters(
             ReplicatedEngineMixin.get_parameters(self),
             CollapsingMergeTree.get_parameters(self)
+        )
+
+
+class ReplicatedVersionedCollapsingMergeTree(ReplicatedEngineMixin,
+                                             VersionedCollapsingMergeTree):
+    def __init__(self, table_path, replica_name,
+                 *args, **kwargs):
+        ReplicatedEngineMixin.__init__(self, table_path, replica_name)
+        VersionedCollapsingMergeTree.__init__(self, *args, **kwargs)
+
+    def get_parameters(self):
+        return self.extend_parameters(
+            ReplicatedEngineMixin.get_parameters(self),
+            VersionedCollapsingMergeTree.get_parameters(self)
         )
 
 

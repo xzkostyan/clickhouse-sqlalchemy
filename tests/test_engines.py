@@ -181,6 +181,68 @@ class CollapsingMergeTreeTestCase(EngineTestCaseBase):
         )
 
 
+class VersionedCollapsingMergeTreeTestCase(EngineTestCaseBase):
+    def test_basic(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+            sign = Column(types.Int8)
+            version = Column(types.Int8)
+
+            __table_args__ = (
+                engines.VersionedCollapsingMergeTree(
+                    sign, version,
+                    date,
+                    (date, x),
+                    (x, y),
+                    func.random(),
+                    key='value'
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table '
+            '(date Date, x Int32, y String, sign Int8, version Int8) '
+            'ENGINE = VersionedCollapsingMergeTree(sign, version) '
+            'PARTITION BY date '
+            'ORDER BY (date, x) '
+            'PRIMARY KEY (x, y) '
+            'SAMPLE BY random() '
+            'SETTINGS key=value'
+        )
+
+    def test_replicated(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+            sign = Column(types.Int8)
+            version = Column(types.Int8)
+
+            __table_args__ = (
+                engines.ReplicatedVersionedCollapsingMergeTree(
+                    '/table/path', 'name',
+                    sign, version,
+                    date,
+                    (date, x),
+                    (x, y)
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            "CREATE TABLE test_table "
+            "(date Date, x Int32, y String, sign Int8, version Int8) "
+            "ENGINE = ReplicatedVersionedCollapsingMergeTree"
+            "('/table/path', 'name', sign, version) "
+            "PARTITION BY date "
+            "ORDER BY (date, x) "
+            "PRIMARY KEY (x, y)"
+        )
+
+
 class SummingMergeTreeTestCase(EngineTestCaseBase):
     def test_basic(self):
         class TestTable(self.base):
