@@ -526,12 +526,12 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def visit_drop_table(self, drop):
         text = '\nDROP TABLE '
 
-        if drop.if_exists:
+        if getattr(drop, "if_exists", False):
             text += 'IF EXISTS '
 
         rv = text + self.preparer.format_table(drop.element)
 
-        if drop.on_cluster:
+        if getattr(drop, "on_cluster", False):
             rv += (
                 ' ON CLUSTER ' +
                 self.preparer.quote(drop.on_cluster)
