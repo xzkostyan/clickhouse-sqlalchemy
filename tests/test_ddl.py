@@ -230,3 +230,15 @@ class DDLTestCase(BaseTestCase):
             self.compile(DropTable(table, if_exists=True)),
             drop_sql
         )
+
+    def test_create_all_drop_all(self):
+        metadata = self.metadata(session=self.session)
+
+        Table(
+            't1', metadata,
+            Column('x', types.Int32, primary_key=True),
+            engines.Memory(),
+        )
+
+        metadata.create_all()
+        metadata.drop_all()
