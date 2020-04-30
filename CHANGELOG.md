@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.1.4] - 2020-04-30
+### Fixed
+- `if_exists` and `on_cluster` AttributeError on table drop. Pull request [#94](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/94) by [vmarkovtsev](https://github.com/vmarkovtsev).
+
 ## [0.1.3] - 2020-04-04
 ### Added
 - Engines: ReplicatedReplacingMergeTree, VersionedCollapsingMergeTree, ReplicatedVersionedCollapsingMergeTree. Solves issue [#70](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/70).
@@ -170,7 +174,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.3...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.4...HEAD
+[0.1.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.3...0.1.4
 [0.1.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.2...0.1.3
 [0.1.2]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.1...0.1.2
 [0.1.1]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.0...0.1.1
