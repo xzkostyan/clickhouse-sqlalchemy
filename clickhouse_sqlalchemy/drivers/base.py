@@ -186,7 +186,9 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         text += join.right._compiler_dispatch(self, asfrom=asfrom, **kwargs)
         if isinstance(onclause, elements.Tuple):
-            text += ' USING ' + onclause._compiler_dispatch(self, **kwargs)
+            text += ' USING ' + onclause._compiler_dispatch(
+                self, include_table=False, **kwargs
+            )
         else:
             text += ' ON ' + onclause._compiler_dispatch(self, **kwargs)
         return text
