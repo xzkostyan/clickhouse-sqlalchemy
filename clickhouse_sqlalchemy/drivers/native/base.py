@@ -21,7 +21,7 @@ class ClickHouseNativeCompiler(ClickHouseCompiler):
         rv = super(ClickHouseNativeCompiler, self).visit_insert(
             insert_stmt, asfrom=asfrom, **kw)
 
-        pos = rv.rfind('VALUES (')
+        pos = rv.lower().rfind('values (')
         # Remove (%s)-templates from VALUES clause if exists.
         # ClickHouse server since version 19.3.3 parse query after VALUES and
         # allows inplace parameters.
