@@ -600,6 +600,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_numeric(self, type_, **kw):
         return 'Decimal(%s, %s)' % (type_.precision, type_.scale)
 
+    def visit_boolean(self, type_, **kw):
+        return 'UInt8'
+
     def visit_nested(self, nested, **kwargs):
         ddl_compiler = self.dialect.ddl_compiler(self.dialect, None)
         cols_create = [
@@ -649,6 +652,7 @@ class ClickHouseDialect(default.DefaultDialect):
     supports_sane_multi_rowcount = False
     supports_native_decimal = True
     supports_native_boolean = False
+    non_native_boolean_check_constraint = False
     supports_alter = True
     supports_sequences = False
     supports_native_enum = True  # Do not render check constraints on enums.
