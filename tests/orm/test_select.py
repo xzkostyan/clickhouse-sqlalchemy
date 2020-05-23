@@ -1,33 +1,24 @@
-from sqlalchemy import (
-    Column,
-    exc,
-    func,
-    literal,
-    select,
-)
-from sqlalchemy import text
-from sqlalchemy import tuple_
+from sqlalchemy import Column, exc, func, literal, select, text, tuple_
 
-from clickhouse_sqlalchemy import types, Table
+from clickhouse_sqlalchemy import types, Table, engines
 from clickhouse_sqlalchemy.ext.clauses import Lambda
-from tests.testcase import (
-    BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase,
-)
+from tests.testcase import BaseTestCase, NativeSessionTestCase
+from tests.util import with_native_and_http_sessions
 
 
-class SelectTestCase(BaseAbstractTestCase):
+@with_native_and_http_sessions
+class SelectTestCase(BaseTestCase):
 
-    def create_table(self, *columns):
-        metadata = self.metadata()
-
+    def _make_table(self, *columns):
+        columns = columns + (engines.Memory(), )
         return Table(
-            't1', metadata,
+            't1', self.metadata(),
             Column('x', types.Int32, primary_key=True),
             *columns
         )
 
     def test_select(self):
-        table = self.create_table()
+        table = self._make_table()
 
         query = self.session.query(table.c.x)\
             .filter(table.c.x.in_([1, 2]))\
@@ -53,7 +44,7 @@ class SelectTestCase(BaseAbstractTestCase):
         )
 
     def test_group_by_query(self):
-        table = self.create_table()
+        table = self._make_table()
 
         query = self.session.query(table.c.x).group_by(table.c.x)
         self.assertEqual(
@@ -73,7 +64,7 @@ class SelectTestCase(BaseAbstractTestCase):
         self.assertIn('with_totals', str(ex.exception))
 
     def test_array_join(self):
-        table = self.create_table(
+        table = self._make_table(
             Column('nested.array_column', types.Array(types.Int8)),
             Column('nested.another_array_column', types.Array(types.Int8))
         )
@@ -93,7 +84,7 @@ class SelectTestCase(BaseAbstractTestCase):
         )
 
     def test_sample(self):
-        table = self.create_table()
+        table = self._make_table()
 
         query = self.session.query(table.c.x).sample(0.1).group_by(table.c.x)
         self.assertEqual(
@@ -106,7 +97,7 @@ class SelectTestCase(BaseAbstractTestCase):
         )
 
     def test_final(self):
-        table = self.create_table()
+        table = self._make_table()
 
         query = self.session.query(table.c.x).final().group_by(table.c.x)
         self.assertEqual(
@@ -129,26 +120,15 @@ class SelectTestCase(BaseAbstractTestCase):
         )
 
 
-class SelectHttpTestCase(SelectTestCase, HttpSessionTestCase):
-    """ ... """
-
-
-class SelectNativeTestCase(SelectTestCase, NativeSessionTestCase):
-    """ ... """
-
-
-class JoinTestCase(BaseAbstractTestCase):
-    def create_tables(self, num):
-        metadata = self.metadata()
-
-        return [Table(
-            't{}'.format(i), metadata,
+@with_native_and_http_sessions
+class JoinTestCase(BaseTestCase):
+    def test_joins(self):
+        t1, t2 = [Table(
+            't{}'.format(i), self.metadata(),
             Column('x', types.Int32, primary_key=True),
             Column('y', types.Int32, primary_key=True),
-        ) for i in range(1, num + 1)]
-
-    def test_joins(self):
-        t1, t2 = self.create_tables(2)
+            engines.Memory()
+        ) for i in range(1, 3)]
 
         query = self.session.query(t1.c.x, t2.c.x) \
             .join(
@@ -243,14 +223,6 @@ class JoinTestCase(BaseAbstractTestCase):
             "SELECT t1.x AS t1_x, t2.x AS t2_x FROM t1 "
             "ALL FULL OUTER JOIN t2 USING x, y"
         )
-
-
-class JoinHttpTestCase(JoinTestCase, HttpSessionTestCase):
-    """ Join over a HTTP session """
-
-
-class JoinNativeTestCase(JoinTestCase, NativeSessionTestCase):
-    """ Join over a native protocol session """
 
 
 class YieldTest(NativeSessionTestCase):

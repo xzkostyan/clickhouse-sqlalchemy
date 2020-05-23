@@ -1,14 +1,13 @@
-
 from sqlalchemy import Column, text, Table, inspect
 from sqlalchemy.sql.elements import TextClause
 
 from clickhouse_sqlalchemy import types, Table as CHTable, engines
-from tests.testcase import (
-    BaseAbstractTestCase, HttpSessionTestCase, NativeSessionTestCase,
-)
+from tests.testcase import BaseTestCase
+from tests.util import with_native_and_http_sessions
 
 
-class SchemaTestCase(BaseAbstractTestCase):
+@with_native_and_http_sessions
+class SchemaTestCase(BaseTestCase):
 
     def test_reflect(self):
         """
@@ -117,11 +116,3 @@ class SchemaTestCase(BaseAbstractTestCase):
 
         insp = inspect(self.session.bind)
         self.assertListEqual(insp.get_table_names(), ['test_reflect'])
-
-
-class SchemaHttpTestCase(SchemaTestCase, HttpSessionTestCase):
-    """ Schema over a HTTP session """
-
-
-class SchemaNativeTestCase(SchemaTestCase, NativeSessionTestCase):
-    """ Schema over a native protocol session """

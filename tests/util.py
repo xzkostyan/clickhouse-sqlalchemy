@@ -1,6 +1,10 @@
 from contextlib import contextmanager
 from functools import wraps
 
+from parameterized import parameterized_class
+
+from tests.session import http_session, native_session
+
 
 def require_server_version(*version_required):
     def check(f):
@@ -45,3 +49,14 @@ def mock_object_attr(dialect, attr, new_value):
         yield
     finally:
         setattr(dialect, attr, old_value)
+
+
+def class_name_func(cls, num, params_dict):
+    suffix = 'HTTP' if params_dict['session'] is http_session else 'Native'
+    return cls.__name__ + suffix
+
+
+with_native_and_http_sessions = parameterized_class([
+    {'session': http_session},
+    {'session': native_session}
+], class_name_func=class_name_func)

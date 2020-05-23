@@ -6,22 +6,20 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm import Query
 
 from tests.config import database, host, port, http_port, user, password
-from tests.session import (
-    http_session, native_session, system_http_session, system_native_session,
-)
+from tests.session import http_session, native_session, system_native_session
 
 
 class BaseAbstractTestCase(object):
     """ Supporting code for tests """
 
     host = host
-    port = http_port
+    port = None
     database = database
     user = user
     password = password
 
     strip_spaces = re.compile(r'[\n\t]')
-    session = http_session
+    session = native_session
 
     @classmethod
     def metadata(cls, session=None):
@@ -52,30 +50,18 @@ class BaseAbstractTestCase(object):
             '', str(self._compile(clause, **kwargs))
         )
 
+    @contextmanager
+    def create_table(self, table):
+        table.drop(bind=self.session.bind, if_exists=True)
+        table.create(bind=self.session.bind)
+        try:
+            yield
+        finally:
+            table.drop(bind=self.session.bind)
+
 
 class BaseTestCase(BaseAbstractTestCase, TestCase):
     """ Actually tests """
-
-
-class HttpSessionTestCase(BaseTestCase):
-    """ Explicitly HTTP-based session Test Case """
-
-    @classmethod
-    def setUpClass(cls):
-        system_http_session.execute(
-            'DROP DATABASE IF EXISTS {}'.format(cls.database))
-        system_http_session.execute(
-            'CREATE DATABASE {}'.format(cls.database))
-
-        super(HttpSessionTestCase, cls).setUpClass()
-
-
-class NativeSessionTestCase(BaseTestCase):
-    """ Explicitly Native-protocol-based session Test Case """
-
-    port = port
-
-    session = native_session
 
     @classmethod
     def setUpClass(cls):
@@ -87,18 +73,41 @@ class NativeSessionTestCase(BaseTestCase):
             'CREATE DATABASE {}'.format(cls.database)
         )
 
-        super(NativeSessionTestCase, cls).setUpClass()
+        super(BaseTestCase, cls).setUpClass()
 
 
-class TypesTestCase(BaseAbstractTestCase):
+class HttpSessionTestCase(BaseTestCase):
+    """ Explicitly HTTP-based session Test Case """
 
-    @contextmanager
-    def create_table(self, table):
-        table.drop(bind=self.session.bind, if_exists=True)
-        table.create(bind=self.session.bind)
-        try:
-            yield
-        except Exception:
-            raise
-        finally:
-            table.drop(bind=self.session.bind)
+    port = http_port
+    session = http_session
+
+
+class NativeSessionTestCase(BaseTestCase):
+    """ Explicitly Native-protocol-based session Test Case """
+
+    port = port
+    session = native_session
+
+
+class CompilationTestCase(BaseTestCase):
+    """ Test Case that should be used only for SQL generation """
+
+    session = native_session
+
+    @classmethod
+    def setUpClass(cls):
+        super(CompilationTestCase, cls).setUpClass()
+
+        cls._session_connection = cls.session.connection
+        cls._session_execute = cls.session.execute
+
+        cls.session.execute = None
+        cls.session.connection = None
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.session.execute = cls._session_execute
+        cls.session.connection = cls._session_connection
+
+        super(CompilationTestCase, cls).tearDownClass()

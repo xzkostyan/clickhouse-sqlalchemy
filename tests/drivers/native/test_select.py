@@ -1,13 +1,11 @@
 from sqlalchemy import Column
 
 from clickhouse_sqlalchemy import engines, types, Table
-from tests.session import native_session, mocked_engine
-from tests.testcase import BaseTestCase
+from tests.session import mocked_engine
+from tests.testcase import NativeSessionTestCase
 
 
-class SanityTestCase(BaseTestCase):
-    session = native_session
-
+class SanityTestCase(NativeSessionTestCase):
     def test_sanity(self):
         with mocked_engine(self.session) as engine:
             table = Table(

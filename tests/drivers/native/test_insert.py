@@ -2,13 +2,10 @@ from sqlalchemy import Column, func
 
 from clickhouse_sqlalchemy import engines, types, Table
 from clickhouse_sqlalchemy.exceptions import DatabaseException
-from tests.session import native_session
 from tests.testcase import NativeSessionTestCase
 
 
 class NativeInsertTestCase(NativeSessionTestCase):
-    session = native_session
-
     def test_rowcount_return(self):
         table = Table(
             'test', self.metadata(),

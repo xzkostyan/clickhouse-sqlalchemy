@@ -2,12 +2,12 @@ from sqlalchemy import Column, Boolean
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import engines, Table
-from tests.testcase import TypesTestCase
+from tests.testcase import CompilationTestCase
 
 
-class BooleanCompilationTestCase(TypesTestCase):
+class BooleanCompilationTestCase(CompilationTestCase):
     table = Table(
-        'test', TypesTestCase.metadata(),
+        'test', CompilationTestCase.metadata(),
         Column('x', Boolean),
         engines.Memory()
     )

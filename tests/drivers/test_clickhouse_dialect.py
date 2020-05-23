@@ -1,17 +1,16 @@
 from sqlalchemy import Column, create_engine
 
 from clickhouse_sqlalchemy import make_session, engines, types, Table
-from tests.testcase import (
-    BaseAbstractTestCase, BaseTestCase,
-    HttpSessionTestCase, NativeSessionTestCase,
-)
+from tests.testcase import BaseTestCase
 from tests.config import (
     system_http_uri, system_native_uri,
     database as test_database,
 )
+from tests.util import with_native_and_http_sessions
 
 
-class ClickHouseDialectTestCase(BaseAbstractTestCase):
+@with_native_and_http_sessions
+class ClickHouseDialectTestCase(BaseTestCase):
 
     @property
     def dialect(self):
@@ -51,16 +50,6 @@ class ClickHouseDialectTestCase(BaseAbstractTestCase):
     def test_get_schema_names(self):
         schemas = self.dialect.get_schema_names(self.session)
         self.assertIn(test_database, schemas)
-
-
-class ClickHouseDialectHttpTestCase(
-        ClickHouseDialectTestCase, HttpSessionTestCase):
-    """ HTTP version """
-
-
-class ClickHouseDialectNativeTestCase(
-        ClickHouseDialectTestCase, NativeSessionTestCase):
-    """ Native version """
 
 
 class CachedServerVersionTestCase(BaseTestCase):

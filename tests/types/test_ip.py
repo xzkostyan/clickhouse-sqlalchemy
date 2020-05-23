@@ -5,16 +5,14 @@ from sqlalchemy import Column, and_
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
-
-from tests.testcase import (
-    TypesTestCase, HttpSessionTestCase, NativeSessionTestCase,
-)
-from tests.util import require_server_version
+from tests.testcase import BaseTestCase
+from tests.util import require_server_version, with_native_and_http_sessions
 
 
-class IPv4TestCase(TypesTestCase):
+@with_native_and_http_sessions
+class IPv4TestCase(BaseTestCase):
     table = Table(
-        'test', TypesTestCase.metadata(),
+        'test', BaseTestCase.metadata(),
         Column('x', types.IPv4),
         engines.Memory()
     )
@@ -365,17 +363,9 @@ class IPv4TestCase(TypesTestCase):
                 ])
 
 
-class IPv4HttpTestCase(IPv4TestCase, HttpSessionTestCase):
-    """ IPv4 over a HTTP session """
-
-
-class IPv4NativeTestCase(IPv4TestCase, NativeSessionTestCase):
-    """ IPv4 over a native protocol session """
-
-
-class IPv6TestCase(TypesTestCase):
+class IPv6TestCase(BaseTestCase):
     table = Table(
-        'test', TypesTestCase.metadata(),
+        'test', BaseTestCase.metadata(),
         Column('x', types.IPv6),
         engines.Memory()
     )
@@ -724,11 +714,3 @@ class IPv6TestCase(TypesTestCase):
                     (IPv6Address('beef::3'),),
                     (IPv6Address('f42e::ffff'),)
                 ])
-
-
-class IPv6HttpTestCase(IPv6TestCase, HttpSessionTestCase):
-    """ IPv6 over a HTTP session """
-
-
-class IPv6NativeTestCase(IPv6TestCase, NativeSessionTestCase):
-    """ IPv6 over a native protocol session """

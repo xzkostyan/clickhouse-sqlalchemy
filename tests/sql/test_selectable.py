@@ -1,15 +1,17 @@
 from sqlalchemy import Column, and_
 from sqlalchemy.exc import CompileError
-from clickhouse_sqlalchemy import types, select, Table
+
+from clickhouse_sqlalchemy import types, select, Table, engines
 from tests.testcase import BaseTestCase
 
 
 class SelectTestCase(BaseTestCase):
-    def create_table(self, table_name=None, *columns):
+    def _make_table(self, table_name=None, *columns):
         metadata = self.metadata()
-        columns = columns or [
-            Column('x', types.Int32, primary_key=True)
-        ]
+        columns = (
+            (columns or (Column('x', types.Int32, primary_key=True), )) +
+            (engines.Memory(), )
+        )
 
         return Table(
             table_name or 't1',
@@ -18,7 +20,7 @@ class SelectTestCase(BaseTestCase):
         )
 
     def test_group_by_with_totals(self):
-        table = self.create_table()
+        table = self._make_table()
 
         query = select([table.c.x]).group_by(table.c.x)
         self.assertEqual(
@@ -33,7 +35,7 @@ class SelectTestCase(BaseTestCase):
         )
 
     def test_sample(self):
-        table = self.create_table()
+        table = self._make_table()
 
         query = select([table.c.x]).sample(0.1).group_by(table.c.x)
         self.assertEqual(
@@ -47,7 +49,7 @@ class SelectTestCase(BaseTestCase):
         )
 
     def test_final(self):
-        table = self.create_table()
+        table = self._make_table()
 
         query = select([table.c.x]).final().group_by(table.c.x)
         self.assertEqual(
@@ -56,7 +58,7 @@ class SelectTestCase(BaseTestCase):
         )
 
     def test_nested_type(self):
-        table = self.create_table(
+        table = self._make_table(
             't1',
             Column('x', types.Int32, primary_key=True),
             Column('parent', types.Nested(
@@ -81,7 +83,7 @@ class SelectTestCase(BaseTestCase):
         )
 
     def test_nested_array_join(self):
-        table = self.create_table(
+        table = self._make_table(
             't1',
             Column('x', types.Int32, primary_key=True),
             Column('parent', types.Nested(
@@ -169,10 +171,10 @@ class SelectTestCase(BaseTestCase):
         )
 
     def test_join(self):
-        table_1 = self.create_table(
+        table_1 = self._make_table(
             'table_1', Column('x', types.UInt32, primary_key=True)
         )
-        table_2 = self.create_table(
+        table_2 = self._make_table(
             'table_2', Column('y', types.UInt32, primary_key=True)
         )
 
@@ -380,10 +382,10 @@ class SelectTestCase(BaseTestCase):
         )
 
     def test_join_same_column_name(self):
-        table_1 = self.create_table(
+        table_1 = self._make_table(
             'table_1', Column('x', types.UInt32, primary_key=True)
         )
-        table_2 = self.create_table(
+        table_2 = self._make_table(
             'table_2', Column('x', types.UInt32, primary_key=True)
         )
 
