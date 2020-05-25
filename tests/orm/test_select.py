@@ -2,12 +2,10 @@ from sqlalchemy import Column, exc, func, literal, select, text, tuple_
 
 from clickhouse_sqlalchemy import types, Table, engines
 from clickhouse_sqlalchemy.ext.clauses import Lambda
-from tests.testcase import BaseTestCase, NativeSessionTestCase
-from tests.util import with_native_and_http_sessions
+from tests.testcase import NativeSessionTestCase, CompilationTestCase
 
 
-@with_native_and_http_sessions
-class SelectTestCase(BaseTestCase):
+class SelectTestCase(CompilationTestCase):
 
     def _make_table(self, *columns):
         columns = columns + (engines.Memory(), )
@@ -120,8 +118,7 @@ class SelectTestCase(BaseTestCase):
         )
 
 
-@with_native_and_http_sessions
-class JoinTestCase(BaseTestCase):
+class JoinTestCase(CompilationTestCase):
     def test_joins(self):
         t1, t2 = [Table(
             't{}'.format(i), self.metadata(),
