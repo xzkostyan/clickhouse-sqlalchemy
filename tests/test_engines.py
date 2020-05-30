@@ -298,6 +298,29 @@ class SummingMergeTreeTestCase(EngineTestCaseBase):
             'ORDER BY (date, x)'
         )
 
+    def test_multiple_columns(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.Int32)
+            z = Column(types.Int32)
+
+            __table_args__ = (
+                engines.SummingMergeTree(
+                    columns=(y, z),
+                    partition_by=date,
+                    order_by=(date, x)
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table (date Date, x Int32, y Int32, z Int32) '
+            'ENGINE = SummingMergeTree((y, z)) '
+            'PARTITION BY date '
+            'ORDER BY (date, x)'
+        )
+
     def test_replicated(self):
         class TestTable(self.base):
             date = Column(types.Date, primary_key=True)

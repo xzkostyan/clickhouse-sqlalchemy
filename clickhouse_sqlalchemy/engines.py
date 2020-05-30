@@ -168,7 +168,8 @@ class SummingMergeTree(MergeTree):
 
     def get_parameters(self):
         if self.summing_cols is not None:
-            return self.summing_cols.get_expressions_or_columns()
+            cols = self.summing_cols.get_expressions_or_columns()
+            return [cols] if len(cols) > 1 else cols
 
 
 class ReplacingMergeTree(MergeTree):
