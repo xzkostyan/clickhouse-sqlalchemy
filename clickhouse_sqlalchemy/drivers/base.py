@@ -481,8 +481,13 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         # Do not render PKs.
         return ''
 
-    def _compile_param(self, expr):
+    def _compile_param(self, expr, opt_list=False):
         compiler = self.sql_compiler
+
+        # Do not render unnecessary brackets.
+        if isinstance(expr, (list, tuple)) and len(expr) == 1 and opt_list:
+            expr = expr[0]
+
         if isinstance(expr, (list, tuple)):
             return '(' + ', '.join(
                 self._compile_param(el) for el in expr
@@ -508,19 +513,22 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         if engine.partition_by:
             text += ' PARTITION BY {0}\n'.format(
                 self._compile_param(
-                    engine.partition_by.get_expressions_or_columns()[0]
+                    engine.partition_by.get_expressions_or_columns(),
+                    opt_list=True
                 )
             )
         if engine.order_by:
             text += ' ORDER BY {0}\n'.format(
                 self._compile_param(
-                    engine.order_by.get_expressions_or_columns()
+                    engine.order_by.get_expressions_or_columns(),
+                    opt_list=True
                 )
             )
         if engine.primary_key:
             text += ' PRIMARY KEY {0}\n'.format(
                 self._compile_param(
-                    engine.primary_key.get_expressions_or_columns()
+                    engine.primary_key.get_expressions_or_columns(),
+                    opt_list=True
                 )
             )
         if engine.sample_by:

@@ -87,6 +87,26 @@ class GenericEngineTestCase(EngineTestCaseBase):
 
         self.assertEqual(str(ex.exception), "No engine for table 't1'")
 
+    def test_multiple_columns_partition_by(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+
+            __table_args__ = (
+                engines.MergeTree(
+                    partition_by=(date, x),
+                    order_by='date'
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table (date Date, x Int32, y String) '
+            'ENGINE = MergeTree() PARTITION BY (date, x) '
+            'ORDER BY date'
+        )
+
 
 class AggregatingMergeTree(EngineTestCaseBase):
     def test_basic(self):

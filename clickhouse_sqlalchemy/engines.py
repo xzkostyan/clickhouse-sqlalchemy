@@ -75,7 +75,7 @@ class MergeTree(Engine):
     ):
         self.partition_by = None
         if partition_by is not None:
-            self.partition_by = KeysExpressionOrColumn(partition_by)
+            self.partition_by = KeysExpressionOrColumn(*to_list(partition_by))
 
         self.order_by = None
         if order_by is not None:
