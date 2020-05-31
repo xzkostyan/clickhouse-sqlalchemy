@@ -10,10 +10,10 @@ from tests.util import with_native_and_http_sessions
 class SchemaTestCase(BaseTestCase):
 
     def test_reflect(self):
-        """
-        checking, that after call metadata.reflect()
-        we have a clickhouse-specific table, which has overridden join methods
-        """
+        # checking, that after call metadata.reflect()
+        # we have a clickhouse-specific table, which has overridden join
+        # methods
+
         session = self.session
         metadata = self.metadata()
 
@@ -64,9 +64,8 @@ class SchemaTestCase(BaseTestCase):
             )
 
     def test_reflect_generic_table(self):
-        """
-        checking, that generic table columns are reflected properly
-        """
+        # checking, that generic table columns are reflected properly
+
         metadata = self.metadata()
 
         table = Table(

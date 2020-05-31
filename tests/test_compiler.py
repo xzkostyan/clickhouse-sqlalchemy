@@ -60,7 +60,7 @@ class VisitTestCase(CompilationTestCase):
 
 class VisitNativeTestCase(NativeSessionTestCase):
     def test_insert_no_templates_after_value(self):
-        """ Optimized non-templating insert test (native protocol only) """
+        # Optimized non-templating insert test (native protocol only).
         table = Table(
             't1', self.metadata(),
             Column('x', types.Int32),
