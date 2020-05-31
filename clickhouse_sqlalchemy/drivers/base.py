@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
+from sqlalchemy import schema, types as sqltypes, exc, util as sa_util, text
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
     compiler, expression, type_api, literal_column, elements, ClauseElement
@@ -16,8 +16,8 @@ from sqlalchemy.util import (
 
 from sqlalchemy.sql.compiler import crud
 
-from clickhouse_sqlalchemy import Table
-from .. import types
+from .. import Table, types
+from .. import engines
 from ..util import compat
 
 # Column specifications
@@ -723,6 +723,7 @@ class ClickHouseDialect(default.DefaultDialect):
     # Dialect related-features
     supports_delete = True
     supports_update = True
+    supports_engine_reflection = True
 
     max_identifier_length = 127
     default_paramstyle = 'pyformat'
@@ -754,10 +755,13 @@ class ClickHouseDialect(default.DefaultDialect):
     def initialize(self, connection):
         super(ClickHouseDialect, self).initialize(connection)
 
-        self.supports_delete = self.server_version_info >= (1, 1, 54388)
-        self.supports_update = self.server_version_info >= (18, 12, 14)
+        version = self.server_version_info
 
-    def _execute(self, connection, sql):
+        self.supports_delete = version >= (1, 1, 54388)
+        self.supports_update = version >= (18, 12, 14)
+        self.supports_engine_reflection = version >= (18, 16, 0)
+
+    def _execute(self, connection, sql, **kwargs):
         raise NotImplementedError
 
     @reflection.cache
@@ -787,9 +791,29 @@ class ClickHouseDialect(default.DefaultDialect):
             )
         else:
             ch_table = table
-        return super(ClickHouseDialect, self).reflecttable(
+
+        rv = super(ClickHouseDialect, self).reflecttable(
             connection, ch_table, include_columns, exclude_columns,
             resolve_fks, **opts)
+
+        self._reflect_engine(connection, table.name, table)
+
+        return rv
+
+    def _reflect_engine(self, connection, table_name, table):
+        if not self.supports_engine_reflection:
+            return
+
+        engine_cls_by_name = {e.__name__: e for e in engines.__all__}
+
+        for e in self.get_engines(connection):
+            if e['name'] == table_name:
+                engine_cls = engine_cls_by_name.get(e['engine'])
+                engine = engine_cls.reflect(**e)
+                engine._set_parent(table)
+                return
+
+        raise ValueError("Cannot find engine for table '%s'" % table_name)
 
     def _quote_table_name(self, table_name):
         # Use case: `describe table (select ...)`, over a TextClause.
@@ -934,6 +958,23 @@ class ClickHouseDialect(default.DefaultDialect):
     def get_table_names(self, connection, schema=None, **kw):
         rows = self._execute(connection, 'SHOW TABLES')
         return [row.name for row in rows]
+
+    @reflection.cache
+    def get_engines(self, connection, schema=None, **kw):
+        columns = [
+            'name', 'engine_full', 'engine', 'partition_key', 'sorting_key',
+            'primary_key', 'sampling_key'
+        ]
+
+        database = connection.engine.url.database
+
+        query = text(
+            'SELECT {} FROM system.tables WHERE database = :database'
+            .format(', '.join(columns))
+        )
+
+        rows = self._execute(connection, query, database=database)
+        return [{x: getattr(row, x, None) for x in columns} for row in rows]
 
     def do_rollback(self, dbapi_connection):
         # No support for transactions.

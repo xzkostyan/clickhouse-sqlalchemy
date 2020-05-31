@@ -45,8 +45,8 @@ class ClickHouseDialect_native(ClickHouseDialect):
 
         return (str(url), ), {}
 
-    def _execute(self, connection, sql):
-        return connection.execute(sql)
+    def _execute(self, connection, sql, **kwargs):
+        return connection.execute(sql, **kwargs)
 
     def _query_server_version_string(self, connection):
         return connection.scalar('select version()')
