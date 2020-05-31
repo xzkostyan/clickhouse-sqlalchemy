@@ -6,6 +6,14 @@ from parameterized import parameterized_class
 from tests.session import http_session, native_session
 
 
+def skip_by_server_version(testcase, version_required):
+    testcase.skipTest(
+        'Mininum revision required: {}'.format(
+            '.'.join(str(x) for x in version_required)
+        )
+    )
+
+
 def require_server_version(*version_required):
     def check(f):
         @wraps(f)

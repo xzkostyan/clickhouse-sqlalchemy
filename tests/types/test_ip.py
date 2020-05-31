@@ -6,25 +6,25 @@ from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
 from tests.testcase import BaseTestCase
-from tests.util import require_server_version, with_native_and_http_sessions
+from tests.util import with_native_and_http_sessions
 
 
 @with_native_and_http_sessions
 class IPv4TestCase(BaseTestCase):
+    required_server_version = (19, 3, 3)
+
     table = Table(
         'test', BaseTestCase.metadata(),
         Column('x', types.IPv4),
         engines.Memory()
     )
 
-    @require_server_version(19, 3, 3)
     def test_create_table(self):
         self.assertEqual(
             self.compile(CreateTable(self.table)),
             'CREATE TABLE test (x IPv4) ENGINE = Memory'
         )
 
-    @require_server_version(19, 3, 3)
     def test_select_insert(self):
         a = IPv4Address('10.0.0.1')
 
@@ -32,7 +32,6 @@ class IPv4TestCase(BaseTestCase):
             self.session.execute(self.table.insert(), [{'x': a}])
             self.assertEqual(self.session.query(self.table.c.x).scalar(), a)
 
-    @require_server_version(19, 3, 3)
     def test_select_insert_string(self):
         a = '10.0.0.1'
 
@@ -41,7 +40,6 @@ class IPv4TestCase(BaseTestCase):
             self.assertEqual(self.session.query(self.table.c.x).scalar(),
                              IPv4Address('10.0.0.1'))
 
-    @require_server_version(19, 3, 3)
     def test_select_where_address(self):
         a = IPv4Address('10.0.0.1')
 
@@ -54,7 +52,6 @@ class IPv4TestCase(BaseTestCase):
                 and_(IPv4Address('10.0.0.0') < self.table.c.x,
                      self.table.c.x < IPv4Address('10.0.0.2'))).scalar(), a)
 
-    @require_server_version(19, 3, 3)
     def test_select_where_string(self):
         a = IPv4Address('10.0.0.1')
 
@@ -65,7 +62,6 @@ class IPv4TestCase(BaseTestCase):
                 and_('10.0.0.0' < self.table.c.x,
                      self.table.c.x < '10.0.0.2')).scalar(), a)
 
-    @require_server_version(19, 3, 3)
     def test_select_where_literal(self):
         a = IPv4Address('10.0.0.1')
 
@@ -79,7 +75,6 @@ class IPv4TestCase(BaseTestCase):
                              "SELECT test.x AS test_x FROM test "
                              "WHERE test.x = toIPv4('10.0.0.1')")
 
-    @require_server_version(19, 3, 3)
     def test_select_in_network(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -100,7 +95,6 @@ class IPv4TestCase(BaseTestCase):
                     (IPv4Address('10.0.0.3'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_in_list_address(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -125,7 +119,6 @@ class IPv4TestCase(BaseTestCase):
                     (IPv4Address('10.0.0.3'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_in_list_network(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -147,7 +140,6 @@ class IPv4TestCase(BaseTestCase):
                     (IPv4Address('10.1.0.3'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_in_list_network_and_address(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -168,7 +160,6 @@ class IPv4TestCase(BaseTestCase):
                     (IPv4Address('10.1.0.3'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_in_list_empty(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -185,7 +176,6 @@ class IPv4TestCase(BaseTestCase):
                 self.session.query(self.table.c.x).filter(
                     self.table.c.x.in_([])).all(), [])
 
-    @require_server_version(19, 3, 3)
     def test_select_in_string(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -206,7 +196,6 @@ class IPv4TestCase(BaseTestCase):
                     (IPv4Address('10.0.0.3'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_network(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -230,7 +219,6 @@ class IPv4TestCase(BaseTestCase):
                     (IPv4Address('192.168.0.1'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_string(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -254,7 +242,6 @@ class IPv4TestCase(BaseTestCase):
                     (IPv4Address('192.168.0.1'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_list_address(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -280,7 +267,6 @@ class IPv4TestCase(BaseTestCase):
                     (IPv4Address('192.168.0.1'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_list_network(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -306,7 +292,6 @@ class IPv4TestCase(BaseTestCase):
                     (IPv4Address('192.168.0.1'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_list_network_address(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -332,7 +317,6 @@ class IPv4TestCase(BaseTestCase):
                     (IPv4Address('192.168.0.1'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_list_empty(self):
         ips = [
             IPv4Address('10.0.0.1'),
@@ -364,13 +348,14 @@ class IPv4TestCase(BaseTestCase):
 
 
 class IPv6TestCase(BaseTestCase):
+    required_server_version = (19, 3, 3)
+
     table = Table(
         'test', BaseTestCase.metadata(),
         Column('x', types.IPv6),
         engines.Memory()
     )
 
-    @require_server_version(19, 3, 3)
     def test_select_insert(self):
         a = IPv6Address('79f4:e698:45de:a59b:2765:28e3:8d3a:35ae')
 
@@ -378,7 +363,6 @@ class IPv6TestCase(BaseTestCase):
             self.session.execute(self.table.insert(), [{'x': a}])
             self.assertEqual(self.session.query(self.table.c.x).scalar(), a)
 
-    @require_server_version(19, 3, 3)
     def test_select_insert_string(self):
         a = '79f4:e698:45de:a59b:2765:28e3:8d3a:35ae'
 
@@ -387,14 +371,12 @@ class IPv6TestCase(BaseTestCase):
             self.assertEqual(self.session.query(self.table.c.x).scalar(),
                              IPv6Address(a))
 
-    @require_server_version(19, 3, 3)
     def test_create_table(self):
         self.assertEqual(
             self.compile(CreateTable(self.table)),
             'CREATE TABLE test (x IPv6) ENGINE = Memory'
         )
 
-    @require_server_version(19, 3, 3)
     def test_select_where_address(self):
         a = IPv6Address('42e::2')
 
@@ -408,7 +390,6 @@ class IPv6TestCase(BaseTestCase):
                 and_(IPv6Address('42e::1') < self.table.c.x,
                      self.table.c.x < IPv6Address('42e::3'))).scalar(), a)
 
-    @require_server_version(19, 3, 3)
     def test_select_where_string(self):
         a = IPv6Address('42e::2')
 
@@ -422,7 +403,6 @@ class IPv6TestCase(BaseTestCase):
                 and_('42e::1' < self.table.c.x,
                      self.table.c.x < '42e::3')).scalar(), a)
 
-    @require_server_version(19, 3, 3)
     def test_select_where_literal(self):
         a = IPv6Address('42e::2')
 
@@ -435,7 +415,6 @@ class IPv6TestCase(BaseTestCase):
                              "SELECT test.x AS test_x FROM test "
                              "WHERE test.x = toIPv6('42e::2')")
 
-    @require_server_version(19, 3, 3)
     def test_select_in_network(self):
         ips = [
             IPv6Address('42e::1'),
@@ -456,7 +435,6 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('42e::3'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_in_list_address(self):
         ips = [
             IPv6Address('42e::1'),
@@ -478,7 +456,6 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('f42e::ffff'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_in_list_network(self):
         ips = [
             IPv6Address('42e::1'),
@@ -500,7 +477,6 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('a42e::3'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_in_list_network_address(self):
         ips = [
             IPv6Address('42e::1'),
@@ -521,7 +497,6 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('a42e::3'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_in_list_empty(self):
         ips = [
             IPv6Address('42e::1'),
@@ -538,7 +513,6 @@ class IPv6TestCase(BaseTestCase):
                 self.session.query(self.table.c.x).filter(
                     self.table.c.x.in_([])).all(), [])
 
-    @require_server_version(19, 3, 3)
     def test_select_in_string(self):
         ips = [
             IPv6Address('42e::1'),
@@ -559,7 +533,6 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('42e::3'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_network(self):
         ips = [
             IPv6Address('42e::1'),
@@ -583,7 +556,6 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('f42e::ffff'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_string(self):
         ips = [
             IPv6Address('42e::1'),
@@ -607,7 +579,6 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('f42e::ffff'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_list_address(self):
         ips = [
             IPv6Address('42e::1'),
@@ -633,7 +604,6 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('f42e::ffff'),),
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_list_network(self):
         ips = [
             IPv6Address('1234::1'),
@@ -659,7 +629,6 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('f42e::ffff'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_list_network_address(self):
         ips = [
             IPv6Address('1234::1'),
@@ -685,7 +654,6 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('f42e::ffff'),)
                 ])
 
-    @require_server_version(19, 3, 3)
     def test_select_not_in_list_empty(self):
         ips = [
             IPv6Address('1234::1'),

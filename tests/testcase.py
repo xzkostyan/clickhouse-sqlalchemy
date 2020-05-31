@@ -7,10 +7,13 @@ from sqlalchemy.orm import Query
 
 from tests.config import database, host, port, http_port, user, password
 from tests.session import http_session, native_session, system_native_session
+from tests.util import skip_by_server_version
 
 
 class BaseAbstractTestCase(object):
     """ Supporting code for tests """
+    required_server_version = None
+    server_version = None
 
     host = host
     port = None
@@ -73,7 +76,18 @@ class BaseTestCase(BaseAbstractTestCase, TestCase):
             'CREATE DATABASE {}'.format(cls.database)
         )
 
+        version = system_native_session.execute('SELECT version()').fetchall()
+        cls.server_version = tuple(int(x) for x in version[0][0].split('.'))
+
         super(BaseTestCase, cls).setUpClass()
+
+    def setUp(self):
+        super(BaseTestCase, self).setUp()
+
+        required = self.required_server_version
+
+        if required and required > self.server_version:
+            skip_by_server_version(self, self.required_server_version)
 
 
 class HttpSessionTestCase(BaseTestCase):
