@@ -1,4 +1,4 @@
-from sqlalchemy import Column
+from sqlalchemy import Column, func
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
@@ -165,6 +165,57 @@ class DDLTestCase(BaseTestCase):
             'tuple UInt8 CODEC(T64, ZSTD(5)), '
             'explicit_none UInt32, '
             'str Int8 CODEC(ZSTD)) '
+            'ENGINE = Memory'
+        )
+
+    def test_create_table_column_materialized(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int8),
+            Column('dt', types.DateTime, clickhouse_materialized=func.now()),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'x Int8, '
+            'dt DateTime MATERIALIZED now()) '
+            'ENGINE = Memory'
+        )
+
+    def test_create_table_column_alias(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int8),
+            Column('dt', types.DateTime, clickhouse_alias=func.now()),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'x Int8, '
+            'dt DateTime ALIAS now()) '
+            'ENGINE = Memory'
+        )
+
+    def test_create_table_column_all_defaults(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int8),
+            Column(
+                'dt', types.DateTime, server_default=func.now(),
+                clickhouse_materialized=func.now(), clickhouse_alias=func.now()
+            ),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'x Int8, '
+            'dt DateTime DEFAULT now()) '
             'ENGINE = Memory'
         )
 

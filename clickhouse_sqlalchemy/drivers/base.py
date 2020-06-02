@@ -3,9 +3,10 @@ import enum
 from sqlalchemy import schema, types as sqltypes, exc, util as sa_util
 from sqlalchemy.engine import default, reflection
 from sqlalchemy.sql import (
-    compiler, expression, type_api, literal_column, elements
+    compiler, expression, type_api, literal_column, elements, ClauseElement
 )
 from sqlalchemy.sql.ddl import CreateColumn
+from sqlalchemy.sql.elements import TextClause
 from sqlalchemy.types import DATE, DATETIME, FLOAT
 from sqlalchemy.util.compat import inspect_getfullargspec
 from sqlalchemy.util import (
@@ -396,12 +397,36 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
+    def _get_default_string(self, default, name):
+        sa_util.assert_arg_type(
+            default, (sa_util.string_types[0], ClauseElement, TextClause), name
+        )
+
+        if isinstance(default, sa_util.string_types):
+            return self.sql_compiler.render_literal_value(
+                default, sqltypes.STRINGTYPE
+            )
+        else:
+            return self.sql_compiler.process(default, literal_binds=True)
+
     def get_column_specification(self, column, **kw):
         column_spec = super(
             ClickHouseDDLCompiler, self
         ).get_column_specification(column, **kw)
 
-        codec = column.dialect_options['clickhouse']['codec']
+        opts = column.dialect_options['clickhouse']
+
+        if column.server_default is None:
+            if opts['materialized'] is not None:
+                column_spec += " MATERIALIZED " + self._get_default_string(
+                    opts['materialized'], 'clickhouse_materialized'
+                )
+            elif opts['alias'] is not None:
+                column_spec += " ALIAS " + self._get_default_string(
+                    opts['alias'], 'clickhouse_alias'
+                )
+
+        codec = opts['codec']
         if codec:
             if isinstance(codec, (list, tuple)):
                 codec = ', '.join(codec)
@@ -684,6 +709,8 @@ class ClickHouseDialect(default.DefaultDialect):
         }),
         (schema.Column, {
             'codec': None,
+            'materialized': None,
+            'alias': None
         }),
     ]
 
