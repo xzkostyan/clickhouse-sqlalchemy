@@ -412,29 +412,36 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             )
 
     def get_column_specification(self, column, **kw):
-        column_spec = super(
-            ClickHouseDDLCompiler, self
-        ).get_column_specification(column, **kw)
+        colspec = (
+            self.preparer.format_column(column)
+            + " "
+            + self.dialect.type_compiler.process(
+                column.type, type_expression=column
+            )
+        )
 
         opts = column.dialect_options['clickhouse']
 
-        if column.server_default is None:
-            if opts['materialized'] is not None:
-                column_spec += " MATERIALIZED " + self._get_default_string(
-                    opts['materialized'], 'clickhouse_materialized'
-                )
-            elif opts['alias'] is not None:
-                column_spec += " ALIAS " + self._get_default_string(
-                    opts['alias'], 'clickhouse_alias'
-                )
+        if column.server_default is not None:
+            colspec += " DEFAULT " + self._get_default_string(
+                column.server_default.arg, 'server_default'
+            )
+        elif opts['materialized'] is not None:
+            colspec += " MATERIALIZED " + self._get_default_string(
+                opts['materialized'], 'clickhouse_materialized'
+            )
+        elif opts['alias'] is not None:
+            colspec += " ALIAS " + self._get_default_string(
+                opts['alias'], 'clickhouse_alias'
+            )
 
         codec = opts['codec']
-        if codec:
+        if codec is not None:
             if isinstance(codec, (list, tuple)):
                 codec = ', '.join(codec)
-            column_spec += " CODEC({0})".format(codec)
+            colspec += " CODEC({0})".format(codec)
 
-        return column_spec
+        return colspec
 
     def visit_create_column(self, create, **kw):
         column = create.element

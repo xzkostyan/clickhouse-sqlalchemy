@@ -168,6 +168,39 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    def test_create_table_column_default(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int8),
+            Column('dt', types.DateTime, server_default=func.now()),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'x Int8, '
+            'dt DateTime DEFAULT now()) '
+            'ENGINE = Memory'
+        )
+
+    def test_create_table_column_default_another_column(self):
+        class TestTable(get_declarative_base()):
+            x = Column(types.Int8, primary_key=True)
+            y = Column(types.Int8, server_default=x)
+
+            __table_args__ = (
+                engines.Memory(),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table ('
+            'x Int8, '
+            'y Int8 DEFAULT x) '
+            'ENGINE = Memory'
+        )
+
     def test_create_table_column_materialized(self):
         table = Table(
             't1', self.metadata(),
