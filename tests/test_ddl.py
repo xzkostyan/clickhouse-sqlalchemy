@@ -1,7 +1,7 @@
 from sqlalchemy import Column, func
 from sqlalchemy.sql.ddl import CreateTable
 
-from clickhouse_sqlalchemy import types, engines, Table
+from clickhouse_sqlalchemy import types, engines, Table, get_declarative_base
 from clickhouse_sqlalchemy.sql.ddl import DropTable
 from tests.testcase import BaseTestCase
 from tests.session import mocked_engine
@@ -181,6 +181,23 @@ class DDLTestCase(BaseTestCase):
             'CREATE TABLE t1 ('
             'x Int8, '
             'dt DateTime MATERIALIZED now()) '
+            'ENGINE = Memory'
+        )
+
+    def test_create_table_column_materialized_another_column(self):
+        class TestTable(get_declarative_base()):
+            x = Column(types.Int8, primary_key=True)
+            y = Column(types.Int8, clickhouse_materialized=x)
+
+            __table_args__ = (
+                engines.Memory(),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table ('
+            'x Int8, '
+            'y Int8 MATERIALIZED x) '
             'ENGINE = Memory'
         )
 

@@ -407,7 +407,9 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
                 default, sqltypes.STRINGTYPE
             )
         else:
-            return self.sql_compiler.process(default, literal_binds=True)
+            return self.sql_compiler.process(
+                default, literal_binds=True, include_table=False
+            )
 
     def get_column_specification(self, column, **kw):
         column_spec = super(
