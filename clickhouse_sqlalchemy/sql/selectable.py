@@ -1,10 +1,10 @@
+from sqlalchemy.sql.base import _generative
 from sqlalchemy.sql.selectable import (
     Select as StandardSelect,
     Join as StandardJoin,
 )
 
-from clickhouse_sqlalchemy.ext.clauses import ArrayJoin
-from ..ext.clauses import sample_clause
+from ..ext.clauses import ArrayJoin, sample_clause
 
 
 __all__ = ('Select', 'select')
@@ -32,21 +32,21 @@ class Select(StandardSelect):
     _sample_clause = None
     _array_join = None
 
+    @_generative
     def with_totals(self):
         self._with_totals = True
-        return self
 
+    @_generative
     def final(self):
         self._final_clause = True
-        return self
 
+    @_generative
     def sample(self, sample):
         self._sample_clause = sample_clause(sample)
-        return self
 
+    @_generative
     def array_join(self, *columns):
         self._array_join = ArrayJoin(*columns)
-        return self
 
     def join(self, right, onclause=None, isouter=False, full=False, type=None,
              strictness=None, distribution=None):

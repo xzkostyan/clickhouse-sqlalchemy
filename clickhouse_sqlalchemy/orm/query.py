@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 
 from sqlalchemy import exc
+from sqlalchemy.orm.base import _generative
 import sqlalchemy.orm.query as query_module
 from sqlalchemy.orm.query import Query as BaseQuery
 from sqlalchemy.orm.util import _ORMJoin as _StandardORMJoin
@@ -28,6 +29,7 @@ class Query(BaseQuery):
 
         return context
 
+    @_generative()
     def with_totals(self):
         if not self._group_by:
             raise exc.InvalidRequestError(
@@ -37,21 +39,18 @@ class Query(BaseQuery):
 
         self._with_totals = True
 
-        return self
-
+    @_generative()
     def array_join(self, *columns):
         self._array_join = ArrayJoin(*columns)
-        return self
 
+    @_generative()
     def final(self):
         self._final = True
 
-        return self
-
+    @_generative()
     def sample(self, sample):
         self._sample = sample
 
-        return self
 
     def join(self, *props, **kwargs):
         type = kwargs.pop('type', None)
