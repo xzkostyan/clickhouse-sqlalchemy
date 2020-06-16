@@ -100,6 +100,21 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             self.process(func.clauses.clauses[2], **kw)
         )
 
+    def limit_by_clause(self, select, **kw):
+        text = ''
+        limit_by_clause = select._limit_by_clause
+        if limit_by_clause:
+            text += ' LIMIT '
+            if limit_by_clause.offset is not None:
+                text += self.process(limit_by_clause.offset, **kw) + ', '
+            text += self.process(limit_by_clause.limit, **kw)
+            limit_by_exprs = limit_by_clause.by_clauses._compiler_dispatch(
+                self, **kw,
+            )
+            text += ' BY ' + limit_by_exprs
+
+        return text
+
     def limit_clause(self, select, **kw):
         text = ''
         if select._limit_clause is not None:
@@ -276,6 +291,11 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         if select._order_by_clause.clauses:
             text += self.order_by_clause(select, **kwargs)
+
+        limit_by_clause = getattr(select, '_limit_by_clause', None)
+
+        if limit_by_clause is not None:
+            text += self.limit_by_clause(select, **kwargs)
 
         if (select._limit_clause is not None or
                 select._offset_clause is not None):

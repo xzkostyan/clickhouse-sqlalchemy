@@ -57,6 +57,20 @@ class SelectTestCase(BaseTestCase):
             'SELECT t1.x FROM t1 FINAL GROUP BY t1.x'
         )
 
+    def test_limit_by(self):
+        table = self._make_table()
+
+        query = select([table.c.x]).order_by(table.c.x)\
+            .limit_by(table.c.x, limit=1)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x FROM t1 ORDER BY t1.x LIMIT %(param_1)s BY t1.x'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x FROM t1 ORDER BY t1.x LIMIT 1 BY t1.x'
+        )
+
     def test_nested_type(self):
         table = self._make_table(
             't1',

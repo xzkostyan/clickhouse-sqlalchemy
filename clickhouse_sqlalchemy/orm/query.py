@@ -7,8 +7,9 @@ from sqlalchemy.orm.query import Query as BaseQuery
 from sqlalchemy.orm.util import _ORMJoin as _StandardORMJoin
 
 from ..ext.clauses import (
-    sample_clause,
     ArrayJoin,
+    LimitByClause,
+    sample_clause,
 )
 
 
@@ -16,6 +17,7 @@ class Query(BaseQuery):
     _with_totals = False
     _final = None
     _sample = None
+    _limit_by = None
     _array_join = None
 
     def _compile_context(self, labels=True):
@@ -25,6 +27,7 @@ class Query(BaseQuery):
         statement._with_totals = self._with_totals
         statement._final_clause = self._final
         statement._sample_clause = sample_clause(self._sample)
+        statement._limit_by_clause = self._limit_by
         statement._array_join = self._array_join
 
         return context
@@ -51,6 +54,9 @@ class Query(BaseQuery):
     def sample(self, sample):
         self._sample = sample
 
+    @_generative()
+    def limit_by(self, *by_clauses, offset=None, limit):
+        self._limit_by = LimitByClause(by_clauses, offset, limit)
 
     def join(self, *props, **kwargs):
         type = kwargs.pop('type', None)

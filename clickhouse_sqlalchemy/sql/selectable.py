@@ -4,7 +4,11 @@ from sqlalchemy.sql.selectable import (
     Join as StandardJoin,
 )
 
-from ..ext.clauses import ArrayJoin, sample_clause
+from ..ext.clauses import (
+    ArrayJoin,
+    LimitByClause,
+    sample_clause,
+)
 
 
 __all__ = ('Select', 'select')
@@ -30,6 +34,7 @@ class Select(StandardSelect):
     _with_totals = False
     _final_clause = None
     _sample_clause = None
+    _limit_by_clause = None
     _array_join = None
 
     @_generative
@@ -43,6 +48,10 @@ class Select(StandardSelect):
     @_generative
     def sample(self, sample):
         self._sample_clause = sample_clause(sample)
+
+    @_generative
+    def limit_by(self, *by_clauses, offset=None, limit):
+        self._limit_by_clause = LimitByClause(by_clauses, offset, limit)
 
     @_generative
     def array_join(self, *columns):

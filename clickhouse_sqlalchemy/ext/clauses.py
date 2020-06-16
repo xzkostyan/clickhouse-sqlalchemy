@@ -1,10 +1,12 @@
 from sqlalchemy import util, exc
 from sqlalchemy.sql import type_api
 from sqlalchemy.sql.elements import (
+    _literal_as_label_reference,
     BindParameter,
     ColumnElement,
     ClauseList
 )
+from sqlalchemy.sql.selectable import _offset_or_limit_clause
 from sqlalchemy.sql.visitors import Visitable
 
 
@@ -27,6 +29,19 @@ def sample_clause(element):
         return element
     else:
         return SampleParam(None, element, unique=True)
+
+
+class LimitByClause:
+
+    def __init__(self, by_clauses, offset, limit):
+        self.by_clauses = ClauseList(
+            *by_clauses, _literal_as_text=_literal_as_label_reference,
+        )
+        self.offset = _offset_or_limit_clause(offset)
+        self.limit = _offset_or_limit_clause(limit)
+
+    def __bool__(self):
+        return bool(self.by_clauses.clauses)
 
 
 class Lambda(ColumnElement):
