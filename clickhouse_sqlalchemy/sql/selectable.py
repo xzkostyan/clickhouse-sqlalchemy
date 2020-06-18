@@ -50,8 +50,8 @@ class Select(StandardSelect):
         self._sample_clause = sample_clause(sample)
 
     @_generative
-    def limit_by(self, *by_clauses, offset=None, limit):
-        self._limit_by_clause = LimitByClause(by_clauses, offset, limit)
+    def limit_by(self, by_clauses, limit, offset=None):
+        self._limit_by_clause = LimitByClause(by_clauses, limit, offset)
 
     @_generative
     def array_join(self, *columns):

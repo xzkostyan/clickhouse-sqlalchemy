@@ -55,8 +55,8 @@ class Query(BaseQuery):
         self._sample = sample
 
     @_generative()
-    def limit_by(self, *by_clauses, offset=None, limit):
-        self._limit_by = LimitByClause(by_clauses, offset, limit)
+    def limit_by(self, by_clauses, limit, offset=None):
+        self._limit_by = LimitByClause(by_clauses, limit, offset)
 
     def join(self, *props, **kwargs):
         type = kwargs.pop('type', None)

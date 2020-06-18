@@ -107,7 +107,7 @@ class SelectTestCase(CompilationTestCase):
         table = self._make_table()
 
         query = self.session.query(table.c.x).order_by(table.c.x)\
-            .limit_by(table.c.x, limit=1)
+            .limit_by([table.c.x], limit=1)
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x '
@@ -122,7 +122,7 @@ class SelectTestCase(CompilationTestCase):
         table = self._make_table()
 
         query = self.session.query(table.c.x).order_by(table.c.x)\
-            .limit_by(table.c.x, offset=1, limit=2)
+            .limit_by([table.c.x], offset=1, limit=2)
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x '

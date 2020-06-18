@@ -61,7 +61,7 @@ class SelectTestCase(BaseTestCase):
         table = self._make_table()
 
         query = select([table.c.x]).order_by(table.c.x)\
-            .limit_by(table.c.x, limit=1)
+            .limit_by([table.c.x], limit=1)
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x FROM t1 ORDER BY t1.x LIMIT %(param_1)s BY t1.x'
@@ -75,7 +75,7 @@ class SelectTestCase(BaseTestCase):
         table = self._make_table()
 
         query = select([table.c.x]).order_by(table.c.x)\
-            .limit_by(table.c.x, offset=1, limit=2)
+            .limit_by([table.c.x], offset=1, limit=2)
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x FROM t1 ORDER BY t1.x '

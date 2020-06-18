@@ -109,7 +109,7 @@ class ClickHouseCompiler(compiler.SQLCompiler):
                 text += self.process(limit_by_clause.offset, **kw) + ', '
             text += self.process(limit_by_clause.limit, **kw)
             limit_by_exprs = limit_by_clause.by_clauses._compiler_dispatch(
-                self, **kw,
+                self, **kw
             )
             text += ' BY ' + limit_by_exprs
 

@@ -33,9 +33,9 @@ def sample_clause(element):
 
 class LimitByClause:
 
-    def __init__(self, by_clauses, offset, limit):
+    def __init__(self, by_clauses, limit, offset):
         self.by_clauses = ClauseList(
-            *by_clauses, _literal_as_text=_literal_as_label_reference,
+            *by_clauses, _literal_as_text=_literal_as_label_reference
         )
         self.offset = _offset_or_limit_clause(offset)
         self.limit = _offset_or_limit_clause(limit)
