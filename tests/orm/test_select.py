@@ -103,6 +103,36 @@ class SelectTestCase(CompilationTestCase):
             'SELECT t1.x AS t1_x FROM t1 FINAL GROUP BY t1.x'
         )
 
+    def test_limit_by(self):
+        table = self._make_table()
+
+        query = self.session.query(table.c.x).order_by(table.c.x)\
+            .limit_by([table.c.x], limit=1)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x '
+            'LIMIT %(param_1)s BY t1.x'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x LIMIT 1 BY t1.x'
+        )
+
+    def test_limit_by_with_offset(self):
+        table = self._make_table()
+
+        query = self.session.query(table.c.x).order_by(table.c.x)\
+            .limit_by([table.c.x], offset=1, limit=2)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x '
+            'LIMIT %(param_1)s, %(param_2)s BY t1.x'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x LIMIT 1, 2 BY t1.x'
+        )
+
     def test_lambda_functions(self):
         query = self.session.query(
             func.arrayFilter(

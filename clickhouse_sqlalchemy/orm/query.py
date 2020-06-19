@@ -1,13 +1,15 @@
 from contextlib import contextmanager
 
 from sqlalchemy import exc
+from sqlalchemy.orm.base import _generative
 import sqlalchemy.orm.query as query_module
 from sqlalchemy.orm.query import Query as BaseQuery
 from sqlalchemy.orm.util import _ORMJoin as _StandardORMJoin
 
 from ..ext.clauses import (
-    sample_clause,
     ArrayJoin,
+    LimitByClause,
+    sample_clause,
 )
 
 
@@ -15,6 +17,7 @@ class Query(BaseQuery):
     _with_totals = False
     _final = None
     _sample = None
+    _limit_by = None
     _array_join = None
 
     def _compile_context(self, labels=True):
@@ -24,10 +27,12 @@ class Query(BaseQuery):
         statement._with_totals = self._with_totals
         statement._final_clause = self._final
         statement._sample_clause = sample_clause(self._sample)
+        statement._limit_by_clause = self._limit_by
         statement._array_join = self._array_join
 
         return context
 
+    @_generative()
     def with_totals(self):
         if not self._group_by:
             raise exc.InvalidRequestError(
@@ -37,21 +42,21 @@ class Query(BaseQuery):
 
         self._with_totals = True
 
-        return self
-
+    @_generative()
     def array_join(self, *columns):
         self._array_join = ArrayJoin(*columns)
-        return self
 
+    @_generative()
     def final(self):
         self._final = True
 
-        return self
-
+    @_generative()
     def sample(self, sample):
         self._sample = sample
 
-        return self
+    @_generative()
+    def limit_by(self, by_clauses, limit, offset=None):
+        self._limit_by = LimitByClause(by_clauses, limit, offset)
 
     def join(self, *props, **kwargs):
         type = kwargs.pop('type', None)
