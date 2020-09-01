@@ -27,7 +27,7 @@ class TestConnectArgs(BaseTestCase):
             host='localhost',
             port='9001',
             database='default',
-            query={'secure': False}
+            query={'secure': 'False'}
         )
         connect_args = self.dialect.create_connect_args(url)
         self.assertEqual(
