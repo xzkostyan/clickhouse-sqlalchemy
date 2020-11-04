@@ -1104,6 +1104,15 @@ class ClickHouseDialect(default.DefaultDialect):
         pass
 
     def do_executemany(self, cursor, statement, parameters, context=None):
+        # render single insert inplace
+        if (
+            context
+            and context.isinsert
+            and context.compiled.insert_single_values_expr
+            and not len(context.compiled_parameters[0])
+        ):
+            parameters = None
+
         cursor.executemany(statement, parameters, context=context)
 
     def do_execute(self, cursor, statement, parameters, context=None):

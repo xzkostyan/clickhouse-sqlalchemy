@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import sql, Column, literal
+from sqlalchemy import sql, Column, literal, literal_column
 
 from clickhouse_sqlalchemy import types, Table, engines
 from clickhouse_sqlalchemy.util import compat
@@ -69,4 +69,17 @@ class VisitNativeTestCase(NativeSessionTestCase):
         self.assertEqual(
             self.compile(table.insert()),
             'INSERT INTO t1 (x) VALUES'
+        )
+
+    def test_insert_inplace_values(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32),
+            engines.Memory()
+        )
+        self.assertEqual(
+            self.compile(
+                table.insert().values(x=literal_column(str(42))),
+                literal_binds=True
+            ), 'INSERT INTO t1 (x) VALUES (42)'
         )
