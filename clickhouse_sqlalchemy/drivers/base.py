@@ -165,7 +165,11 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             return column
 
     def visit_join(self, join, asfrom=False, **kwargs):
-        text = join.left._compiler_dispatch(self, asfrom=asfrom, **kwargs)
+        text = join.left._compiler_dispatch(self, asfrom=True, **kwargs)
+
+        if text[0] == '(' and text[-1] == ')':
+            text = text[1:-1]
+
         # need to make a variable to prevent leaks in some debuggers
         join_type = getattr(join, 'type', None)
         if join_type is None:
@@ -200,7 +204,7 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         onclause = join.onclause
 
-        text += join.right._compiler_dispatch(self, asfrom=asfrom, **kwargs)
+        text += join.right._compiler_dispatch(self, asfrom=True, **kwargs)
         if isinstance(onclause, elements.Tuple):
             text += ' USING ' + onclause._compiler_dispatch(
                 self, include_table=False, **kwargs

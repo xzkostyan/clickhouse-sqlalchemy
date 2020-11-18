@@ -1,5 +1,6 @@
 from sqlalchemy import Column, and_
 from sqlalchemy.exc import CompileError
+from sqlalchemy.sql import expression
 
 from clickhouse_sqlalchemy import types, select, Table, engines
 from tests.testcase import BaseTestCase
@@ -424,4 +425,22 @@ class SelectTestCase(BaseTestCase):
             self.compile(select([table_1.c.x]).select_from(join)),
             'SELECT table_1.x FROM table_1 '
             'INNER JOIN table_2 ON table_1.x = table_2.x'
+        )
+
+    def test_sql_expression_join(self):
+        table_1 = self._make_table(
+            'table_1', Column('x', types.UInt32, primary_key=True)
+        )
+        table_2 = self._make_table(
+            'table_2', Column('x', types.UInt32, primary_key=True)
+        )
+
+        join = expression.join(
+            table_1, table_2, onclause=table_1.c.x == table_2.c.x,
+            isouter=False
+        )
+
+        self.assertEqual(
+            self.compile(join),
+            'table_1 INNER JOIN table_2 ON table_1.x = table_2.x'
         )
