@@ -653,6 +653,6 @@ class TTLTestCase(EngineTestCaseBase):
             'CREATE TABLE test_table (date Date, x Int32) '
             'ENGINE = MergeTree()'
             ' TTL date + toIntervalDay(1) DELETE,'
-            '      date + toIntervalDay(1) TO DISK \'hdd\','
-            '      date + toIntervalDay(1) TO VOLUME \'slow\''
+            '     date + toIntervalDay(1) TO DISK \'hdd\','
+            '     date + toIntervalDay(1) TO VOLUME \'slow\''
         )
