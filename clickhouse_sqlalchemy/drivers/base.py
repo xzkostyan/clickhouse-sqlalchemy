@@ -541,6 +541,14 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
                     engine.sample_by.get_expressions_or_columns()[0]
                 )
             )
+        if engine.ttl:
+            compile = self.sql_compiler.process
+            text += ' TTL {0}\n'.format(
+                ', \n     '.join(
+                    compile(i, include_table=False, literal_binds=True)
+                    for i in engine.ttl.get_expressions_or_columns(),
+                )
+            )
         if engine.settings:
             text += ' SETTINGS ' + ', '.join(
                 '{key}={value}'.format(

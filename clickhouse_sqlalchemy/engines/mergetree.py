@@ -14,6 +14,7 @@ class MergeTree(Engine):
             order_by=None,
             primary_key=None,
             sample_by=None,
+            ttl=None,
             **settings
     ):
         self.partition_by = None
@@ -31,6 +32,11 @@ class MergeTree(Engine):
         self.sample_by = None
         if sample_by is not None:
             self.sample_by = KeysExpressionOrColumn(sample_by)
+
+        self.ttl = None
+        if ttl is not None:
+            self.ttl = KeysExpressionOrColumn(*to_list(ttl))
+
         self.settings = settings
         super(MergeTree, self).__init__()
 
