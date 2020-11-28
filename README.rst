@@ -7,14 +7,17 @@ ClickHouse dialect for SQLAlchemy to `ClickHouse database <https://clickhouse.ya
 .. image:: https://img.shields.io/pypi/v/clickhouse-sqlalchemy.svg
     :target: https://pypi.org/project/clickhouse-sqlalchemy
 
+.. image:: https://coveralls.io/repos/github/xzkostyan/clickhouse-sqlalchemy/badge.svg?branch=master
+    :target: https://coveralls.io/github/xzkostyan/clickhouse-sqlalchemy?branch=master
+
 .. image:: https://img.shields.io/pypi/l/clickhouse-sqlalchemy.svg
     :target: https://pypi.org/project/clickhouse-sqlalchemy
 
 .. image:: https://img.shields.io/pypi/pyversions/clickhouse-sqlalchemy.svg
     :target: https://pypi.org/project/clickhouse-sqlalchemy
 
-.. image:: https://coveralls.io/repos/github/xzkostyan/clickhouse-sqlalchemy/badge.svg?branch=master
-    :target: https://coveralls.io/github/xzkostyan/clickhouse-sqlalchemy?branch=master
+.. image:: https://img.shields.io/pypi/dm/clickhouse-sqlalchemy.svg
+    :target: https://pypi.org/project/clickhouse-sqlalchemy
 
 .. image:: https://img.shields.io/travis/xzkostyan/clickhouse-sqlalchemy.svg?branch=master
    :target: https://travis-ci.org/xzkostyan/clickhouse-sqlalchemy
