@@ -615,8 +615,8 @@ class TTLTestCase(EngineTestCaseBase):
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
             'CREATE TABLE test_table (date Date, x Int32) '
-            'ENGINE = MergeTree()'
-            ' TTL date + toIntervalDay(1)'
+            'ENGINE = MergeTree() '
+            'TTL date + toIntervalDay(1)'
         )
 
     def test_ttl_delete(self):
@@ -633,8 +633,8 @@ class TTLTestCase(EngineTestCaseBase):
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
             'CREATE TABLE test_table (date Date, x Int32) '
-            'ENGINE = MergeTree()'
-            ' TTL date + toIntervalDay(1) DELETE'
+            'ENGINE = MergeTree() '
+            'TTL date + toIntervalDay(1) DELETE'
         )
 
     def test_ttl_list(self):
@@ -655,8 +655,8 @@ class TTLTestCase(EngineTestCaseBase):
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
             'CREATE TABLE test_table (date Date, x Int32) '
-            'ENGINE = MergeTree()'
-            ' TTL date + toIntervalDay(1) DELETE,'
-            '     date + toIntervalDay(1) TO DISK \'hdd\','
-            '     date + toIntervalDay(1) TO VOLUME \'slow\''
+            'ENGINE = MergeTree() '
+            'TTL date + toIntervalDay(1) DELETE, '
+            '    date + toIntervalDay(1) TO DISK \'hdd\', '
+            '    date + toIntervalDay(1) TO VOLUME \'slow\''
         )
