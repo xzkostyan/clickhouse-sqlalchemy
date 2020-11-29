@@ -2,7 +2,11 @@ from sqlalchemy import Column, func, exc
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, get_declarative_base, Table
-from clickhouse_sqlalchemy.sql.ddl import ttl_delete, ttl_to_disk, ttl_to_volume
+from clickhouse_sqlalchemy.sql.ddl import (
+    ttl_delete,
+    ttl_to_disk,
+    ttl_to_volume,
+)
 from tests.testcase import CompilationTestCase
 
 
