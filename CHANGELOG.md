@@ -2,6 +2,29 @@
 
 ## [Unreleased]
 
+## [0.1.5] - 2020-12-14
+### Added
+- `MATERIALIZED` and `ALIAS` column options.
+- `LIMIT BY` clause support. Pull request [#97](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/97) by [ods](https://github.com/ods).
+- Basic engines reflection.
+- `TTL` param for *MergeTree engines. Pull request [#111](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/111) by [aamalev](https://github.com/aamalev).
+
+### Changed
+- Session parametrization in tests.
+- Exclude table name from `DEFAULT` column option.
+- Allow multiple columns in `PARTITION BY`.
+- Replace `uuid1` with `uuid4` for automatic query_id generation.
+
+### Fixed
+- Remove table names during `JOIN` with`USING` clause.
+- [Native] Case insensitive`VALUES` clause check for (%s)-templates.
+- Render `sqlalchemy.Boolean` as `UInt8` instead of `BOOLEAN`. Solves issue [#93](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/93).
+- Allow multiple columns in SummingMergeTree.
+- Proper `JOIN` clause rendering. Solves issue [#108](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/108).
+
+### Removed
+- Drop Python 3.4 support due to urllib3 drop.
+
 ## [0.1.4] - 2020-04-30
 ### Fixed
 - `if_exists` and `on_cluster` AttributeError on table drop. Pull request [#94](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/94) by [vmarkovtsev](https://github.com/vmarkovtsev).
@@ -174,7 +197,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.4...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.5...HEAD
+[0.1.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.4...0.1.5
 [0.1.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.3...0.1.4
 [0.1.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.2...0.1.3
 [0.1.2]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.1...0.1.2
