@@ -14,6 +14,7 @@ class MergeTree(Engine):
             order_by=None,
             primary_key=None,
             sample_by=None,
+            ttl=None,
             **settings
     ):
         self.partition_by = None
@@ -31,6 +32,11 @@ class MergeTree(Engine):
         self.sample_by = None
         if sample_by is not None:
             self.sample_by = KeysExpressionOrColumn(sample_by)
+
+        self.ttl = None
+        if ttl is not None:
+            self.ttl = KeysExpressionOrColumn(*to_list(ttl))
+
         self.settings = settings
         super(MergeTree, self).__init__()
 
@@ -44,11 +50,13 @@ class MergeTree(Engine):
             self.primary_key._set_parent(table)
         if self.sample_by is not None:
             self.sample_by._set_parent(table)
+        if self.ttl is not None:
+            self.ttl._set_parent(table)
 
     @classmethod
     def _reflect_merge_tree(
             self, partition_key=None, sorting_key=None, primary_key=None,
-            sampling_key=None, **kwargs):
+            sampling_key=None, ttl=None, **kwargs):
 
         # TODO: reflect settings
         rv = {}
@@ -60,6 +68,8 @@ class MergeTree(Engine):
             rv['primary_key'] = parse_columns(primary_key)
         if sampling_key:
             rv['sample_by'] = parse_columns(sampling_key)
+        if ttl:
+            rv['ttl'] = parse_columns(ttl)
 
         return rv
 

@@ -369,3 +369,27 @@ class EngineClassReflectionTestCase(BaseTestCase):
         engine.__init__.assert_called_with(
             'default', 'test', 16, 10, 100, 10000, 1000000, 10000000, 100000000
         )
+
+    def test_ttl_replicated_merge_tree(self):
+        engine = engines.ReplicatedMergeTree
+        engine_full = (
+            "ReplicatedMergeTree('/table/path', 'name') "
+            "PARTITION BY x ORDER BY x PRIMARY KEY x TTL x"
+        )
+
+        engine.__init__ = Mock(return_value=None)
+        engine.reflect(
+            engine_full,
+            partition_key='x',
+            sorting_key='x',
+            primary_key='x',
+            ttl='x',
+        )
+
+        engine.__init__.assert_called_with(
+            '/table/path', 'name',
+            partition_by=['x'],
+            order_by=['x'],
+            primary_key=['x'],
+            ttl=['x'],
+        )

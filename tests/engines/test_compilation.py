@@ -2,6 +2,11 @@ from sqlalchemy import Column, func, exc
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, get_declarative_base, Table
+from clickhouse_sqlalchemy.sql.ddl import (
+    ttl_delete,
+    ttl_to_disk,
+    ttl_to_volume,
+)
 from tests.testcase import CompilationTestCase
 
 
@@ -592,4 +597,66 @@ class MiscEnginesTestCase(EngineTestCaseBase):
             self.compile(CreateTable(TestTable.__table__)),
             'CREATE TABLE test_table (date Date, x Int32) '
             'ENGINE = Memory'
+        )
+
+
+class TTLTestCase(EngineTestCaseBase):
+    def test_ttl_expr(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+
+            __table_args__ = (
+                engines.MergeTree(
+                    ttl=date + func.toIntervalDay(1),
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table (date Date, x Int32) '
+            'ENGINE = MergeTree() '
+            'TTL date + toIntervalDay(1)'
+        )
+
+    def test_ttl_delete(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+
+            __table_args__ = (
+                engines.MergeTree(
+                    ttl=ttl_delete(date + func.toIntervalDay(1)),
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table (date Date, x Int32) '
+            'ENGINE = MergeTree() '
+            'TTL date + toIntervalDay(1) DELETE'
+        )
+
+    def test_ttl_list(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+
+            __table_args__ = (
+                engines.MergeTree(
+                    ttl=[
+                        ttl_delete(date + func.toIntervalDay(1)),
+                        ttl_to_disk(date + func.toIntervalDay(1), 'hdd'),
+                        ttl_to_volume(date + func.toIntervalDay(1), 'slow'),
+                    ],
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table (date Date, x Int32) '
+            'ENGINE = MergeTree() '
+            'TTL date + toIntervalDay(1) DELETE, '
+            '    date + toIntervalDay(1) TO DISK \'hdd\', '
+            '    date + toIntervalDay(1) TO VOLUME \'slow\''
         )
