@@ -546,7 +546,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             text += ' TTL {0}\n'.format(
                 ',\n     '.join(
                     compile(i, include_table=False, literal_binds=True)
-                    for i in engine.ttl.get_expressions_or_columns(),
+                    for i in engine.ttl.get_expressions_or_columns()
                 )
             )
         if engine.settings:
