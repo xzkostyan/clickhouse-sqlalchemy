@@ -18,6 +18,7 @@ __all__ = [
     'Float64',
     'Date',
     'DateTime',
+    'DateTime64',
     'Enum',
     'Enum8',
     'Enum16',
@@ -46,6 +47,7 @@ from .common import Float32
 from .common import Float64
 from .common import Date
 from .common import DateTime
+from .common import DateTime64
 from .common import Enum
 from .common import Enum8
 from .common import Enum16

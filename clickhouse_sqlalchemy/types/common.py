@@ -103,6 +103,15 @@ class DateTime(types.Date):
     __visit_name__ = 'datetime'
 
 
+class DateTime64(DateTime):
+    __visit_name__ = 'datetime64'
+
+    def __init__(self, precision=3, timezone=None):
+        self.precision = precision
+        self.timezone = timezone
+        super().__init__()
+
+
 class Enum(types.Enum):
     __visit_name__ = 'enum'
 

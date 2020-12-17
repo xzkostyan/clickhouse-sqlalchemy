@@ -45,6 +45,10 @@ class Escaper(object):
         # XXX: shouldn't this be `toDateTime(...)`?
         return self.escape_string(item.strftime('%Y-%m-%d %H:%M:%S'))
 
+    def escape_datetime64(self, item):
+        # XXX: shouldn't this be `toDateTime64(...)`?
+        return self.escape_string(item.strftime('%Y-%m-%d %H:%M:%S.%f'))
+
     def escape_decimal(self, item):
         return float(item)
 

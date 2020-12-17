@@ -22,9 +22,12 @@ def date_converter(x):
 
 
 def datetime_converter(x):
-    if x != DATETIME_NULL:
+    if x == DATETIME_NULL:
+        return None
+    elif len(x) > 19:
+        return datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f')
+    else:
         return datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
-    return None
 
 
 converters = {
@@ -41,6 +44,7 @@ converters = {
     'Decimal': Decimal,
     'Date': date_converter,
     'DateTime': datetime_converter,
+    'DateTime64': datetime_converter,
     'IPv4': IPv4Address,
     'IPv6': IPv6Address,
 }

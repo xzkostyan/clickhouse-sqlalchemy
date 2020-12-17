@@ -36,6 +36,7 @@ ischema_names = {
     'UInt8': types.UInt8,
     'Date': DATE,
     'DateTime': DATETIME,
+    'DateTime64': DATETIME,
     'Float64': FLOAT,
     'Float32': FLOAT,
     'Decimal': types.Decimal,
@@ -664,6 +665,12 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_datetime(self, type_, **kw):
         return 'DateTime'
+
+    def visit_datetime64(self, type_, **kw):
+        if type_.timezone:
+            return 'DateTime64(%s, \'%s\')' % (type_.precision, type_.timezone)
+        else:
+            return 'DateTime64(%s)' % type_.precision
 
     def visit_float32(self, type_, **kw):
         return 'Float32'
