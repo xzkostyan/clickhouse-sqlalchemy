@@ -109,7 +109,7 @@ class DateTime64(DateTime):
     def __init__(self, precision=3, timezone=None):
         self.precision = precision
         self.timezone = timezone
-        super().__init__()
+        super(DateTime64, self).__init__()
 
 
 class Enum(types.Enum):
