@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- DateTime64 support. Pull request [#116](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/116) by [aamalev](https://github.com/aamalev).
 
 ## [0.1.5] - 2020-12-14
 ### Added
@@ -13,7 +15,7 @@
 - Session parametrization in tests.
 - Exclude table name from `DEFAULT` column option.
 - Allow multiple columns in `PARTITION BY`.
-- Replace `uuid1` with `uuid4` for automatic query_id generation.
+- Replace `uuid1` with `uuid4` for automatic query_id generation. Solves issue [#99setup](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/99).
 
 ### Fixed
 - Remove table names during `JOIN` with`USING` clause.
