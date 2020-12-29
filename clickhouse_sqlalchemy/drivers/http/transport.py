@@ -85,6 +85,9 @@ class RequestsTransport(object):
         if ddl_timeout is not None:
             self.ch_settings['distributed_ddl_task_timeout'] = int(ddl_timeout)
 
+        # Keep connection open between queries.
+        self.http = requests.Session()
+
         super(RequestsTransport, self).__init__()
 
     def execute(self, query, params=None):
@@ -130,7 +133,7 @@ class RequestsTransport(object):
         params.update(self.ch_settings)
 
         # TODO: retries, prepared requests
-        r = requests.post(
+        r = self.http.post(
             self.db_url, auth=self.auth, params=params, data=data,
             stream=stream, timeout=self.timeout, headers=self.headers,
             verify=self.verify,
