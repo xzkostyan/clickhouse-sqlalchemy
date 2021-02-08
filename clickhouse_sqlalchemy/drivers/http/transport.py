@@ -85,8 +85,8 @@ class RequestsTransport(object):
         if ddl_timeout is not None:
             self.ch_settings['distributed_ddl_task_timeout'] = int(ddl_timeout)
 
-        # Keep connection open between queries.
-        self.http = requests.Session()
+        # By default, keep connection open between queries.
+        self.http = kwargs.pop('http_session', requests.Session())
 
         super(RequestsTransport, self).__init__()
 
