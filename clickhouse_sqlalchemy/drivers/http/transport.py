@@ -78,8 +78,7 @@ class RequestsTransport(object):
             if key.startswith('header__')
         }
 
-        se_option = kwargs.pop('surrogate_encoding', '').lower() == 'true'
-        self.use_surrogates = se_option
+        self.unicode_errors = kwargs.pop('unicode_errors', 'escape')
 
         ch_settings = dict(ch_settings or {})
         self.ch_settings = ch_settings
@@ -101,8 +100,8 @@ class RequestsTransport(object):
         r = self._send(query, params=params, stream=True)
         lines = r.iter_lines()
         try:
-            names = parse_tsv(next(lines), self.use_surrogates)
-            types = parse_tsv(next(lines), self.use_surrogates)
+            names = parse_tsv(next(lines), self.unicode_errors)
+            types = parse_tsv(next(lines), self.unicode_errors)
         except StopIteration:
             # Empty result; e.g. a DDL request.
             return
@@ -115,7 +114,7 @@ class RequestsTransport(object):
         for line in lines:
             yield [
                 (conv(x) if conv else x)
-                for x, conv in zip(parse_tsv(line, self.use_surrogates), convs)
+                for x, conv in zip(parse_tsv(line, self.unicode_errors), convs)
             ]
 
     def raw(self, query, params=None, stream=False):

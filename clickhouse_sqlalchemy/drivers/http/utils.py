@@ -1,16 +1,14 @@
 import codecs
 
 
-def unescape(value, use_surrogates=False):
-    # Surrogates keep strings reversible to what's really in the database.
-    errors = 'surrogateescape' if use_surrogates else 'replace'
-
-    # Things like '\0' arrive as '\\0' and must be escaped explicitly.
+def unescape(value, errors=None):
+    if errors is None:
+        errors = 'replace'
     return codecs.escape_decode(value)[0].decode('utf-8', errors=errors)
 
 
-def parse_tsv(line, use_surrogates=False):
+def parse_tsv(line, errors=None):
     return [
-        (unescape(x, use_surrogates) if x != b'\\N' else None)
+        (unescape(x, errors) if x != b'\\N' else None)
         for x in line.split(b'\t')
     ]
