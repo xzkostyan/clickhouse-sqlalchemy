@@ -78,7 +78,8 @@ class RequestsTransport(object):
             if key.startswith('header__')
         }
 
-        self.use_surrogates = kwargs.pop('surrogate_encoding', False)
+        se_option = kwargs.pop('surrogate_encoding', '').lower() == 'true'
+        self.use_surrogates = se_option
 
         ch_settings = dict(ch_settings or {})
         self.ch_settings = ch_settings
