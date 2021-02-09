@@ -80,6 +80,19 @@ When you are using `nginx` as proxy server for ClickHouse server connection stri
 
 Where ``8124`` is proxy port.
 
+If you need control over the underlying HTTP connection, pass a `requests.Session
+<https://requests.readthedocs.io/en/master/user/advanced/#session-objects>`_ instance
+to ``create_engine()``, like so:
+
+    .. code-block:: python
+
+        from sqlalchemy import create_engine
+        from requests import Session
+
+        uri = 'clickhouse://default:@localhost/test'
+
+        engine = create_engine(uri, connect_args={'http_session': Session()})
+
 
 Native
 ------
