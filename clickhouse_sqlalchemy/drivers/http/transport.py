@@ -78,6 +78,8 @@ class RequestsTransport(object):
             if key.startswith('header__')
         }
 
+        self.use_surrogates = kwargs.pop('surrogate_encoding', False)
+
         ch_settings = dict(ch_settings or {})
         self.ch_settings = ch_settings
 
@@ -98,8 +100,8 @@ class RequestsTransport(object):
         r = self._send(query, params=params, stream=True)
         lines = r.iter_lines()
         try:
-            names = parse_tsv(next(lines))
-            types = parse_tsv(next(lines))
+            names = parse_tsv(next(lines), self.use_surrogates)
+            types = parse_tsv(next(lines), self.use_surrogates)
         except StopIteration:
             # Empty result; e.g. a DDL request.
             return
@@ -111,8 +113,8 @@ class RequestsTransport(object):
 
         for line in lines:
             yield [
-                (converter(x) if converter else x)
-                for x, converter in zip(parse_tsv(line), convs)
+                (conv(x) if conv else x)
+                for x, conv in zip(parse_tsv(line, self.use_surrogates), convs)
             ]
 
     def raw(self, query, params=None, stream=False):
