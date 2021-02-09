@@ -10,8 +10,6 @@ def unescape(value, use_surrogates=False):
 
 
 def parse_tsv(line, use_surrogates=False):
-    if line and line[-1] == b'\n':
-        line = line[:-1]
     return [
         (unescape(x, use_surrogates) if x != b'\\N' else None)
         for x in line.split(b'\t')

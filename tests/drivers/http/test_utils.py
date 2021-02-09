@@ -26,11 +26,13 @@ class HttpUtilsTestCase(BaseTestCase):
         self.assertListEqual(actual, expected)
 
     def test_parse_tsv(self):
-        test_values = [b'', b'a\tb\tc', b'a\tb\t\xff']
+        test_values = [b'', b'a\tb\tc\n', b'a\tb\t\xff']
+        expected = [[u''], [u'a', u'b', u'c\n'], [u'a', u'b', u'\ufffd']]
         try:
-            for value in test_values:
-                parse_tsv(value)
+            actual = [parse_tsv(value) for value in test_values]
         except IndexError:
             self.fail('"parse_tsv" raised IndexError exception!')
         except TypeError:
             self.fail('"parse_tsv" raised TypeError exception!')
+
+        self.assertListEqual(actual, expected)
