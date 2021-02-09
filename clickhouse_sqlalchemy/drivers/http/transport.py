@@ -1,5 +1,8 @@
+import re
+
 from datetime import datetime
 from decimal import Decimal
+from functools import partial
 
 from ipaddress import IPv4Address, IPv6Address
 
@@ -13,6 +16,8 @@ from .utils import parse_tsv
 DEFAULT_DDL_TIMEOUT = None
 DATE_NULL = '0000-00-00'
 DATETIME_NULL = '0000-00-00 00:00:00'
+
+EXTRACT_SUBTYPE_RE = re.compile(r'^[^\(]+\((.+)\)$')
 
 
 def date_converter(x):
@@ -28,6 +33,18 @@ def datetime_converter(x):
         return datetime.strptime(x, '%Y-%m-%d %H:%M:%S.%f')
     else:
         return datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+
+
+def nullable_converter(subtype_str, x):
+    if x is None:
+        return None
+
+    converter = _get_type(subtype_str)
+    return converter(x) if converter else x
+
+
+def nothing_converter(x):
+    return None
 
 
 converters = {
@@ -47,6 +64,8 @@ converters = {
     'DateTime64': datetime_converter,
     'IPv4': IPv4Address,
     'IPv6': IPv6Address,
+    'Nullable': nullable_converter,
+    'Nothing': nothing_converter,
 }
 
 
@@ -56,6 +75,9 @@ def _get_type(type_str):
         return result
     if type_str.startswith('Decimal('):
         return converters['Decimal']
+    if type_str.startswith('Nullable('):
+        subtype_str = EXTRACT_SUBTYPE_RE.match(type_str).group(1)
+        return partial(converters['Nullable'], subtype_str)
     return None
 
 
