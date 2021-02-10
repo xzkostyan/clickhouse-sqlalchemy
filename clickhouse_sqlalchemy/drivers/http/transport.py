@@ -73,7 +73,7 @@ def _get_type(type_str):
     result = converters.get(type_str)
     if result is not None:
         return result
-    if type_str.startswith('Decimal('):
+    if type_str.startswith('Decimal'):
         return converters['Decimal']
     if type_str.startswith('Nullable('):
         subtype_str = EXTRACT_SUBTYPE_RE.match(type_str).group(1)
