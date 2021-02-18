@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 from responses import mock
 from mock import patch
@@ -117,3 +118,80 @@ class TransportCase(HttpSessionTestCase):
 
         rv = self.session.query(*table.c).all()
         self.assertEqual(rv, [(None, ), ('\\N', ), ('', )])
+
+    @mock.activate
+    def test_parse_decimal(self):
+        mock.add(
+            mock.POST, self.url, status=200,
+            body=(
+                'a\n' +
+                'Decimal(8,8)\n' +
+                '1.1\n'
+            )
+        )
+
+        table = Table(
+            't1', self.metadata(),
+            Column('a', types.Decimal)
+        )
+
+        rv = self.session.query(*table.c).all()
+        self.assertEqual(rv, [(Decimal('1.1'), )])
+
+    @mock.activate
+    def test_parse_decimal_bits(self):
+        mock.add(
+            mock.POST, self.url, status=200,
+            body=(
+                'a\n' +
+                'Decimal32(8)\n' +
+                '1.1\n'
+            )
+        )
+
+        table = Table(
+            't1', self.metadata(),
+            Column('a', types.Decimal)
+        )
+
+        rv = self.session.query(*table.c).all()
+        self.assertEqual(rv, [(Decimal('1.1'), )])
+
+    @mock.activate
+    def test_parse_nullable_with_subtype(self):
+        mock.add(
+            mock.POST, self.url, status=200,
+            body=(
+                'a\n' +
+                'Nullable(Float64)\n' +
+                '\\N\n' +
+                '1.1\n'
+            )
+        )
+
+        table = Table(
+            't1', self.metadata(),
+            Column('a', types.Float)
+        )
+
+        rv = self.session.query(*table.c).all()
+        self.assertEqual(rv, [(None, ), (1.1, )])
+
+    @mock.activate
+    def test_parse_nullable_nothing(self):
+        mock.add(
+            mock.POST, self.url, status=200,
+            body=(
+                'a\n' +
+                'Nullable(Nothing)\n' +
+                '\\N\n'
+            )
+        )
+
+        table = Table(
+            't1', self.metadata(),
+            Column('a', types.Float)
+        )
+
+        rv = self.session.query(*table.c).all()
+        self.assertEqual(rv, [(None, )])
