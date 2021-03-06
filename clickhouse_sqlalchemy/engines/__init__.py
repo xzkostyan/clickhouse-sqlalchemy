@@ -3,7 +3,10 @@ from .mergetree import (
     MergeTree, AggregatingMergeTree, GraphiteMergeTree, CollapsingMergeTree,
     VersionedCollapsingMergeTree, ReplacingMergeTree, SummingMergeTree
 )
-from .misc import Distributed, Buffer, TinyLog, Log, Memory, Null, File
+from .misc import (
+    Distributed, View, MaterializedView,
+    Buffer, TinyLog, Log, Memory, Null, File
+)
 from .replicated import (
     ReplicatedMergeTree, ReplicatedAggregatingMergeTree,
     ReplicatedCollapsingMergeTree, ReplicatedVersionedCollapsingMergeTree,
@@ -26,6 +29,8 @@ __all__ = (
     ReplicatedVersionedCollapsingMergeTree,
     ReplicatedReplacingMergeTree,
     ReplicatedSummingMergeTree,
+    View,
+    MaterializedView,
     Buffer,
     TinyLog,
     Log,

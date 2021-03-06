@@ -785,10 +785,18 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @reflection.cache
     def get_view_names(self, connection, schema=None, **kw):
-        return self.get_table_names(connection, schema, **kw)
+        query = text(
+            "SHOW TABLES{} WHERE engine LIKE '%View'"
+            .format(self._from_schema(schema)))
+        rows = self._execute(connection, query)
+        return [row.name for row in rows]
 
     def has_table(self, connection, table_name, schema=None):
-        query = 'EXISTS TABLE {}'.format(self._quote_table_name(table_name))
+        if schema:
+            qualified_name = schema + '.' + table_name
+        else:
+            qualified_name = table_name
+        query = 'EXISTS TABLE {}'.format(qualified_name)
         for r in self._execute(connection, query):
             if r.result == 1:
                 return True
@@ -822,10 +830,9 @@ class ClickHouseDialect(default.DefaultDialect):
     def _reflect_engine(self, connection, table_name, table):
         if not self.supports_engine_reflection:
             return
-
         engine_cls_by_name = {e.__name__: e for e in engines.__all__}
 
-        for e in self.get_engines(connection):
+        for e in self.get_engines(connection, schema=table.schema):
             if e['name'] == table_name:
                 engine_cls = engine_cls_by_name.get(e['engine'])
                 engine = engine_cls.reflect(**e)
@@ -840,9 +847,21 @@ class ClickHouseDialect(default.DefaultDialect):
             return str(table_name)
         return self.identifier_preparer.quote_identifier(table_name)
 
+    def _from_schema(self, schema):
+        # Use case: generate FROM <schema> for SHOW command.
+        if schema:
+            return ' FROM {}'.format(schema)
+        else:
+            return ''
+
     @reflection.cache
     def get_columns(self, connection, table_name, schema=None, **kw):
-        query = 'DESCRIBE TABLE {}'.format(self._quote_table_name(table_name))
+        if schema:
+            qualified_name = schema + '.' + table_name
+        else:
+            qualified_name = table_name
+        query = text(
+            'DESCRIBE TABLE {}'.format(qualified_name))
         rows = self._execute(connection, query)
 
         return [self._get_column_info(row.name, row.type) for row in rows]
@@ -975,7 +994,10 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @reflection.cache
     def get_table_names(self, connection, schema=None, **kw):
-        rows = self._execute(connection, 'SHOW TABLES')
+        query = text(
+            "SHOW TABLES {} WHERE engine NOT LIKE '%View'"
+            .format(self._from_schema(schema)))
+        rows = self._execute(connection, query)
         return [row.name for row in rows]
 
     @reflection.cache
@@ -985,7 +1007,10 @@ class ClickHouseDialect(default.DefaultDialect):
             'primary_key', 'sampling_key'
         ]
 
-        database = connection.engine.url.database
+        if schema:
+            database = schema
+        else:
+            database = connection.engine.url.database
 
         query = text(
             'SELECT {} FROM system.tables WHERE database = :database'
