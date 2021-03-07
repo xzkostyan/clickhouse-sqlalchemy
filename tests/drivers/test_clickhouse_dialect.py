@@ -16,6 +16,10 @@ class ClickHouseDialectTestCase(BaseTestCase):
     def dialect(self):
         return self.session.bind.dialect
 
+    @property
+    def connection(self):
+        return self.session.connection()
+
     def setUp(self):
         super(ClickHouseDialectTestCase, self).setUp()
         self.table = Table(
@@ -52,22 +56,22 @@ class ClickHouseDialectTestCase(BaseTestCase):
 
     def test_get_table_names(self):
         self.table.create(self.session.bind)
-        db_tables = self.dialect.get_table_names(self.session)
+        db_tables = self.dialect.get_table_names(self.connection)
         self.assertIn(self.table.name, db_tables)
 
     def test_get_table_names_with_schema(self):
         self.table.create(self.session.bind)
-        db_tables = self.dialect.get_table_names(self.session, 'system')
+        db_tables = self.dialect.get_table_names(self.connection, 'system')
         self.assertIn('columns', db_tables)
 
     def test_get_view_names(self):
         self.table.create(self.session.bind)
-        db_views = self.dialect.get_view_names(self.session)
+        db_views = self.dialect.get_view_names(self.connection)
         self.assertNotIn(self.table.name, db_views)
 
     def test_get_view_names_with_schema(self):
         self.table.create(self.session.bind)
-        db_views = self.dialect.get_view_names(self.session, test_database)
+        db_views = self.dialect.get_view_names(self.connection, test_database)
         self.assertNotIn(self.table.name, db_views)
 
     def test_reflecttable(self):
