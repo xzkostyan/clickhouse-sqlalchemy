@@ -87,6 +87,14 @@ class _NoParamsEngine(Engine):
         return cls()
 
 
+class View(_NoParamsEngine):
+    pass
+
+
+class MaterializedView(_NoParamsEngine):
+    pass
+
+
 class TinyLog(_NoParamsEngine):
     pass
 

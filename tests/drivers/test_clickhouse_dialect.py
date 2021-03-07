@@ -1,4 +1,4 @@
-from sqlalchemy import Column, create_engine
+from sqlalchemy import Column, create_engine, inspect
 
 from clickhouse_sqlalchemy import make_session, engines, types, Table
 from tests.testcase import BaseTestCase
@@ -42,10 +42,53 @@ class ClickHouseDialectTestCase(BaseTestCase):
                                    self.table.name)
         )
 
+    def test_has_table_with_schema(self):
+        self.assertFalse(
+            self.dialect.has_table(self.session, 'bad', schema='system')
+        )
+        self.assertTrue(
+            self.dialect.has_table(self.session, 'columns', schema='system')
+        )
+
     def test_get_table_names(self):
         self.table.create(self.session.bind)
         db_tables = self.dialect.get_table_names(self.session)
         self.assertIn(self.table.name, db_tables)
+
+    def test_get_table_names_with_schema(self):
+        self.table.create(self.session.bind)
+        db_tables = self.dialect.get_table_names(self.session, 'system')
+        self.assertIn('columns', db_tables)
+
+    def test_get_view_names(self):
+        self.table.create(self.session.bind)
+        db_views = self.dialect.get_view_names(self.session)
+        self.assertNotIn(self.table.name, db_views)
+
+    def test_get_view_names_with_schema(self):
+        self.table.create(self.session.bind)
+        db_views = self.dialect.get_view_names(self.session, test_database)
+        self.assertNotIn(self.table.name, db_views)
+
+    def test_reflecttable(self):
+        self.table.create(self.session.bind)
+        meta = self.metadata()
+        insp = inspect(self.session.bind)
+        reflected_table = Table(self.table.name, meta)
+        insp.reflecttable(reflected_table, None)
+
+        self.assertEqual(self.table.name, reflected_table.name)
+
+    def test_reflecttable_with_schema(self):
+        # Imitates calling sequence for clients like Superset that look
+        # across schemas.
+        meta = self.metadata()
+        insp = inspect(self.session.bind)
+        reflected_table = Table('columns', meta, schema='system')
+        insp.reflecttable(reflected_table, None)
+
+        self.assertEqual(reflected_table.name, 'columns')
+        self.assertEqual(reflected_table.schema, 'system')
 
     def test_get_schema_names(self):
         schemas = self.dialect.get_schema_names(self.session)
