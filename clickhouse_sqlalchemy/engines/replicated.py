@@ -36,14 +36,14 @@ class ReplicatedMergeTree(ReplicatedEngineMixin, MergeTree):
         )
 
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         args = cls._reflect_replicated(engine_full)
         table_path, replica_name = args[:2]
 
         return cls(
             table_path.strip("'"), replica_name.strip("'"),
             *args[2:],
-            **cls._reflect_merge_tree(**kwargs)
+            **cls._reflect_merge_tree(table, **kwargs)
         )
 
 
@@ -61,14 +61,14 @@ class ReplicatedAggregatingMergeTree(ReplicatedEngineMixin,
         )
 
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         args = cls._reflect_replicated(engine_full)
         table_path, replica_name = args[:2]
 
         return cls(
             table_path.strip("'"), replica_name.strip("'"),
             *args[2:],
-            **cls._reflect_merge_tree(**kwargs)
+            **cls._reflect_merge_tree(table, **kwargs)
         )
 
 
@@ -86,14 +86,14 @@ class ReplicatedCollapsingMergeTree(ReplicatedEngineMixin,
         )
 
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         args = cls._reflect_replicated(engine_full)
         table_path, replica_name = args[:2]
 
         return cls(
             table_path.strip("'"), replica_name.strip("'"),
             *args[2:],
-            **cls._reflect_merge_tree(**kwargs)
+            **cls._reflect_merge_tree(table, **kwargs)
         )
 
 
@@ -111,14 +111,14 @@ class ReplicatedVersionedCollapsingMergeTree(ReplicatedEngineMixin,
         )
 
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         args = cls._reflect_replicated(engine_full)
         table_path, replica_name = args[:2]
 
         return cls(
             table_path.strip("'"), replica_name.strip("'"),
             *args[2:],
-            **cls._reflect_merge_tree(**kwargs)
+            **cls._reflect_merge_tree(table, **kwargs)
         )
 
 
@@ -135,14 +135,14 @@ class ReplicatedReplacingMergeTree(ReplicatedEngineMixin, ReplacingMergeTree):
         )
 
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         args = cls._reflect_replicated(engine_full)
         table_path, replica_name = args[:2]
 
         return cls(
             table_path.strip("'"), replica_name.strip("'"),
             *args[2:],
-            **cls._reflect_merge_tree(**kwargs)
+            **cls._reflect_merge_tree(table, **kwargs)
         )
 
 
@@ -159,7 +159,7 @@ class ReplicatedSummingMergeTree(ReplicatedEngineMixin, SummingMergeTree):
         )
 
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         args = cls._reflect_replicated(engine_full)
         table_path, replica_name = args[:2]
         columns = None
@@ -169,5 +169,5 @@ class ReplicatedSummingMergeTree(ReplicatedEngineMixin, SummingMergeTree):
         return cls(
             table_path.strip("'"), replica_name.strip("'"),
             columns=columns,
-            **cls._reflect_merge_tree(**kwargs)
+            **cls._reflect_merge_tree(table, **kwargs)
         )

@@ -24,7 +24,7 @@ class Distributed(Engine):
         return params
 
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         engine = parse_columns(engine_full, delimeter=' ')[0]
         columns = engine.split('(', 1)[1][:-1]
         columns = parse_columns(columns)
@@ -61,7 +61,7 @@ class Buffer(Engine):
         ]
 
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         engine = parse_columns(engine_full, delimeter=' ')[0]
         params = parse_columns(engine[len(cls.__name__):].strip("()"))
 
@@ -83,7 +83,7 @@ class Buffer(Engine):
 
 class _NoParamsEngine(Engine):
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         return cls()
 
 
@@ -145,6 +145,6 @@ class File(Engine):
         return (self.data_format, )
 
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         fmt = engine_full.split('(', 1)[1][:-1].strip("'")
         return cls(fmt)

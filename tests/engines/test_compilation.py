@@ -1,4 +1,4 @@
-from sqlalchemy import Column, func, exc
+from sqlalchemy import Column, func, exc, text
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, get_declarative_base, Table
@@ -437,6 +437,30 @@ class MergeTreeTestCase(EngineTestCaseBase):
                 engines.ReplacingMergeTree(
                     version=version,
                     partition_by=func.toYYYYMM(date),
+                    order_by=(date, x),
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table '
+            '(date Date, x Int32, y String, version Int32) '
+            'ENGINE = ReplacingMergeTree(version) '
+            'PARTITION BY toYYYYMM(date) '
+            'ORDER BY (date, x)'
+        )
+
+    def test_partition_by_text(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+            version = Column(types.Int32)
+
+            __table_args__ = (
+                engines.ReplacingMergeTree(
+                    version=version,
+                    partition_by=text('toYYYYMM(date)'),
                     order_by=(date, x),
                 ),
             )

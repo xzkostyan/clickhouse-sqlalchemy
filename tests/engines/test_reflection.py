@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 
-from sqlalchemy import Column
+from sqlalchemy import Column, text
 from mock import Mock
 
 from clickhouse_sqlalchemy import types, engines, Table
@@ -45,6 +45,20 @@ class EngineReflectionTestCase(BaseTestCase):
         with self._test_table(engine) as (table, engine):
             self.assertIsInstance(engine, engines.MergeTree)
             self.assertEqual(engine.partition_by.columns, [table.c.x])
+            self.assertEqual(engine.order_by.columns, [table.c.x])
+            self.assertEqual(engine.primary_key.columns, [table.c.x])
+
+    def test_merge_tree_param_expressions(self):
+        engine = engines.MergeTree(
+            partition_by=text('toYYYYMM(toDate(x))'),
+            order_by='x', primary_key='x'
+        )
+
+        with self._test_table(engine) as (table, engine):
+            self.assertIsInstance(engine, engines.MergeTree)
+            self.assertEqual(
+                str(engine.partition_by.expressions[0]), 'toYYYYMM(toDate(x))'
+            )
             self.assertEqual(engine.order_by.columns, [table.c.x])
             self.assertEqual(engine.primary_key.columns, [table.c.x])
 
@@ -188,9 +202,11 @@ class EngineClassReflectionTestCase(BaseTestCase):
             "PARTITION BY x ORDER BY x PRIMARY KEY x"
         )
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full, partition_key='x', sorting_key='x', primary_key='x'
+            table, engine_full,
+            partition_key='x', sorting_key='x', primary_key='x'
         )
 
         engine.__init__.assert_called_with(
@@ -202,8 +218,9 @@ class EngineClassReflectionTestCase(BaseTestCase):
         engine = engines.Distributed
         engine_full = 'Distributed(cluster, test, merge_distributed1, rand())'
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
-        engine.reflect(engine_full)
+        engine.reflect(table, engine_full)
 
         engine.__init__.assert_called_with(
             'cluster', 'test', 'merge_distributed1', 'rand()'
@@ -213,8 +230,9 @@ class EngineClassReflectionTestCase(BaseTestCase):
         engine = engines.Distributed
         engine_full = 'Distributed(cluster, test, merge_distributed1)'
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
-        engine.reflect(engine_full)
+        engine.reflect(table, engine_full)
 
         engine.__init__.assert_called_with(
             'cluster', 'test', 'merge_distributed1'
@@ -224,9 +242,11 @@ class EngineClassReflectionTestCase(BaseTestCase):
         engine = engines.ReplicatedMergeTree
         engine_full = "ReplicatedMergeTree('/table/path', 'name')"
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full, partition_key='x', sorting_key='x', primary_key='x'
+            table, engine_full,
+            partition_key='x', sorting_key='x', primary_key='x'
         )
 
         engine.__init__.assert_called_with(
@@ -240,9 +260,11 @@ class EngineClassReflectionTestCase(BaseTestCase):
             "ReplicatedCollapsingMergeTree('/table/path', 'name', sign)"
         )
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full, partition_key='x', sorting_key='x', primary_key='x'
+            table, engine_full,
+            partition_key='x', sorting_key='x', primary_key='x'
         )
 
         engine.__init__.assert_called_with(
@@ -257,9 +279,11 @@ class EngineClassReflectionTestCase(BaseTestCase):
             "sign, version)"
         )
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full, partition_key='x', sorting_key='x', primary_key='x'
+            table, engine_full,
+            partition_key='x', sorting_key='x', primary_key='x'
         )
 
         engine.__init__.assert_called_with(
@@ -273,9 +297,11 @@ class EngineClassReflectionTestCase(BaseTestCase):
             "ReplicatedReplacingMergeTree('/table/path', 'name', version)"
         )
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full, partition_key='x', sorting_key='x', primary_key='x'
+            table, engine_full,
+            partition_key='x', sorting_key='x', primary_key='x'
         )
 
         engine.__init__.assert_called_with(
@@ -287,9 +313,11 @@ class EngineClassReflectionTestCase(BaseTestCase):
         engine = engines.ReplicatedReplacingMergeTree
         engine_full = "ReplicatedReplacingMergeTree('/table/path', 'name')"
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full, partition_key='x', sorting_key='x', primary_key='x'
+            table, engine_full,
+            partition_key='x', sorting_key='x', primary_key='x'
         )
 
         engine.__init__.assert_called_with(
@@ -301,9 +329,11 @@ class EngineClassReflectionTestCase(BaseTestCase):
         engine = engines.ReplicatedAggregatingMergeTree
         engine_full = "ReplicatedAggregatingMergeTree('/table/path', 'name')"
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full, partition_key='x', sorting_key='x', primary_key='x'
+            table, engine_full,
+            partition_key='x', sorting_key='x', primary_key='x'
         )
 
         engine.__init__.assert_called_with(
@@ -315,9 +345,11 @@ class EngineClassReflectionTestCase(BaseTestCase):
         engine = engines.ReplicatedSummingMergeTree
         engine_full = "ReplicatedSummingMergeTree('/table/path', 'name', y)"
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full, partition_key='x', sorting_key='x', primary_key='x'
+            table, engine_full,
+            partition_key='x', sorting_key='x', primary_key='x'
         )
 
         engine.__init__.assert_called_with(
@@ -331,9 +363,11 @@ class EngineClassReflectionTestCase(BaseTestCase):
             "ReplicatedSummingMergeTree('/table/path', 'name', (y, z))"
         )
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full, partition_key='x', sorting_key='x', primary_key='x'
+            table, engine_full,
+            partition_key='x', sorting_key='x', primary_key='x'
         )
 
         engine.__init__.assert_called_with(
@@ -345,9 +379,11 @@ class EngineClassReflectionTestCase(BaseTestCase):
         engine = engines.ReplicatedSummingMergeTree
         engine_full = "ReplicatedSummingMergeTree('/table/path', 'name')"
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full, partition_key='x', sorting_key='x', primary_key='x'
+            table, engine_full,
+            partition_key='x', sorting_key='x', primary_key='x'
         )
 
         engine.__init__.assert_called_with(
@@ -363,8 +399,9 @@ class EngineClassReflectionTestCase(BaseTestCase):
             ")"
         )
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
-        engine.reflect(engine_full)
+        engine.reflect(table, engine_full)
 
         engine.__init__.assert_called_with(
             'default', 'test', 16, 10, 100, 10000, 1000000, 10000000, 100000000
@@ -377,9 +414,10 @@ class EngineClassReflectionTestCase(BaseTestCase):
             "PARTITION BY x ORDER BY x PRIMARY KEY x TTL x"
         )
 
+        table = Mock(columns=['x'])
         engine.__init__ = Mock(return_value=None)
         engine.reflect(
-            engine_full,
+            table, engine_full,
             partition_key='x',
             sorting_key='x',
             primary_key='x',

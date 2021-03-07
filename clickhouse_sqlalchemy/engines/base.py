@@ -29,7 +29,7 @@ class Engine(SchemaEventTarget, Visitable):
         self.table.engine = self
 
     @classmethod
-    def reflect(cls, engine_full, **kwargs):
+    def reflect(cls, table, engine_full, **kwargs):
         raise NotImplementedError
 
 

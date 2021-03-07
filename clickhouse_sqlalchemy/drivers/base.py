@@ -838,7 +838,7 @@ class ClickHouseDialect(default.DefaultDialect):
         for e in self.get_engines(connection, schema=table.schema):
             if e['name'] == table_name:
                 engine_cls = engine_cls_by_name.get(e['engine'])
-                engine = engine_cls.reflect(**e)
+                engine = engine_cls.reflect(table, **e)
                 engine._set_parent(table)
                 return
 
