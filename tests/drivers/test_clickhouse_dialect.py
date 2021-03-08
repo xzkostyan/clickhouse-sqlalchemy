@@ -98,6 +98,11 @@ class ClickHouseDialectTestCase(BaseTestCase):
         schemas = self.dialect.get_schema_names(self.session)
         self.assertIn(test_database, schemas)
 
+    def test_columns_compilation(self):
+        # should not raise UnsupportedCompilationError
+        col = Column('x', types.Nullable(types.Int32))
+        self.assertEqual(str(col.type), 'Nullable(Int32)')
+
 
 class CachedServerVersionTestCase(BaseTestCase):
 

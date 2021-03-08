@@ -1052,3 +1052,6 @@ class ClickHouseDialect(default.DefaultDialect):
         self.forced_server_version_string = cparams.pop(
             'server_version', self.forced_server_version_string)
         return super(ClickHouseDialect, self).connect(*cargs, **cparams)
+
+
+clickhouse_dialect = ClickHouseDialect()

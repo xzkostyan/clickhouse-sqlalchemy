@@ -2,19 +2,28 @@ from sqlalchemy.sql.type_api import to_instance
 from sqlalchemy import types
 
 
-class String(types.String):
+class ClickHouseTypeEngine(types.TypeEngine):
+    def compile(self, dialect=None):
+        from clickhouse_sqlalchemy.drivers.base import clickhouse_dialect
+
+        return super(ClickHouseTypeEngine, self).compile(
+            dialect=clickhouse_dialect
+        )
+
+
+class String(types.String, ClickHouseTypeEngine):
     pass
 
 
-class Int(types.Integer):
+class Int(types.Integer, ClickHouseTypeEngine):
     pass
 
 
-class Float(types.Float):
+class Float(types.Float, ClickHouseTypeEngine):
     pass
 
 
-class Array(types.TypeEngine):
+class Array(ClickHouseTypeEngine):
     __visit_name__ = 'array'
 
     def __init__(self, item_type):
@@ -35,7 +44,7 @@ class Array(types.TypeEngine):
         return process
 
 
-class Nullable(types.TypeEngine):
+class Nullable(ClickHouseTypeEngine):
     __visit_name__ = 'nullable'
 
     def __init__(self, nested_type):
@@ -47,7 +56,7 @@ class UUID(String):
     __visit_name__ = 'uuid'
 
 
-class LowCardinality(types.TypeEngine):
+class LowCardinality(ClickHouseTypeEngine):
     __visit_name__ = 'lowcardinality'
 
     def __init__(self, nested_type):
@@ -95,15 +104,15 @@ class Float64(Float):
     __visit_name__ = 'float64'
 
 
-class Date(types.Date):
+class Date(types.Date, ClickHouseTypeEngine):
     __visit_name__ = 'date'
 
 
-class DateTime(types.Date):
+class DateTime(types.Date, ClickHouseTypeEngine):
     __visit_name__ = 'datetime'
 
 
-class DateTime64(DateTime):
+class DateTime64(DateTime, ClickHouseTypeEngine):
     __visit_name__ = 'datetime64'
 
     def __init__(self, precision=3, timezone=None):
@@ -112,7 +121,7 @@ class DateTime64(DateTime):
         super(DateTime64, self).__init__()
 
 
-class Enum(types.Enum):
+class Enum(types.Enum, ClickHouseTypeEngine):
     __visit_name__ = 'enum'
 
     def __init__(self, *enums, **kw):
@@ -130,5 +139,5 @@ class Enum16(Enum):
     __visit_name__ = 'enum16'
 
 
-class Decimal(types.Numeric):
+class Decimal(types.Numeric, ClickHouseTypeEngine):
     __visit_name__ = 'numeric'
