@@ -97,7 +97,13 @@ class RequestsTransport(object):
         self.db_name = db_name
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
-        self.verify = False if verify.lower() == 'false' else True
+        self.verify = (
+            verify
+            if not isinstance(verify, str)
+            else (
+                False 
+                if verify.lower() == 'false'
+                else True))
         self.headers = {
             key[8:]: value
             for key, value in kwargs.items()
