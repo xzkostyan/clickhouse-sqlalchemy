@@ -1,8 +1,21 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.1.6] - 2021-03-15
 ### Added
-- DateTime64 support. Pull request [#116](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/116) by [aamalev](https://github.com/aamalev).
+- [HTTP] Optional custom `requests.Session`. Pull request [#119](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/119) by [carlosefr](https://github.com/carlosefr).
+- DateTime64 type. Pull request [#116](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/116) by [aamalev](https://github.com/aamalev).
+- [HTTP] Keep HTTP connection open between queries. Pull request [#117](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/117) by [carlosefr](https://github.com/carlosefr).
+
+### Fixed
+- [HTTP] Don't lose information on unicode conversion. Pull request [#120](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/120) by [carlosefr](https://github.com/carlosefr).
+- [HTTP] Fix server version parsing (non-numeric build). Pull request [#118](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/118) by [carlosefr](https://github.com/carlosefr).
+- [HTTP] Handle nullable columns. Pull request [#121](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/121) by [carlosefr](https://github.com/carlosefr).
+- Reflection for schema and views handling. Pull request [#125](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/125) by [hodgesrm](https://github.com/hodgesrm).
+- Expressions reflection in *MergeTree engines. Solves issue [#123](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/123). 
+- Columns compilation fix. Replace default dialect. Solves issue [#124](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/124).
+- [HTTP] Proper handling `verify` flag when parsing DSN. Pull request [#126](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/126) by [yhvicey](https://github.com/yhvicey).
 
 ## [0.1.5] - 2020-12-14
 ### Added
@@ -15,7 +28,7 @@
 - Session parametrization in tests.
 - Exclude table name from `DEFAULT` column option.
 - Allow multiple columns in `PARTITION BY`.
-- Replace `uuid1` with `uuid4` for automatic query_id generation. Solves issue [#99setup](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/99).
+- Replace `uuid1` with `uuid4` for automatic query_id generation. Solves issue [#99](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/99).
 
 ### Fixed
 - Remove table names during `JOIN` with`USING` clause.
@@ -199,7 +212,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.5...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.6...HEAD
+[0.1.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.5...0.1.6
 [0.1.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.4...0.1.5
 [0.1.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.3...0.1.4
 [0.1.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.2...0.1.3
