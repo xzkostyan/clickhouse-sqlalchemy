@@ -39,7 +39,7 @@ class EngineReflectionTestCase(BaseTestCase):
 
     def test_merge_tree(self):
         engine = engines.MergeTree(
-            partition_by='x', order_by='x', primary_key='x'
+            partition_by='x', order_by='x', primary_key='x', sample_by='x'
         )
 
         with self._test_table(engine) as (table, engine):
@@ -47,6 +47,7 @@ class EngineReflectionTestCase(BaseTestCase):
             self.assertEqual(engine.partition_by.columns, [table.c.x])
             self.assertEqual(engine.order_by.columns, [table.c.x])
             self.assertEqual(engine.primary_key.columns, [table.c.x])
+            self.assertEqual(engine.sample_by.columns, [table.c.x])
 
     def test_merge_tree_param_expressions(self):
         engine = engines.MergeTree(

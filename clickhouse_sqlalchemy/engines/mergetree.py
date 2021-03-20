@@ -32,7 +32,7 @@ class MergeTree(Engine):
 
         self.sample_by = None
         if sample_by is not None:
-            self.sample_by = KeysExpressionOrColumn(sample_by)
+            self.sample_by = KeysExpressionOrColumn(*to_list(sample_by))
 
         self.ttl = None
         if ttl is not None:
