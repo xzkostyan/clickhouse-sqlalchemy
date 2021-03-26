@@ -3,7 +3,6 @@ import re
 from datetime import datetime
 from decimal import Decimal
 from functools import partial
-from sqlalchemy.util import asbool
 
 from ipaddress import IPv4Address, IPv6Address
 
@@ -91,14 +90,15 @@ class RequestsTransport(object):
     def __init__(
             self,
             db_url, db_name, username, password,
-            timeout=None, ch_settings=None, verify=None,
+            timeout=None, ch_settings=None,
             **kwargs):
 
         self.db_url = db_url
         self.db_name = db_name
         self.auth = (username, password)
         self.timeout = float(timeout) if timeout is not None else None
-        self.verify = asbool(verify)
+        self.verify = kwargs.pop('verify', True)
+        self.cert = kwargs.pop('cert', None)
         self.headers = {
             key[8:]: value
             for key, value in kwargs.items()
@@ -165,7 +165,7 @@ class RequestsTransport(object):
         r = self.http.post(
             self.db_url, auth=self.auth, params=params, data=data,
             stream=stream, timeout=self.timeout, headers=self.headers,
-            verify=self.verify,
+            verify=self.verify, cert=self.cert
         )
         if r.status_code != 200:
             orig = HTTPException(r.text)

@@ -34,6 +34,8 @@ class ClickHouseDialect_http(ClickHouseDialect):
         endpoint = url.query.pop('endpoint', '')
 
         kwargs.update(url.query)
+        if kwargs.get('verify') and kwargs['verify'] in ('False', 'false'):
+            kwargs['verify'] = False
 
         db_url = '%s://%s:%d/%s' % (protocol, url.host, port, endpoint)
 
