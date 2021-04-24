@@ -24,6 +24,9 @@ class EngineReflectionTestCase(BaseTestCase):
             table = Table('test_reflect', metadata, autoload=True)
             yield table, table.engine
 
+    def assertColumns(self, first, second, msg=None):
+        self.assertListEqual(list(first), second, msg=msg)
+
     def test_file(self):
         engine = engines.File('Values')
 
@@ -44,10 +47,10 @@ class EngineReflectionTestCase(BaseTestCase):
 
         with self._test_table(engine) as (table, engine):
             self.assertIsInstance(engine, engines.MergeTree)
-            self.assertEqual(engine.partition_by.columns, [table.c.x])
-            self.assertEqual(engine.order_by.columns, [table.c.x])
-            self.assertEqual(engine.primary_key.columns, [table.c.x])
-            self.assertEqual(engine.sample_by.columns, [table.c.x])
+            self.assertColumns(engine.partition_by.columns, [table.c.x])
+            self.assertColumns(engine.order_by.columns, [table.c.x])
+            self.assertColumns(engine.primary_key.columns, [table.c.x])
+            self.assertColumns(engine.sample_by.columns, [table.c.x])
 
     def test_merge_tree_param_expressions(self):
         engine = engines.MergeTree(
@@ -60,8 +63,8 @@ class EngineReflectionTestCase(BaseTestCase):
             self.assertEqual(
                 str(engine.partition_by.expressions[0]), 'toYYYYMM(toDate(x))'
             )
-            self.assertEqual(engine.order_by.columns, [table.c.x])
-            self.assertEqual(engine.primary_key.columns, [table.c.x])
+            self.assertColumns(engine.order_by.columns, [table.c.x])
+            self.assertColumns(engine.primary_key.columns, [table.c.x])
 
     def test_aggregating_merge_tree(self):
         engine = engines.AggregatingMergeTree(
@@ -70,9 +73,9 @@ class EngineReflectionTestCase(BaseTestCase):
 
         with self._test_table(engine) as (table, engine):
             self.assertIsInstance(engine, engines.AggregatingMergeTree)
-            self.assertEqual(engine.partition_by.columns, [table.c.x])
-            self.assertEqual(engine.order_by.columns, [table.c.x])
-            self.assertEqual(engine.primary_key.columns, [table.c.x])
+            self.assertColumns(engine.partition_by.columns, [table.c.x])
+            self.assertColumns(engine.order_by.columns, [table.c.x])
+            self.assertColumns(engine.primary_key.columns, [table.c.x])
 
     def test_collapsing_merge_tree(self):
         sign = Column('sign', types.Int8)
@@ -82,10 +85,10 @@ class EngineReflectionTestCase(BaseTestCase):
 
         with self._test_table(engine, sign) as (table, engine):
             self.assertIsInstance(engine, engines.CollapsingMergeTree)
-            self.assertEqual(engine.sign_col.columns, [table.c.sign])
-            self.assertEqual(engine.partition_by.columns, [table.c.x])
-            self.assertEqual(engine.order_by.columns, [table.c.x])
-            self.assertEqual(engine.primary_key.columns, [table.c.x])
+            self.assertColumns(engine.sign_col.columns, [table.c.sign])
+            self.assertColumns(engine.partition_by.columns, [table.c.x])
+            self.assertColumns(engine.order_by.columns, [table.c.x])
+            self.assertColumns(engine.primary_key.columns, [table.c.x])
 
     def test_versioned_collapsing_merge_tree(self):
         sign = Column('sign', types.Int8)
@@ -96,11 +99,13 @@ class EngineReflectionTestCase(BaseTestCase):
 
         with self._test_table(engine, sign, version) as (table, engine):
             self.assertIsInstance(engine, engines.VersionedCollapsingMergeTree)
-            self.assertEqual(engine.sign_col.columns, [table.c.sign])
-            self.assertEqual(engine.version_col.columns, [table.c.version])
-            self.assertEqual(engine.partition_by.columns, [table.c.x])
-            self.assertEqual(engine.order_by.columns, [table.c.x])
-            self.assertEqual(engine.primary_key.columns, [table.c.x])
+            self.assertColumns(engine.sign_col.columns, [table.c.sign])
+            self.assertColumns(engine.version_col.columns, [table.c.version])
+            self.assertColumns(engine.partition_by.columns, [table.c.x])
+            self.assertColumns(
+                engine.order_by.columns, [table.c.x, table.c.version]
+            )
+            self.assertColumns(engine.primary_key.columns, [table.c.x])
 
     def test_summing_merge_tree(self):
         y = Column('y', types.Int8)
@@ -111,10 +116,10 @@ class EngineReflectionTestCase(BaseTestCase):
 
         with self._test_table(engine, y) as (table, engine):
             self.assertIsInstance(engine, engines.SummingMergeTree)
-            self.assertEqual(engine.summing_cols.columns, [table.c.y])
-            self.assertEqual(engine.partition_by.columns, [table.c.x])
-            self.assertEqual(engine.order_by.columns, [table.c.x])
-            self.assertEqual(engine.primary_key.columns, [table.c.x])
+            self.assertColumns(engine.summing_cols.columns, [table.c.y])
+            self.assertColumns(engine.partition_by.columns, [table.c.x])
+            self.assertColumns(engine.order_by.columns, [table.c.x])
+            self.assertColumns(engine.primary_key.columns, [table.c.x])
 
     def test_summing_merge_tree_multiple_columns(self):
         y = Column('y', types.Int8)
@@ -126,12 +131,12 @@ class EngineReflectionTestCase(BaseTestCase):
 
         with self._test_table(engine, y, z) as (table, engine):
             self.assertIsInstance(engine, engines.SummingMergeTree)
-            self.assertEqual(
-                list(engine.summing_cols.columns), [table.c.y, table.c.z]
+            self.assertColumns(
+                engine.summing_cols.columns, [table.c.y, table.c.z]
             )
-            self.assertEqual(engine.partition_by.columns, [table.c.x])
-            self.assertEqual(engine.order_by.columns, [table.c.x])
-            self.assertEqual(engine.primary_key.columns, [table.c.x])
+            self.assertColumns(engine.partition_by.columns, [table.c.x])
+            self.assertColumns(engine.order_by.columns, [table.c.x])
+            self.assertColumns(engine.primary_key.columns, [table.c.x])
 
     def test_summing_merge_tree_no_columns(self):
         engine = engines.SummingMergeTree(
@@ -141,9 +146,9 @@ class EngineReflectionTestCase(BaseTestCase):
         with self._test_table(engine) as (table, engine):
             self.assertIsInstance(engine, engines.SummingMergeTree)
             self.assertIsNone(engine.summing_cols)
-            self.assertEqual(engine.partition_by.columns, [table.c.x])
-            self.assertEqual(engine.order_by.columns, [table.c.x])
-            self.assertEqual(engine.primary_key.columns, [table.c.x])
+            self.assertColumns(engine.partition_by.columns, [table.c.x])
+            self.assertColumns(engine.order_by.columns, [table.c.x])
+            self.assertColumns(engine.primary_key.columns, [table.c.x])
 
     def test_replacing_merge_tree(self):
         version = Column('version', types.Int8)
@@ -154,10 +159,10 @@ class EngineReflectionTestCase(BaseTestCase):
 
         with self._test_table(engine, version) as (table, engine):
             self.assertIsInstance(engine, engines.ReplacingMergeTree)
-            self.assertEqual(engine.version_col.columns, [table.c.version])
-            self.assertEqual(engine.partition_by.columns, [table.c.x])
-            self.assertEqual(engine.order_by.columns, [table.c.x])
-            self.assertEqual(engine.primary_key.columns, [table.c.x])
+            self.assertColumns(engine.version_col.columns, [table.c.version])
+            self.assertColumns(engine.partition_by.columns, [table.c.x])
+            self.assertColumns(engine.order_by.columns, [table.c.x])
+            self.assertColumns(engine.primary_key.columns, [table.c.x])
 
     def test_replacing_merge_tree_no_version(self):
         engine = engines.ReplacingMergeTree(
@@ -167,9 +172,9 @@ class EngineReflectionTestCase(BaseTestCase):
         with self._test_table(engine) as (table, engine):
             self.assertIsInstance(engine, engines.ReplacingMergeTree)
             self.assertIsNone(engine.version_col)
-            self.assertEqual(engine.partition_by.columns, [table.c.x])
-            self.assertEqual(engine.order_by.columns, [table.c.x])
-            self.assertEqual(engine.primary_key.columns, [table.c.x])
+            self.assertColumns(engine.partition_by.columns, [table.c.x])
+            self.assertColumns(engine.order_by.columns, [table.c.x])
+            self.assertColumns(engine.primary_key.columns, [table.c.x])
 
     def test_create_reflected(self):
         metadata = self.metadata()
