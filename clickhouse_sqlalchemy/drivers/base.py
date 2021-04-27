@@ -242,8 +242,20 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             )
 
     def _compose_select_body(
-            self, text, select, inner_columns, froms, byfrom, kwargs):
+            self,
+            text,
+            select,
+            compile_state,
+            inner_columns,
+            froms,
+            byfrom,
+            toplevel,
+            kwargs
+    ):  # TODO появились новые аргументы. Возможно, здесь тоже стоит добавить их обработку.
         text += ', '.join(inner_columns)
+
+        # TODO в оригинальной функции появились участки кода связанные с from_linting.
+        #  узнать, что это и зачем.
 
         if froms:
             text += " \nFROM "
@@ -281,16 +293,20 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         if final_clause is not None:
             text += self.final_clause()
 
-        if select._whereclause is not None:
-            t = select._whereclause._compiler_dispatch(self, **kwargs)
+        if select._where_criteria:
+            t = self._generate_delimited_and_list(
+                select._where_criteria, **kwargs
+            )
             if t:
                 text += " \nWHERE " + t
 
         if select._group_by_clause.clauses:
             text += self.group_by_clause(select, **kwargs)
 
-        if select._having is not None:
-            t = select._having._compiler_dispatch(self, **kwargs)
+        if select._having_criteria:
+            t = self._generate_delimited_and_list(
+                select._having_criteria, **kwargs
+            )
             if t:
                 text += " \nHAVING " + t
 

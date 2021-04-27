@@ -35,8 +35,8 @@ class BaseAbstractTestCase(object):
             bind = self.session.bind
         if isinstance(clause, Query):
             context = clause._compile_context()
-            context.statement.use_labels = True
-            clause = context.statement
+            clause = context.compile_state.statement
+            clause.use_labels = True
 
         kw = {}
         compile_kwargs = {}

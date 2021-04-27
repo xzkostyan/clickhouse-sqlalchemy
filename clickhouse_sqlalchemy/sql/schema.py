@@ -14,9 +14,9 @@ class Table(TableBase):
     def drop(self, bind=None, checkfirst=False, if_exists=False):
         if bind is None:
             bind = _bind_or_error(self)
-        bind._run_visitor(ddl.SchemaDropper,
-                          self,
-                          checkfirst=checkfirst, if_exists=if_exists)
+        bind._run_ddl_visitor(ddl.SchemaDropper,
+                              self,
+                              checkfirst=checkfirst, if_exists=if_exists)
 
     def join(self, right, onclause=None, isouter=False, full=False,
              type=None, strictness=None, distribution=None):

@@ -41,7 +41,7 @@ class ClickHouseDialect_native(ClickHouseDialect):
         return connector
 
     def create_connect_args(self, url):
-        url.drivername = 'clickhouse'
+        url = url.set(drivername='clickhouse')
 
         return (str(url), ), {}
 

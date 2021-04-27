@@ -14,7 +14,7 @@ FORMAT_SUFFIX = 'FORMAT TabSeparatedWithNamesAndTypes'
 class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
     def pre_exec(self):
         # TODO: refactor
-        if not self.isinsert and not self.isddl:
+        if not self.isinsert and not self.isddl and not self.statement.endswith(FORMAT_SUFFIX):
             self.statement += ' ' + FORMAT_SUFFIX
 
 
@@ -28,12 +28,13 @@ class ClickHouseDialect_http(ClickHouseDialect):
 
     def create_connect_args(self, url):
         kwargs = {}
-        protocol = url.query.pop('protocol', 'http')
-        port = url.port or 8123
-        db_name = url.database or 'default'
-        endpoint = url.query.pop('endpoint', '')
+        opts = url.translate_connect_args()
+        protocol = opts.get('query', {}).pop('protocol', 'http')
+        port = opts.get('port', 8123)
+        db_name = opts.get('database', 'default')
+        endpoint = opts.get('query', {}).pop('endpoint', '')
 
-        kwargs.update(url.query)
+        kwargs.update(opts.get('query', {}))
         if kwargs.get('verify') and kwargs['verify'] in ('False', 'false'):
             kwargs['verify'] = False
 

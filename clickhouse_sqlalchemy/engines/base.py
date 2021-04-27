@@ -1,4 +1,4 @@
-from sqlalchemy.sql import ClauseElement
+from sqlalchemy.sql import ClauseElement, coercions, roles
 from sqlalchemy.sql.base import SchemaEventTarget
 from sqlalchemy.sql.schema import ColumnCollectionMixin, SchemaItem
 from sqlalchemy.sql.visitors import Visitable
@@ -24,7 +24,7 @@ class Engine(SchemaEventTarget, Visitable):
     def name(self):
         return self.__class__.__name__
 
-    def _set_parent(self, table):
+    def _set_parent(self, table, **kw):
         self.table = table
         self.table.engine = self
 
@@ -45,15 +45,16 @@ class KeysExpressionOrColumn(ColumnCollectionMixin, SchemaItem):
     def __init__(self, *expressions, **kwargs):
         columns = []
         self.expressions = []
-        for expr, column, strname, add_element in self.\
-                _extract_col_expression_collection(expressions):
+        for expr, column, strname, add_element in coercions.expect_col_expression_collection(
+            roles.ColumnArgumentOrKeyRole, expressions
+        ):
             if add_element is not None:
                 columns.append(add_element)
             self.expressions.append(expr)
 
         super(KeysExpressionOrColumn, self).__init__(*columns, **kwargs)
 
-    def _set_parent(self, table):
+    def _set_parent(self, table, **kwargs):
         super(KeysExpressionOrColumn, self)._set_parent(table)
 
     def get_expressions_or_columns(self):

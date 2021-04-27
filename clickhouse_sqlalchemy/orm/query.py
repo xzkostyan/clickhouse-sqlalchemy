@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 
 from sqlalchemy import exc
-from sqlalchemy.orm.base import _generative
+from sqlalchemy.sql.base import _generative
 import sqlalchemy.orm.query as query_module
 from sqlalchemy.orm.query import Query as BaseQuery
 from sqlalchemy.orm.util import _ORMJoin as _StandardORMJoin
@@ -20,9 +20,9 @@ class Query(BaseQuery):
     _limit_by = None
     _array_join = None
 
-    def _compile_context(self, labels=True):
-        context = super(Query, self)._compile_context(labels=labels)
-        statement = context.statement
+    def _compile_context(self, for_statement=False):
+        context = super(Query, self)._compile_context(for_statement=for_statement)
+        statement = context.compile_state.statement
 
         statement._with_totals = self._with_totals
         statement._final_clause = self._final
@@ -32,9 +32,9 @@ class Query(BaseQuery):
 
         return context
 
-    @_generative()
+    @_generative
     def with_totals(self):
-        if not self._group_by:
+        if not self._group_by_clauses:
             raise exc.InvalidRequestError(
                 "Query.with_totals() can be used only with specified "
                 "GROUP BY, call group_by()"
@@ -42,19 +42,19 @@ class Query(BaseQuery):
 
         self._with_totals = True
 
-    @_generative()
+    @_generative
     def array_join(self, *columns):
         self._array_join = ArrayJoin(*columns)
 
-    @_generative()
+    @_generative
     def final(self):
         self._final = True
 
-    @_generative()
+    @_generative
     def sample(self, sample):
         self._sample = sample
 
-    @_generative()
+    @_generative
     def limit_by(self, by_clauses, limit, offset=None):
         self._limit_by = LimitByClause(by_clauses, limit, offset)
 

@@ -123,7 +123,8 @@ class Cursor(object):
             external_tables = None
 
         transport = self._connection.transport
-        execute = transport.execute
+        execute = transport.execute  # TODO запустить на старой версии алхмии и понять,
+                                        # почему КХ драйвер молча не создает таблицу
         execute_iter = getattr(transport, 'execute_iter', None)
 
         self._stream_results = execution_options.get('stream_results', False)
@@ -145,7 +146,6 @@ class Cursor(object):
     def execute(self, operation, parameters=None, context=None):
         self._reset_state()
         self._begin_query()
-
         try:
             execute, execute_kwargs = self._prepare(context)
 

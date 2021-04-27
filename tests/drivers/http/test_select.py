@@ -18,7 +18,7 @@ class FormatSectionTestCase(HttpSessionTestCase):
         )
 
         context = self.execution_ctx_cls._init_compiled(
-            bind.dialect, bind, bind, statement, []
+            bind.dialect, bind, bind, {}, statement, [], [], []
         )
         context.pre_exec()
 
@@ -60,4 +60,4 @@ class FormatSectionTestCase(HttpSessionTestCase):
         query = t2.insert() \
             .from_select(['x'], self.session.query(t1.c.x).subquery())
         statement = self.compile(query, bind=bind)
-        self.assertEqual(statement, 'INSERT INTO t2 (x) SELECT t1.x FROM t1')
+        self.assertEqual('INSERT INTO t2 (x) SELECT anon_1.x FROM (SELECT t1.x AS x FROM t1) AS anon_1', statement)

@@ -16,7 +16,7 @@ class EscapingTestCase(HttpSessionTestCase):
         query = self.session.query(literal('\t'))
         self.assertEqual(
             self.escaped_compile(query, literal_binds=True),
-            "SELECT '\t' AS param_1"
+            "SELECT '\t' AS anon_1"
         )
 
     def test_escaper(self):

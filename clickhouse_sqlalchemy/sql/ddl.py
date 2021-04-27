@@ -7,9 +7,8 @@ from sqlalchemy.sql.operators import custom_op
 
 class DropTable(DropTableBase):
     def __init__(self, element, if_exists=False):
-        self.if_exists = if_exists
         self.on_cluster = element.dialect_options['clickhouse']['cluster']
-        super(DropTable, self).__init__(element)
+        super(DropTable, self).__init__(element, if_exists=if_exists)
 
 
 class SchemaDropper(SchemaDropperBase):
