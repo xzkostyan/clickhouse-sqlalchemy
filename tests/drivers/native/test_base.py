@@ -9,7 +9,7 @@ class TestConnectArgs(BaseTestCase):
         self.dialect = ClickHouseDialect_native()
 
     def test_simple_url(self):
-        url = URL(
+        url = URL.create(
             drivername='clickhouse+native',
             host='localhost',
             database='default',
@@ -20,12 +20,12 @@ class TestConnectArgs(BaseTestCase):
         )
 
     def test_secure_false(self):
-        url = URL(
+        url = URL.create(
             drivername='clickhouse+native',
             username='default',
             password='default',
             host='localhost',
-            port='9001',
+            port=9001,
             database='default',
             query={'secure': 'False'}
         )
@@ -36,10 +36,10 @@ class TestConnectArgs(BaseTestCase):
         )
 
     def test_no_auth(self):
-        url = URL(
+        url = URL.create(
             drivername='clickhouse+native',
             host='localhost',
-            port='9001',
+            port=9001,
             database='default',
         )
         connect_args = self.dialect.create_connect_args(url)

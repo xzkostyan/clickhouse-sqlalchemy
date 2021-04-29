@@ -107,6 +107,7 @@ class IPv4TestCase(BaseTestCase):
             self.session.execute(self.table.insert(),
                                  [{'x': ip} for ip in ips])
 
+            print('select')
             self.assertEqual(
                 self.session.query(self.table.c.x).filter(
                     self.table.c.x.in_([

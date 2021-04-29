@@ -23,10 +23,10 @@ class SelectTestCase(CompilationTestCase):
             .having(func.count() > 0)\
             .order_by(table.c.x.desc())
         self.assertEqual(
-            self.compile(query),
+            self.compile(query, render_postcompile=True),
             'SELECT t1.x AS t1_x '
             'FROM t1 '
-            'WHERE t1.x IN (%(x_1)s, %(x_2)s) '
+            'WHERE t1.x IN (%(x_1_1)s, %(x_1_2)s) '
             'HAVING count(*) > %(count_1)s '
             'ORDER BY t1.x DESC'
         )

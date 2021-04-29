@@ -7,10 +7,10 @@ from sqlalchemy.sql.operators import custom_op
 
 
 class DropTable(DropTableBase):
-    def __init__(self, element, if_exists=False):
-        self.if_exists = if_exists
+    def __init__(self, element, bind=None, if_exists=False):
         self.on_cluster = element.dialect_options['clickhouse']['cluster']
-        super(DropTable, self).__init__(element)
+        super(DropTable, self).__init__(element, bind=bind,
+                                        if_exists=if_exists)
 
 
 class SchemaDropper(SchemaDropperBase):
@@ -18,7 +18,7 @@ class SchemaDropper(SchemaDropperBase):
         self.if_exists = if_exists
         super(SchemaDropper, self).__init__(dialect, connection, **kwargs)
 
-    def visit_table(self, table, drop_ok=False, _is_metadata_operation=False):
+    def visit_table(self, table, **kwargs):
         self.connection.execute(DropTable(table, if_exists=self.if_exists))
 
 

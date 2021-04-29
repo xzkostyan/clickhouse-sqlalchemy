@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 
 from sqlalchemy import exc
-from sqlalchemy.orm.base import _generative
+from sqlalchemy.sql.base import _generative
 import sqlalchemy.orm.query as query_module
 from sqlalchemy.orm.query import Query as BaseQuery
 from sqlalchemy.orm.util import _ORMJoin as _StandardORMJoin
@@ -21,21 +21,21 @@ class Query(BaseQuery):
     _limit_by = None
     _array_join = None
 
-    def _compile_context(self, labels=True):
-        context = super(Query, self)._compile_context(labels=labels)
-        statement = context.statement
+    def _compile_context(self, *args, **kwargs):
+        context = super(Query, self)._compile_context(*args, **kwargs)
+        query = context.query
 
-        statement._with_totals = self._with_totals
-        statement._final_clause = self._final
-        statement._sample_clause = sample_clause(self._sample)
-        statement._limit_by_clause = self._limit_by
-        statement._array_join = self._array_join
+        query._with_totals = self._with_totals
+        query._final_clause = self._final
+        query._sample_clause = sample_clause(self._sample)
+        query._limit_by_clause = self._limit_by
+        query._array_join = self._array_join
 
         return context
 
-    @_generative()
+    @_generative
     def with_totals(self):
-        if not self._group_by:
+        if not self._group_by_clauses:
             raise exc.InvalidRequestError(
                 "Query.with_totals() can be used only with specified "
                 "GROUP BY, call group_by()"
@@ -47,24 +47,24 @@ class Query(BaseQuery):
         join_type = ArrayJoin if not left else LeftArrayJoin
         self._array_join = join_type(*columns)
 
-    @_generative()
+    @_generative
     def array_join(self, *columns, **kwargs):
         left = kwargs.get("left", False)
         self._add_array_join(columns, left=left)
 
-    @_generative()
+    @_generative
     def left_array_join(self, *columns):
         self._add_array_join(columns, left=True)
 
-    @_generative()
+    @_generative
     def final(self):
         self._final = True
 
-    @_generative()
+    @_generative
     def sample(self, sample):
         self._sample = sample
 
-    @_generative()
+    @_generative
     def limit_by(self, by_clauses, limit, offset=None):
         self._limit_by = LimitByClause(by_clauses, limit, offset)
 

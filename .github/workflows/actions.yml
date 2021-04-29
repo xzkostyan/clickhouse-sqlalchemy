@@ -7,10 +7,10 @@ jobs:
       matrix:
         python-version:
           - "2.7"
-          - "3.5"
           - "3.6"
           - "3.7"
           - "3.8"
+          - "3.9"
         clickhouse-version:
           - 19.3.5
           - 18.14.9

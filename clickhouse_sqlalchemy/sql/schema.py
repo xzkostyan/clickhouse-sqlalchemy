@@ -1,4 +1,4 @@
-from sqlalchemy import Table as TableBase
+from sqlalchemy import Table as TableBase, inspection
 from sqlalchemy.sql.base import (
     _bind_or_error, DialectKWArgs, Immutable
 )
@@ -14,9 +14,8 @@ class Table(TableBase):
     def drop(self, bind=None, checkfirst=False, if_exists=False):
         if bind is None:
             bind = _bind_or_error(self)
-        bind._run_visitor(ddl.SchemaDropper,
-                          self,
-                          checkfirst=checkfirst, if_exists=if_exists)
+        bind._run_ddl_visitor(ddl.SchemaDropper, self,
+                              checkfirst=checkfirst, if_exists=if_exists)
 
     def join(self, right, onclause=None, isouter=False, full=False,
              type=None, strictness=None, distribution=None):
@@ -26,7 +25,7 @@ class Table(TableBase):
                     strictness=strictness, distribution=distribution)
 
     def select(self, whereclause=None, **params):
-        return Select([self], whereclause, **params)
+        return Select._create([self], whereclause, **params)
 
     @classmethod
     def _make_from_standard(cls, std_table, _extend_on=None):
@@ -43,6 +42,18 @@ class Table(TableBase):
             ch_table._columns = std_table._columns
 
         return ch_table
+
+    def _autoload(self, metadata, autoload_with, include_columns, **kwargs):
+        rv = super(Table, self)._autoload(
+            metadata, autoload_with, include_columns, **kwargs
+        )
+        autoload_with = _bind_or_error(
+            metadata, msg="No engine is bound to this Table's MetaData."
+        )
+        insp = inspection.inspect(autoload_with)
+        with insp._operation_context() as conn:
+            autoload_with.dialect._reflect_engine(conn, self)
+        return rv
 
 
 class MaterializedView(DialectKWArgs, SchemaItem, Immutable, FromClause):

@@ -31,18 +31,20 @@ class BaseAbstractTestCase(object):
             session = cls.session
         return MetaData(bind=session.bind)
 
-    def _compile(self, clause, bind=None, literal_binds=False):
+    def _compile(self, clause, bind=None, literal_binds=False,
+                 render_postcompile=False):
         if bind is None:
             bind = self.session.bind
         if isinstance(clause, Query):
             context = clause._compile_context()
-            context.statement.use_labels = True
-            clause = context.statement
+            clause = context.query
 
         kw = {}
         compile_kwargs = {}
         if literal_binds:
             compile_kwargs['literal_binds'] = True
+        if render_postcompile:
+            compile_kwargs['render_postcompile'] = True
 
         if compile_kwargs:
             kw['compile_kwargs'] = compile_kwargs

@@ -45,10 +45,10 @@ class ClickHouseDialect_native(ClickHouseDialect):
         return connector
 
     def create_connect_args(self, url):
-        url.drivername = 'clickhouse'
+        url = url.set(drivername='clickhouse')
 
         self.engine_reflection = asbool(
-            url.query.pop('engine_reflection', 'true')
+            url.query.get('engine_reflection', 'true')
         )
 
         return (str(url), ), {}

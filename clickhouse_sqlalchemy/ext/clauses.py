@@ -1,12 +1,11 @@
 from sqlalchemy import util, exc
-from sqlalchemy.sql import type_api
+from sqlalchemy.sql import type_api, roles
 from sqlalchemy.sql.elements import (
-    _literal_as_label_reference,
     BindParameter,
     ColumnElement,
     ClauseList
 )
-from sqlalchemy.sql.selectable import _offset_or_limit_clause
+from sqlalchemy.sql.util import _offset_or_limit_clause
 from sqlalchemy.sql.visitors import Visitable
 
 
@@ -35,7 +34,7 @@ class LimitByClause:
 
     def __init__(self, by_clauses, limit, offset):
         self.by_clauses = ClauseList(
-            *by_clauses, _literal_as_text=_literal_as_label_reference
+            *by_clauses, _literal_as_text=roles.ByOfRole
         )
         self.offset = _offset_or_limit_clause(offset)
         self.limit = _offset_or_limit_clause(limit)

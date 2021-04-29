@@ -29,13 +29,13 @@ class ClickHouseDialect_http(ClickHouseDialect):
 
     def create_connect_args(self, url):
         kwargs = {}
-        protocol = url.query.pop('protocol', 'http')
+        protocol = url.query.get('protocol', 'http')
         port = url.port or 8123
         db_name = url.database or 'default'
-        endpoint = url.query.pop('endpoint', '')
+        endpoint = url.query.get('endpoint', '')
 
         self.engine_reflection = asbool(
-            url.query.pop('engine_reflection', 'true')
+            url.query.get('engine_reflection', 'true')
         )
 
         kwargs.update(url.query)

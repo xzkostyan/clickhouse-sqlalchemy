@@ -28,6 +28,7 @@ class BaseIPComparator(UserDefinedType.Comparator):
         return addresses, networks
 
     def in_(self, other):
+        print(other)
         if isinstance(other, (list, tuple)):
             addresses, networks = self._split_other(other)
             addresses_clause = super(BaseIPComparator, self).in_(
@@ -108,6 +109,12 @@ class IPv4(types.UserDefinedType):
         return process
 
     def bind_expression(self, bindvalue):
+        print(type(bindvalue.value))
+        if isinstance(bindvalue.value, (list, tuple)):
+            bindvalue.value = ([func.toIPv4(x) for x in bindvalue.value])
+            return bindvalue
+            # print(rv)
+            # return rv
         return func.toIPv4(bindvalue)
 
     class comparator_factory(BaseIPComparator):

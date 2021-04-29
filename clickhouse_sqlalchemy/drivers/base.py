@@ -14,8 +14,6 @@ from sqlalchemy.util import (
     to_list,
 )
 
-from sqlalchemy.sql.compiler import crud
-
 from .. import Table, types
 from .. import engines
 from ..util import compat
@@ -276,28 +274,54 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             )
 
     def _compose_select_body(
-            self, text, select, inner_columns, froms, byfrom, kwargs):
-        text += ', '.join(inner_columns)
+        self,
+        text,
+        select,
+        compile_state,
+        inner_columns,
+        froms,
+        byfrom,
+        toplevel,
+        kwargs,
+    ):
+        text += ", ".join(inner_columns)
+
+        if self.linting & compiler.COLLECT_CARTESIAN_PRODUCTS:
+            from_linter = compiler.FromLinter({}, set())
+            warn_linting = self.linting & compiler.WARN_LINTING
+            if toplevel:
+                self.from_linter = from_linter
+        else:
+            from_linter = None
+            warn_linting = False
 
         if froms:
             text += " \nFROM "
 
             if select._hints:
-                text += ', '.join(
+                text += ", ".join(
                     [
                         f._compiler_dispatch(
-                                self,
-                                asfrom=True,
-                                fromhints=byfrom,
-                                **kwargs
+                            self,
+                            asfrom=True,
+                            fromhints=byfrom,
+                            from_linter=from_linter,
+                            **kwargs
                         )
                         for f in froms
                     ]
                 )
             else:
-                text += ', '.join(
-                    [f._compiler_dispatch(self, asfrom=True, **kwargs)
-                     for f in froms]
+                text += ", ".join(
+                    [
+                        f._compiler_dispatch(
+                            self,
+                            asfrom=True,
+                            from_linter=from_linter,
+                            **kwargs
+                        )
+                        for f in froms
+                    ]
                 )
         else:
             text += self.default_from()
@@ -315,20 +339,27 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         if final_clause is not None:
             text += self.final_clause()
 
-        if select._whereclause is not None:
-            t = select._whereclause._compiler_dispatch(self, **kwargs)
+        if select._where_criteria:
+            t = self._generate_delimited_and_list(
+                select._where_criteria, from_linter=from_linter, **kwargs
+            )
             if t:
                 text += " \nWHERE " + t
 
-        if select._group_by_clause.clauses:
+        if warn_linting:
+            from_linter.warn()
+
+        if select._group_by_clauses:
             text += self.group_by_clause(select, **kwargs)
 
-        if select._having is not None:
-            t = select._having._compiler_dispatch(self, **kwargs)
+        if select._having_criteria:
+            t = self._generate_delimited_and_list(
+                select._having_criteria, **kwargs
+            )
             if t:
                 text += " \nHAVING " + t
 
-        if select._order_by_clause.clauses:
+        if select._order_by_clauses:
             text += self.order_by_clause(select, **kwargs)
 
         limit_by_clause = getattr(select, '_limit_by_clause', None)
@@ -336,9 +367,8 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         if limit_by_clause is not None:
             text += self.limit_by_clause(select, **kwargs)
 
-        if (select._limit_clause is not None or
-                select._offset_clause is not None):
-            text += self.limit_clause(select, **kwargs)
+        if select._has_row_limiting_clause:
+            text += self._row_limit_clause(select, **kwargs)
 
         if select._for_update_arg is not None:
             text += self.for_update_clause(select, **kwargs)
@@ -365,13 +395,18 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         return text
 
-    def visit_delete(self, delete_stmt, asfrom=False, **kw):
+    def visit_delete(self, delete_stmt, **kw):
         if not self.dialect.supports_delete:
             raise exc.CompileError(
                 'ALTER DELETE is not supported by this server version'
             )
 
-        extra_froms = delete_stmt._extra_froms
+        compile_state = delete_stmt._compile_state_factory(
+            delete_stmt, self, **kw
+        )
+        delete_stmt = compile_state.statement
+
+        extra_froms = compile_state._extra_froms
 
         correlate_froms = {delete_stmt.table}.union(extra_froms)
         self.stack.append(
@@ -390,11 +425,9 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         text += table_text + " DELETE"
 
-        if delete_stmt._whereclause is not None:
-            # Do not include table name.
-            # ClickHouse doesn't expect tablename in where.
-            t = delete_stmt._whereclause._compiler_dispatch(
-                self, include_table=False, **kw
+        if delete_stmt._where_criteria:
+            t = self._generate_delimited_and_list(
+                delete_stmt._where_criteria, include_table=False, **kw
             )
             if t:
                 text += " WHERE " + t
@@ -405,11 +438,16 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         return text
 
-    def visit_update(self, update_stmt, asfrom=False, **kw):
+    def visit_update(self, update_stmt, **kw):
         if not self.dialect.supports_update:
             raise exc.CompileError(
                 'ALTER UPDATE is not supported by this server version'
             )
+
+        compile_state = update_stmt._compile_state_factory(
+            update_stmt, self, **kw
+        )
+        update_stmt = compile_state.statement
 
         render_extra_froms = []
         correlate_froms = {update_stmt.table}
@@ -427,24 +465,19 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         table_text = self.update_tables_clause(
             update_stmt, update_stmt.table, render_extra_froms, **kw
         )
-        crud_params = crud._setup_crud_params(
-            self, update_stmt, crud.ISUPDATE, **kw
+        crud_params = compiler.crud._get_crud_params(
+            self, update_stmt, compile_state, **kw
         )
 
         text += table_text
         text += " UPDATE "
 
-        text += ", ".join(
-            c[0]._compiler_dispatch(self, include_table=False) +
-            "=" + c[1]
-            for c in crud_params
-        )
+        text += ", ".join(expr + "=" + value for c, expr, value in crud_params)
 
-        if update_stmt._whereclause is not None:
-            # Do not include table name.
-            # ClickHouse doesn't expect tablename in where.
-            t = self.process(update_stmt._whereclause, include_table=False,
-                             **kw)
+        if update_stmt._where_criteria:
+            t = self._generate_delimited_and_list(
+                update_stmt._where_criteria, include_table=False, **kw
+            )
             if t:
                 text += " WHERE " + t
         else:
@@ -520,7 +553,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
 
         return rv
 
-    def visit_primary_key_constraint(self, constraint):
+    def visit_primary_key_constraint(self, constraint, **kw):
         # Do not render PKs.
         return ''
 
@@ -680,7 +713,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
 
         return text
 
-    def visit_drop_table(self, drop):
+    def visit_drop_table(self, drop, **kw):
         text = '\nDROP TABLE '
 
         if getattr(drop, "if_exists", False):
@@ -904,30 +937,30 @@ class ClickHouseDialect(default.DefaultDialect):
                 return True
         return False
 
-    def reflecttable(self, connection, table, include_columns, exclude_columns,
-                     resolve_fks, **opts):
-        """
-        Hack to ensure the autoloaded table class is
-        `clickhouse_sqlalchemy.Table`
-        (to support CH-specific features e.g. joins).
-        """
-        # This check is necessary to support direct instantiation of
-        # `clickhouse_sqlalchemy.Table` and then reflection of it.
-        if not isinstance(table, Table):
-            table.metadata.remove(table)
-            ch_table = Table._make_from_standard(
-                table, _extend_on=opts.get('_extend_on')
-            )
-        else:
-            ch_table = table
-
-        rv = super(ClickHouseDialect, self).reflecttable(
-            connection, ch_table, include_columns, exclude_columns,
-            resolve_fks, **opts)
-
-        self._reflect_engine(connection, table.name, table)
-
-        return rv
+    # def reflecttable(self, connection, table, include_columns, exclude_columns,
+    #                  resolve_fks, **opts):
+    #     """
+    #     Hack to ensure the autoloaded table class is
+    #     `clickhouse_sqlalchemy.Table`
+    #     (to support CH-specific features e.g. joins).
+    #     """
+    #     # This check is necessary to support direct instantiation of
+    #     # `clickhouse_sqlalchemy.Table` and then reflection of it.
+    #     if not isinstance(table, Table):
+    #         table.metadata.remove(table)
+    #         ch_table = Table._make_from_standard(
+    #             table, _extend_on=opts.get('_extend_on')
+    #         )
+    #     else:
+    #         ch_table = table
+    #
+    #     rv = super(ClickHouseDialect, self).reflecttable(
+    #         connection, ch_table, include_columns, exclude_columns,
+    #         resolve_fks, **opts)
+    #
+    #     self._reflect_engine(connection, table.name, table)
+    #
+    #     return rv
 
     def _reflect_engine(self, connection, table_name, table):
         if not self.supports_engine_reflection or not self.engine_reflection:
