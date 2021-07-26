@@ -107,6 +107,10 @@ class Cursor(object):
         if parameters is not None:
             raw_sql = raw_sql % self._params_escaper.escape(parameters)
 
+        raw_sql_big = raw_sql.upper()
+        if 'FORMAT' not in raw_sql_big and 'INSERT' not in raw_sql_big:
+            raw_sql += ' FORMAT TabSeparatedWithNamesAndTypes'
+
         self._reset_state()
         self._begin_query()
 

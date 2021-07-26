@@ -6,7 +6,7 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm import Query
 
 from tests.config import database, host, port, http_port, user, password
-from tests.session import http_session, native_session, system_native_session
+from tests.session import http_session, native_session, system_native_session, http_engine, native_engine
 from tests.util import skip_by_server_version
 
 
@@ -96,6 +96,11 @@ class HttpSessionTestCase(BaseTestCase):
     port = http_port
     session = http_session
 
+class HttpEngineTestCase(BaseTestCase):
+    """ Explicitly HTTP-based session Test Case """
+
+    port = http_port
+    engine = http_engine
 
 class NativeSessionTestCase(BaseTestCase):
     """ Explicitly Native-protocol-based session Test Case """
