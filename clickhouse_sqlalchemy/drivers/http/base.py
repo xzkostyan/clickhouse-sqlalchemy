@@ -1,5 +1,7 @@
 
 import sqlalchemy as sa
+
+from .utils import FORMAT_SUFFIX
 from ...util.compat import string_types
 from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
 from . import connector
@@ -7,8 +9,6 @@ from . import connector
 
 # Export connector version
 VERSION = (0, 0, 2, None)
-
-FORMAT_SUFFIX = 'FORMAT TabSeparatedWithNamesAndTypes'
 
 
 class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
