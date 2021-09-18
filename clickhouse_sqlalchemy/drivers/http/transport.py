@@ -77,6 +77,9 @@ def _get_type(type_str):
     result = converters.get(type_str)
     if result is not None:
         return result
+    # sometimes type_str is DateTime64(x)
+    if type_str.startswith('DateTime64'):
+        return converters['DateTime64']
     if type_str.startswith('Decimal'):
         return converters['Decimal']
     if type_str.startswith('Nullable('):
