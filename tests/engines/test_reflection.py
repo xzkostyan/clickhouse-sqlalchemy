@@ -15,7 +15,7 @@ class EngineReflectionTestCase(BaseTestCase):
     @contextmanager
     def _test_table(self, engine, *columns):
         metadata = self.metadata()
-        columns = list(columns) + [Column('x', types.Int32)] + [engine]
+        columns = list(columns) + [Column('x', types.UInt32)] + [engine]
         table = Table('test_reflect', metadata, *columns)
 
         with self.create_table(table):
