@@ -1,3 +1,4 @@
+from sqlalchemy.util import asbool
 
 from . import connector
 from ..base import (
@@ -42,6 +43,10 @@ class ClickHouseDialect_native(ClickHouseDialect):
 
     def create_connect_args(self, url):
         url.drivername = 'clickhouse'
+
+        self.engine_reflection = asbool(
+            url.query.pop('engine_reflection', 'true')
+        )
 
         return (str(url), ), {}
 

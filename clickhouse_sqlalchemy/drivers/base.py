@@ -744,6 +744,8 @@ class ClickHouseDialect(default.DefaultDialect):
     supports_update = True
     supports_engine_reflection = True
 
+    engine_reflection = True  # Disables engine reflection from URL.
+
     max_identifier_length = 127
     default_paramstyle = 'pyformat'
     colspecs = colspecs
@@ -831,7 +833,7 @@ class ClickHouseDialect(default.DefaultDialect):
         return rv
 
     def _reflect_engine(self, connection, table_name, table):
-        if not self.supports_engine_reflection:
+        if not self.supports_engine_reflection or not self.engine_reflection:
             return
         engine_cls_by_name = {e.__name__: e for e in engines.__all__}
 

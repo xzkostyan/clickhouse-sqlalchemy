@@ -1,5 +1,6 @@
 
 import sqlalchemy as sa
+from sqlalchemy.util import asbool
 
 from .utils import FORMAT_SUFFIX
 from ...util.compat import string_types
@@ -32,6 +33,10 @@ class ClickHouseDialect_http(ClickHouseDialect):
         port = url.port or 8123
         db_name = url.database or 'default'
         endpoint = url.query.pop('endpoint', '')
+
+        self.engine_reflection = asbool(
+            url.query.pop('engine_reflection', 'true')
+        )
 
         kwargs.update(url.query)
         if kwargs.get('verify') and kwargs['verify'] in ('False', 'false'):
