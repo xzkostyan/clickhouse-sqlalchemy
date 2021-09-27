@@ -232,7 +232,7 @@ class JoinTestCase(CompilationTestCase):
         self.assertEqual(
             self.compile(query),
             "SELECT t1.x AS t1_x, t2.x AS t2_x FROM t1 "
-            "ALL INNER JOIN t2 USING x, y"
+            "ALL INNER JOIN t2 USING (x, y)"
         )
 
         query = self.session.query(t1.c.x, t2.c.x) \
@@ -245,7 +245,7 @@ class JoinTestCase(CompilationTestCase):
         self.assertEqual(
             self.compile(query),
             "SELECT t1.x AS t1_x, t2.x AS t2_x FROM t1 "
-            "GLOBAL ALL INNER JOIN t2 USING x, y"
+            "GLOBAL ALL INNER JOIN t2 USING (x, y)"
         )
 
         query = self.session.query(t1.c.x, t2.c.x) \
@@ -260,7 +260,7 @@ class JoinTestCase(CompilationTestCase):
         self.assertEqual(
             self.compile(query),
             "SELECT t1.x AS t1_x, t2.x AS t2_x FROM t1 "
-            "GLOBAL ALL LEFT OUTER JOIN t2 USING x, y"
+            "GLOBAL ALL LEFT OUTER JOIN t2 USING (x, y)"
         )
 
         query = self.session.query(t1.c.x, t2.c.x) \
@@ -275,7 +275,7 @@ class JoinTestCase(CompilationTestCase):
         self.assertEqual(
             self.compile(query),
             "SELECT t1.x AS t1_x, t2.x AS t2_x FROM t1 "
-            "GLOBAL ALL LEFT OUTER JOIN t2 USING x, y"
+            "GLOBAL ALL LEFT OUTER JOIN t2 USING (x, y)"
         )
 
         query = self.session.query(t1.c.x, t2.c.x) \
@@ -287,7 +287,7 @@ class JoinTestCase(CompilationTestCase):
         self.assertEqual(
             self.compile(query),
             "SELECT t1.x AS t1_x, t2.x AS t2_x FROM t1 "
-            "ALL FULL OUTER JOIN t2 USING x, y"
+            "ALL FULL OUTER JOIN t2 USING (x, y)"
         )
 
 

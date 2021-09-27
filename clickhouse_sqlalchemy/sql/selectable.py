@@ -1,7 +1,7 @@
 from sqlalchemy.sql.base import _generative
 from sqlalchemy.sql.selectable import (
     Select as StandardSelect,
-    Join as StandardJoin,
+    Join
 )
 
 from ..ext.clauses import (
@@ -13,22 +13,6 @@ from ..ext.clauses import (
 
 
 __all__ = ('Select', 'select')
-
-
-class Join(StandardJoin):
-
-    def __init__(self, left, right,
-                 onclause=None, isouter=False, full=False,
-                 type=None, strictness=None, distribution=None):
-        if type is not None:
-            type = type.upper()
-        super(Join, self).__init__(left, right, onclause,
-                                   isouter=isouter, full=full)
-        self.strictness = None
-        if strictness:
-            self.strictness = strictness
-        self.distribution = distribution
-        self.type = type
 
 
 class Select(StandardSelect):
@@ -69,11 +53,14 @@ class Select(StandardSelect):
 
     def join(self, right, onclause=None, isouter=False, full=False, type=None,
              strictness=None, distribution=None):
-        return Join(self, right,
-                    onclause=onclause, type=type,
-                    isouter=isouter, full=full,
-                    strictness=strictness, distribution=distribution)
+        flags = {
+            'full': full,
+            'type': type,
+            'strictness': strictness,
+            'distribution': distribution
+        }
+        return Join(self, right, onclause=onclause, isouter=isouter,
+                    full=flags)
 
 
 select = Select._create
-join = Join._create_join

@@ -1,10 +1,6 @@
-from contextlib import contextmanager
-
 from sqlalchemy import exc
 from sqlalchemy.sql.base import _generative
-import sqlalchemy.orm.query as query_module
 from sqlalchemy.orm.query import Query as BaseQuery
-from sqlalchemy.orm.util import _ORMJoin as _StandardORMJoin
 
 from ..ext.clauses import (
     ArrayJoin,
@@ -69,55 +65,19 @@ class Query(BaseQuery):
         self._limit_by = LimitByClause(by_clauses, limit, offset)
 
     def join(self, *props, **kwargs):
-        type = kwargs.pop('type', None)
-        strictness = kwargs.pop('strictness', None)
-        distribution = kwargs.pop('distribution', None)
+        spec = {
+            'type': kwargs.pop('type', None),
+            'strictness': kwargs.pop('strictness', None),
+            'distribution': kwargs.pop('distribution', None)
+        }
         rv = super(Query, self).join(*props, **kwargs)
-        joined = list(set(rv._from_obj) - set(self._from_obj))[0]
-        new = _ORMJoin._from_standard(joined,
-                                      type=type,
-                                      strictness=strictness,
-                                      distribution=distribution)
-
-        @contextmanager
-        def replace_join():
-            original = query_module.orm_join
-            query_module.orm_join = new
-            yield
-            query_module.orm_join = original
-
-        with replace_join():
-            return super(Query, self).join(*props, **kwargs)
+        for x in rv._legacy_setup_joins:
+            x_spec = dict(spec)
+            # use 'full' key to pass extra flags
+            x_spec['full'] = x[-1]['full']
+            x[-1]['full'] = x_spec
+        return rv
 
     def outerjoin(self, *props, **kwargs):
         kwargs['type'] = kwargs.get('type') or 'LEFT OUTER'
         return self.join(*props, **kwargs)
-
-
-class _ORMJoin(_StandardORMJoin):
-    @classmethod
-    def _from_standard(cls, standard_join, type, strictness, distribution):
-        return cls(
-            standard_join.left,
-            standard_join.right,
-            standard_join.onclause,
-            type=type,
-            strictness=strictness,
-            distribution=distribution
-        )
-
-    def __init__(self, left, right, onclause=None, type=None, strictness=None,
-                 distribution=None):
-        super(_ORMJoin, self).__init__(left, right, onclause, False, False,
-                                       None, None)
-        self.distribution = distribution
-        self.strictness = str
-        self.type = type
-        self.strictness = None
-        if strictness:
-            self.strictness = strictness
-        self.distribution = distribution
-        self.type = type
-
-    def __call__(self, *args, **kwargs):
-        return self

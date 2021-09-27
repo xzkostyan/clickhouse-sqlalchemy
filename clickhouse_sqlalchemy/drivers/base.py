@@ -191,8 +191,11 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         if text[0] == '(' and text[-1] == ')':
             text = text[1:-1]
 
+        flags = join.full
+        if not isinstance(flags, dict):
+            flags = {'full': flags}
         # need to make a variable to prevent leaks in some debuggers
-        join_type = getattr(join, 'type', None)
+        join_type = flags.get('type')
         if join_type is None:
             if join.isouter:
                 join_type = 'LEFT OUTER'
@@ -211,14 +214,16 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             #         "can't compile join with specified "
             #         "OUTER type and isouter=False"
             #     )
-        if join.full and 'FULL' not in join_type:
+        if flags.get('full') and 'FULL' not in join_type:
             join_type = 'FULL ' + join_type
 
-        if getattr(join, 'strictness', None):
-            join_type = join.strictness.upper() + ' ' + join_type
+        strictness = flags.get('strictness')
+        if strictness:
+            join_type = strictness.upper() + ' ' + join_type
 
-        if getattr(join, 'distribution', None):
-            join_type = join.distribution.upper() + ' ' + join_type
+        distribution = flags.get('distribution')
+        if distribution:
+            join_type = distribution.upper() + ' ' + join_type
 
         if join_type is not None:
             text += ' ' + join_type.upper() + ' JOIN '
