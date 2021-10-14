@@ -857,6 +857,57 @@ class ClickHouseExecutionContextBase(default.DefaultExecutionContext):
         return False  # No DML supported, never autocommit
 
 
+class ClickHouseInspector(reflection.Inspector):
+    def reflect_table(self, table, *args, **kwargs):
+        # This check is necessary to support direct instantiation of
+        # `clickhouse_sqlalchemy.Table` and then reflection of it.
+        if not isinstance(table, Table):
+            table.metadata.remove(table)
+            ch_table = Table._make_from_standard(
+                table, _extend_on=kwargs.get('_extend_on')
+            )
+        else:
+            ch_table = table
+
+        super(ClickHouseInspector, self).reflect_table(
+            ch_table, *args, **kwargs
+        )
+
+        with self._operation_context() as conn:
+            schema = conn.schema_for_object(ch_table)
+
+            self._reflect_engine(ch_table.name, schema, ch_table)
+
+    def _reflect_engine(self, table_name, schema, table):
+        should_reflect = (
+            self.dialect.supports_engine_reflection and
+            self.dialect.engine_reflection
+        )
+        if not should_reflect:
+            return
+
+        engine_cls_by_name = {e.__name__: e for e in engines.__all__}
+
+        for e in self.get_engines(schema=schema):
+            if e['name'] == table.name:
+                engine_cls = engine_cls_by_name.get(e['engine'])
+                if engine_cls is None:
+                    table.engine = None
+                    return
+
+                engine = engine_cls.reflect(table, **e)
+                engine._set_parent(table)
+                return
+
+        raise ValueError("Cannot find engine for table '%s'" % table.name)
+
+    def get_engines(self, schema=None, **kw):
+        with self._operation_context() as conn:
+            return self.dialect.get_engines(
+                conn, schema=schema, info_cache=self.info_cache, **kw
+            )
+
+
 class ClickHouseDialect(default.DefaultDialect):
     name = 'clickhouse'
     supports_cast = True
@@ -907,6 +958,8 @@ class ClickHouseDialect(default.DefaultDialect):
         }),
     ]
 
+    inspector = ClickHouseInspector
+
     def initialize(self, connection):
         super(ClickHouseDialect, self).initialize(connection)
 
@@ -941,45 +994,6 @@ class ClickHouseDialect(default.DefaultDialect):
             if r.result == 1:
                 return True
         return False
-
-    # def reflecttable(self, connection, table, include_columns, exclude_columns,
-    #                  resolve_fks, **opts):
-    #     """
-    #     Hack to ensure the autoloaded table class is
-    #     `clickhouse_sqlalchemy.Table`
-    #     (to support CH-specific features e.g. joins).
-    #     """
-    #     # This check is necessary to support direct instantiation of
-    #     # `clickhouse_sqlalchemy.Table` and then reflection of it.
-    #     if not isinstance(table, Table):
-    #         table.metadata.remove(table)
-    #         ch_table = Table._make_from_standard(
-    #             table, _extend_on=opts.get('_extend_on')
-    #         )
-    #     else:
-    #         ch_table = table
-    #
-    #     rv = super(ClickHouseDialect, self).reflecttable(
-    #         connection, ch_table, include_columns, exclude_columns,
-    #         resolve_fks, **opts)
-    #
-    #     self._reflect_engine(connection, table.name, table)
-    #
-    #     return rv
-
-    def _reflect_engine(self, connection, table_name, table):
-        if not self.supports_engine_reflection or not self.engine_reflection:
-            return
-        engine_cls_by_name = {e.__name__: e for e in engines.__all__}
-
-        e = self.get_engine(connection, table_name, schema=table.schema)
-        if not e:
-            raise ValueError("Cannot find engine for table '%s'" % table_name)
-
-        engine_cls = engine_cls_by_name.get(e['engine'])
-        if engine_cls is not None:
-            engine = engine_cls.reflect(table, **e)
-            engine._set_parent(table)
 
     def _quote_table_name(self, table_name):
         # Use case: `describe table (select ...)`, over a TextClause.

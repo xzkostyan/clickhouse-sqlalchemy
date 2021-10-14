@@ -49,16 +49,16 @@ class SchemaTestCase(BaseTestCase):
 
         # Sub-test: check that they all reflected the same.
         for table_x in [table, table2, table3]:
-            query = table_x.select().join(
+            query = table_x.select().select_from(table_x.join(
                 text('another_table'),
                 table.c.x == 'xxx',
                 type='INNER',
                 strictness='ALL',
                 distribution='GLOBAL'
-            )
+            ))
             self.assertEqual(
                 self.compile(query),
-                "SELECT test_reflect.x AS x FROM test_reflect "
+                "SELECT test_reflect.x FROM test_reflect "
                 "GLOBAL ALL INNER JOIN another_table "
                 "ON test_reflect.x = %(x_1)s"
             )

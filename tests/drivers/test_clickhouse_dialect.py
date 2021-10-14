@@ -93,6 +93,8 @@ class ClickHouseDialectTestCase(BaseTestCase):
 
         self.assertEqual(reflected_table.name, 'columns')
         self.assertEqual(reflected_table.schema, 'system')
+        if self.server_version >= (18, 16, 0):
+            self.assertIsNone(reflected_table.engine)
 
     def test_get_schema_names(self):
         schemas = self.dialect.get_schema_names(self.session)
