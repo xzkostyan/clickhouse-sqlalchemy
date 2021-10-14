@@ -9,6 +9,9 @@ from ..util.compat import text_type
 class BaseIPComparator(UserDefinedType.Comparator):
     network_class = None
 
+    def _wrap_to_ip(self, x):
+        raise NotImplementedError()
+
     def _split_other(self, other):
         """
         Split values between addresses and networks
@@ -28,16 +31,15 @@ class BaseIPComparator(UserDefinedType.Comparator):
         return addresses, networks
 
     def in_(self, other):
-        print(other)
         if isinstance(other, (list, tuple)):
             addresses, networks = self._split_other(other)
             addresses_clause = super(BaseIPComparator, self).in_(
-                addresses
+                self._wrap_to_ip(x) for x in addresses
             ) if addresses else None
             networks_clause = or_(*[
                 and_(
-                    self >= net[0],
-                    self <= net[-1]
+                    self >= self._wrap_to_ip(net[0]),
+                    self <= self._wrap_to_ip(net[-1])
                 )
                 for net in networks
             ]) if networks else None
@@ -55,20 +57,20 @@ class BaseIPComparator(UserDefinedType.Comparator):
             other = self.network_class(other)
 
         return and_(
-            self >= other[0],
-            self <= other[-1]
+            self >= self._wrap_to_ip(other[0]),
+            self <= self._wrap_to_ip(other[-1])
         )
 
-    def notin_(self, other):
+    def not_in(self, other):
         if isinstance(other, (list, tuple)):
             addresses, networks = self._split_other(other)
             addresses_clause = super(BaseIPComparator, self).notin_(
-                addresses
+                self._wrap_to_ip(x) for x in addresses
             ) if addresses else None
             networks_clause = and_(*[
                 or_(
-                    self < net[0],
-                    self > net[-1]
+                    self < self._wrap_to_ip(net[0]),
+                    self > self._wrap_to_ip(net[-1])
                 )
                 for net in networks
             ]) if networks else None
@@ -86,8 +88,8 @@ class BaseIPComparator(UserDefinedType.Comparator):
             other = self.network_class(other)
 
         return or_(
-            self < other[0],
-            self > other[-1]
+            self < self._wrap_to_ip(other[0]),
+            self > self._wrap_to_ip(other[-1])
         )
 
 
@@ -109,16 +111,16 @@ class IPv4(types.UserDefinedType):
         return process
 
     def bind_expression(self, bindvalue):
-        print(type(bindvalue.value))
         if isinstance(bindvalue.value, (list, tuple)):
             bindvalue.value = ([func.toIPv4(x) for x in bindvalue.value])
             return bindvalue
-            # print(rv)
-            # return rv
         return func.toIPv4(bindvalue)
 
     class comparator_factory(BaseIPComparator):
         network_class = IPv4Network
+
+        def _wrap_to_ip(self, x):
+            return func.toIPv4(str(x))
 
 
 class IPv6(types.UserDefinedType):
@@ -139,7 +141,13 @@ class IPv6(types.UserDefinedType):
         return process
 
     def bind_expression(self, bindvalue):
+        if isinstance(bindvalue.value, (list, tuple)):
+            bindvalue.value = ([func.toIPv6(x) for x in bindvalue.value])
+            return bindvalue
         return func.toIPv6(bindvalue)
 
     class comparator_factory(BaseIPComparator):
         network_class = IPv6Network
+
+        def _wrap_to_ip(self, x):
+            return func.toIPv6(str(x))
