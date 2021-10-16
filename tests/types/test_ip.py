@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network
 from sqlalchemy import Column, and_
 from sqlalchemy.sql.ddl import CreateTable

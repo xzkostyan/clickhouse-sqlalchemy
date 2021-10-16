@@ -3,8 +3,6 @@ from sqlalchemy.sql import compiler, ClauseElement, expression
 from sqlalchemy.sql.elements import TextClause
 from sqlalchemy.util import to_list
 
-from ...util import compat
-
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def _get_default_string(self, default, name):
@@ -85,7 +83,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         if not isinstance(expr, expression.ColumnClause):
             if not hasattr(expr, 'self_group'):
                 # assuming base type (int, string, etc.)
-                return compat.text_type(expr)
+                return str(expr)
             else:
                 expr = expr.self_group()
         return compiler.process(

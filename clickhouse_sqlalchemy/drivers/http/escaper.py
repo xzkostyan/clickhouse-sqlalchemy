@@ -2,13 +2,10 @@ from datetime import date, datetime
 from decimal import Decimal
 import enum
 
-from ...util import compat
-
 
 class Escaper(object):
 
-    number_types = compat.integer_types + (float, )
-    string_types = compat.string_types
+    number_types = (int, float, )
 
     escape_chars = {
         "\b": "\\b",
@@ -63,7 +60,7 @@ class Escaper(object):
             return self.escape_date(item)
         elif isinstance(item, Decimal):
             return self.escape_decimal(item)
-        elif isinstance(item, self.string_types):
+        elif isinstance(item, str):
             return self.escape_string(item)
         elif isinstance(item, (list, tuple)):
             return "[" + ", ".join(

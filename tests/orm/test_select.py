@@ -1,4 +1,5 @@
-import mock
+from unittest import mock
+
 from sqlalchemy import Column, exc, func, literal, select, tuple_
 
 from clickhouse_sqlalchemy import types, Table, engines

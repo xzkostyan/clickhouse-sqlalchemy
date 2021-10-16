@@ -67,7 +67,6 @@ setup(
 
 
         'Programming Language :: SQL',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
@@ -89,8 +88,7 @@ setup(
     install_requires=[
         'sqlalchemy>=1.4,<1.5',
         'requests',
-        'clickhouse-driver>=0.1.2',
-        'ipaddress; python_version<"3.4"',
+        'clickhouse-driver>=0.1.2'
     ],
     # Registering `clickhouse` as dialect.
     entry_points={
@@ -100,10 +98,8 @@ setup(
     tests_require=[
         'nose',
         'sqlalchemy>=1.4,<1.5',
-        'mock',
         'requests',
         'responses',
-        'enum34; python_version<"3.4"',
         'parameterized'
     ],
 )

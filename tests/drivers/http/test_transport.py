@@ -1,8 +1,8 @@
 from datetime import date, datetime
 from decimal import Decimal
+from unittest.mock import patch
 
 from responses import mock
-from mock import patch
 from sqlalchemy import Column, func
 
 from clickhouse_sqlalchemy import types, Table

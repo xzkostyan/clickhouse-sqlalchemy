@@ -3,7 +3,6 @@ import sqlalchemy as sa
 from sqlalchemy.util import asbool
 
 from .utils import FORMAT_SUFFIX
-from ...util.compat import string_types
 from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
 from . import connector
 
@@ -47,7 +46,7 @@ class ClickHouseDialect_http(ClickHouseDialect):
         return (db_url, db_name, url.username, url.password), kwargs
 
     def _execute(self, connection, sql, scalar=False, **kwargs):
-        if isinstance(sql, string_types):
+        if isinstance(sql, str):
             # Makes sure the query will go through the
             # `ClickHouseExecutionContext` logic.
             sql = sa.sql.elements.TextClause(sql)

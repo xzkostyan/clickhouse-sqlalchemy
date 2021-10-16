@@ -1,7 +1,7 @@
 from contextlib import contextmanager
+from unittest.mock import Mock
 
 from sqlalchemy import Column, text, create_engine
-from mock import Mock
 
 from clickhouse_sqlalchemy import types, engines, Table, make_session
 from tests.testcase import BaseTestCase

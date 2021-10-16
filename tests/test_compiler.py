@@ -2,7 +2,6 @@ import enum
 from sqlalchemy import sql, Column, literal, literal_column
 
 from clickhouse_sqlalchemy import types, Table, engines
-from clickhouse_sqlalchemy.util import compat
 from tests.testcase import CompilationTestCase, NativeSessionTestCase
 
 
@@ -37,13 +36,7 @@ class VisitTestCase(CompilationTestCase):
             "Enum16('foo' = 100, 'bar' = 500)"
         )
 
-        if compat.PY3:
-            data = [" ' t = ", "test"]
-        else:
-            from collections import OrderedDict
-            data = OrderedDict([(" ' t = ", 1), ("test", 2)])
-
-        MyEnum = enum.Enum('MyEnum', data)
+        MyEnum = enum.Enum('MyEnum', [" ' t = ", "test"])
 
         self.assertEqual(
             self.compile(types.Enum8(MyEnum)),

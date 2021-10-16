@@ -3,8 +3,6 @@ from ipaddress import IPv4Network, IPv6Network
 from sqlalchemy import or_, and_, types, func
 from sqlalchemy.sql.type_api import UserDefinedType
 
-from ..util.compat import text_type
-
 
 class BaseIPComparator(UserDefinedType.Comparator):
     network_class = None
@@ -98,7 +96,7 @@ class IPv4(types.UserDefinedType):
 
     def bind_processor(self, dialect):
         def process(value):
-            return text_type(value)
+            return str(value)
 
         return process
 
@@ -128,7 +126,7 @@ class IPv6(types.UserDefinedType):
 
     def bind_processor(self, dialect):
         def process(value):
-            return text_type(value)
+            return str(value)
 
         return process
 
