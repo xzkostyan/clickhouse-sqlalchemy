@@ -2,7 +2,7 @@ from sqlalchemy.util import asbool
 
 from . import connector
 from ..base import (
-    ClickHouseDialect, ClickHouseExecutionContextBase, ClickHouseCompiler,
+    ClickHouseDialect, ClickHouseExecutionContextBase, ClickHouseSQLCompiler,
 )
 
 # Export connector version
@@ -16,10 +16,10 @@ class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
             self.executemany = True
 
 
-class ClickHouseNativeCompiler(ClickHouseCompiler):
+class ClickHouseNativeSQLCompiler(ClickHouseSQLCompiler):
 
     def visit_insert(self, insert_stmt, asfrom=False, **kw):
-        rv = super(ClickHouseNativeCompiler, self).visit_insert(
+        rv = super(ClickHouseNativeSQLCompiler, self).visit_insert(
             insert_stmt, asfrom=asfrom, **kw)
 
         if kw.get('literal_binds'):
@@ -38,7 +38,7 @@ class ClickHouseNativeCompiler(ClickHouseCompiler):
 class ClickHouseDialect_native(ClickHouseDialect):
     driver = 'native'
     execution_ctx_cls = ClickHouseExecutionContext
-    statement_compiler = ClickHouseNativeCompiler
+    statement_compiler = ClickHouseNativeSQLCompiler
 
     @classmethod
     def dbapi(cls):

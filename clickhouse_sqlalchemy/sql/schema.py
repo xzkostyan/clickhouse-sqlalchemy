@@ -6,9 +6,8 @@ from sqlalchemy.sql.schema import SchemaItem
 from sqlalchemy.sql.selectable import FromClause
 from sqlalchemy.sql.selectable import Join
 
-from clickhouse_sqlalchemy.sql.selectable import (
-    Select,
-)
+from clickhouse_sqlalchemy.sql.selectable import Select
+
 from . import ddl
 
 

@@ -1,6 +1,6 @@
 import re
 
-import sqlalchemy
+from sqlalchemy import Column
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
 
 from ..sql.schema import Table
@@ -17,8 +17,7 @@ class ClickHouseDeclarativeMeta(DeclarativeMeta):
         tablename = d.get('__tablename__')
 
         has_pks = any(
-            v.primary_key for k, v in d.items()
-            if isinstance(v, sqlalchemy.Column)
+            v.primary_key for k, v in d.items() if isinstance(v, Column)
         )
 
         # generate a table name automatically if it's missing and the
