@@ -1,4 +1,5 @@
-from sqlalchemy import Column, exc, func, literal, select, text, tuple_
+import mock
+from sqlalchemy import Column, exc, func, literal, select, tuple_
 
 from clickhouse_sqlalchemy import types, Table, engines
 from clickhouse_sqlalchemy.ext.clauses import Lambda
@@ -296,36 +297,50 @@ class YieldTest(NativeSessionTestCase):
         numbers = Table(
             'numbers', self.metadata(),
             Column('number', types.UInt64, primary_key=True),
+            schema='system'
         )
 
-        query = self.session.query(numbers.c.number).limit(100).yield_per(15)
-        query = query.execution_options(foo='bar')
-        self.assertIsNotNone(query._yield_per)
-        self.assertEqual(
-            query._execution_options,
-            {'stream_results': True, 'foo': 'bar', 'max_row_buffer': 15}
-        )
+        query = self.session.query(numbers.c.number) \
+            .limit(100) \
+            .yield_per(15) \
+            .execution_options(foo='bar')
+
+        self.assertEqual(query.load_options._yield_per, 15)
+
+        # emit query for the first 'select version()'
+        self.session.query(literal(1)).scalar()
+
+        do_execute_orig = self.session.bind.dialect.do_execute
+
+        def side_effect(*args, **kwargs):
+            context = args[3]
+            options = context.execution_options
+            self.assertEqual(options['stream_results'], True)
+            self.assertEqual(options['foo'], 'bar')
+            self.assertEqual(options['max_row_buffer'], 15)
+            return do_execute_orig(*args, **kwargs)
+
+        tgt = 'clickhouse_sqlalchemy.drivers.base.ClickHouseDialect.do_execute'
+        with mock.patch(tgt, side_effect=side_effect):
+            query.all()
 
     def test_basic(self):
         numbers = Table(
             'numbers', self.metadata(),
             Column('number', types.UInt64, primary_key=True),
+            schema='system'
         )
 
         q = iter(
-            self.session.query(numbers.c.number)
-            .yield_per(1)
-            .from_statement(text('SELECT * FROM system.numbers LIMIT 3'))
+            self.session.query(numbers.c.number).yield_per(1).limit(3)
         )
 
         ret = []
         ret.append(next(q))
         ret.append(next(q))
         ret.append(next(q))
-        try:
+
+        with self.assertRaises(StopIteration):
             next(q)
-            self.assertTrue(False)
-        except StopIteration:
-            pass
 
         self.assertEqual(ret, [(0, ), (1, ), (2, )])
