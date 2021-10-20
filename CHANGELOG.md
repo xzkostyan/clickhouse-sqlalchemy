@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Support for distinctness comparisons (`is_distinct_from` / `isnot_distinct_from`). Solves issue [#143](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/143).
 
 ## [0.1.6] - 2021-03-15
 ### Added

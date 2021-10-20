@@ -70,6 +70,22 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         return self.process(binary.left, **kw) + ' %% ' + \
             self.process(binary.right, **kw)
 
+    def visit_isnot_distinct_from_binary(self, binary, operator, **kw):
+        """Implementation of distinctness comparison in ClickHouse SQL.
+
+        A distinctness comparison treats NULL as if it is a (singleton) value and is
+        what ClickHouse uses for `SELECT DISTINCT` and `GROUP BY`. Some databases have
+        direct support for a `IS DISTINCT` comparison, but ClickHouse does not, so
+        we rely on the `hasAny` array function here."""
+
+        return "hasAny([%s], [%s])" % (
+            self.process(binary.left, **kw),
+            self.process(binary.right, **kw),
+        )
+
+    def visit_is_distinct_from_binary(self, binary, operator, **kw):
+        return "NOT %s" % self.visit_isnot_distinct_from_binary(binary, operator, **kw)
+
     def post_process_text(self, text):
         return text.replace('%', '%%')
 
