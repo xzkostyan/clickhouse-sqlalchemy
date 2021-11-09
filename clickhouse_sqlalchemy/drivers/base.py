@@ -479,6 +479,10 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             colspec += " ALIAS " + self._get_default_string(
                 opts['alias'], 'clickhouse_alias'
             )
+        elif opts['after'] is not None:
+            colspec += " AFTER " + self._get_default_string(
+                opts['after'], 'clickhouse_after'
+            )
 
         codec = opts['codec']
         if codec is not None:
@@ -789,7 +793,8 @@ class ClickHouseDialect(default.DefaultDialect):
         (schema.Column, {
             'codec': None,
             'materialized': None,
-            'alias': None
+            'alias': None,
+            'after': None,
         }),
     ]
 
@@ -882,17 +887,27 @@ class ClickHouseDialect(default.DefaultDialect):
             'DESCRIBE TABLE {}'.format(qualified_name))
         rows = self._execute(connection, query)
 
-        return [self._get_column_info(row.name, row.type) for row in rows]
+        return [self._get_column_info(row.name, row.type, row.default_type,
+                                      row.default_expression)
+                for row in rows]
 
-    def _get_column_info(self, name, format_type):
+    def _get_column_info(self, name, format_type, default_type,
+                         default_expression):
         col_type = self._get_column_type(name, format_type)
+        col_default = self._get_column_default(default_type,
+                                               default_expression)
         result = {
             'name': name,
             'type': col_type,
             'nullable': True,
-            'default': None,
+            'default': col_default,
         }
         return result
+
+    def _get_column_default(self, default_type, default_expression):
+        if default_type == 'DEFAULT':
+            return default_expression
+        return None
 
     def _get_column_type(self, name, spec):
         if spec.startswith('Array'):

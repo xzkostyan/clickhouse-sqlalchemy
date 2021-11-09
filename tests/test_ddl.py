@@ -1,5 +1,5 @@
-from sqlalchemy import Column, func
-from sqlalchemy.sql.ddl import CreateTable
+from sqlalchemy import Column, func, text
+from sqlalchemy.sql.ddl import CreateTable, CreateColumn
 
 from clickhouse_sqlalchemy import types, engines, Table, get_declarative_base
 from clickhouse_sqlalchemy.sql.ddl import DropTable
@@ -267,6 +267,16 @@ class DDLTestCase(BaseTestCase):
             'x Int8, '
             'dt DateTime DEFAULT now()) '
             'ENGINE = Memory'
+        )
+
+    def test_add_column(self):
+        col = Column(
+            'x2', types.Int8, nullable=True, clickhouse_after=text('x1')
+        )
+
+        self.assertEqual(
+            self.compile(CreateColumn(col)),
+            'x2 Int8 AFTER x1'
         )
 
     def test_table_create_on_cluster(self):
