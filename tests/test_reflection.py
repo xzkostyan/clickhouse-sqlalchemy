@@ -22,7 +22,7 @@ class ReflectionTestCase(BaseTestCase):
             self.assertEqual([
                 c['default'] for c in inspect(metadata.bind
                                               ).get_columns('t')
-            ], [None, ''])
+            ], [None, "''"])
 
     def _type_round_trip(self, *types):
         metadata = self.metadata()
