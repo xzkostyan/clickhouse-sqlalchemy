@@ -862,14 +862,14 @@ class ClickHouseDialect(default.DefaultDialect):
             return
         engine_cls_by_name = {e.__name__: e for e in engines.__all__}
 
-        for e in self.get_engines(connection, schema=table.schema):
-            if e['name'] == table_name:
-                engine_cls = engine_cls_by_name.get(e['engine'])
-                engine = engine_cls.reflect(table, **e)
-                engine._set_parent(table)
-                return
+        e = self.get_engine(connection, table_name, schema=table.schema)
+        if not e:
+            raise ValueError("Cannot find engine for table '%s'" % table_name)
 
-        raise ValueError("Cannot find engine for table '%s'" % table_name)
+        engine_cls = engine_cls_by_name.get(e['engine'])
+        if engine_cls is not None:
+            engine = engine_cls.reflect(table, **e)
+            engine._set_parent(table)
 
     def _quote_table_name(self, table_name):
         # Use case: `describe table (select ...)`, over a TextClause.
@@ -1037,7 +1037,7 @@ class ClickHouseDialect(default.DefaultDialect):
         return [row.name for row in rows]
 
     @reflection.cache
-    def get_engines(self, connection, schema=None, **kw):
+    def get_engine(self, connection, table_name, schema=None, **kw):
         columns = [
             'name', 'engine_full', 'engine', 'partition_key', 'sorting_key',
             'primary_key', 'sampling_key'
@@ -1049,12 +1049,19 @@ class ClickHouseDialect(default.DefaultDialect):
             database = connection.engine.url.database
 
         query = text(
-            'SELECT {} FROM system.tables WHERE database = :database'
+            'SELECT {} FROM system.tables '
+            'WHERE database = :database AND name = :name'
             .format(', '.join(columns))
         )
 
-        rows = self._execute(connection, query, database=database)
-        return [{x: getattr(row, x, None) for x in columns} for row in rows]
+        rows = self._execute(
+            connection, query, database=database, name=table_name
+        )
+
+        row = next(rows, None)
+
+        if row:
+            return {x: getattr(row, x, None) for x in columns}
 
     def do_rollback(self, dbapi_connection):
         # No support for transactions.
