@@ -34,13 +34,10 @@ class ReflectionTestCase(BaseTestCase):
 
         table = Table('t', metadata, *args)
         with self.create_table(table):
-            return [
-                c['type'] for c in
-                inspect(metadata.bind).get_columns('t')
-            ]
+            return inspect(metadata.bind).get_columns('t')
 
     def test_array(self):
-        coltype = self._type_round_trip(types.Array(types.Int32))[0]
+        coltype = self._type_round_trip(types.Array(types.Int32))[0]['type']
 
         self.assertIsInstance(coltype, types.Array)
         self.assertEqual(coltype.item_type, types.Int32)
@@ -48,27 +45,43 @@ class ReflectionTestCase(BaseTestCase):
     def test_array_of_array(self):
         coltype = self._type_round_trip(
             types.Array(types.Array(types.Int32))
-        )[0]
+        )[0]['type']
 
         self.assertIsInstance(coltype, types.Array)
         self.assertIsInstance(coltype.item_type, types.Array)
         self.assertEqual(coltype.item_type.item_type, types.Int32)
 
     def test_sting_length(self):
-        coltype = self._type_round_trip(types.String(10))[0]
+        coltype = self._type_round_trip(types.String(10))[0]['type']
 
         self.assertIsInstance(coltype, types.String)
         self.assertEqual(coltype.length, 10)
 
     def test_nullable(self):
-        coltype = self._type_round_trip(types.Nullable(types.Int32))[0]
+        col = self._type_round_trip(types.Nullable(types.Int32))[0]
 
-        self.assertIsInstance(coltype, types.Nullable)
-        self.assertEqual(coltype.nested_type, types.Int32)
+        self.assertIsInstance(col['type'], types.Nullable)
+        self.assertTrue(col['nullable'])
+        self.assertEqual(col['type'].nested_type, types.Int32)
+
+    def test_not_null(self):
+        metadata = self.metadata()
+        table = Table(
+            't', metadata,
+            Column('x', types.Int32, nullable=False),
+            engines.Memory()
+        )
+        with self.create_table(table):
+            col = inspect(metadata.bind).get_columns('t')[0]
+
+        self.assertIsInstance(col['type'], types.Int32)
+        self.assertFalse(col['nullable'])
 
     @require_server_version(19, 3, 3)
     def test_low_cardinality(self):
-        coltype = self._type_round_trip(types.LowCardinality(types.String))[0]
+        coltype = self._type_round_trip(
+            types.LowCardinality(types.String)
+        )[0]['type']
 
         self.assertIsInstance(coltype, types.LowCardinality)
         self.assertEqual(coltype.nested_type, types.String)
@@ -76,7 +89,7 @@ class ReflectionTestCase(BaseTestCase):
     def test_tuple(self):
         coltype = self._type_round_trip(
             types.Tuple(types.String, types.Int32)
-        )[0]
+        )[0]['type']
 
         self.assertIsInstance(coltype, types.Tuple)
         self.assertEqual(coltype.nested_types[0], types.String)
@@ -86,7 +99,7 @@ class ReflectionTestCase(BaseTestCase):
     def test_map(self):
         coltype = self._type_round_trip(
             types.Map(types.String, types.String)
-        )[0]
+        )[0]['type']
 
         self.assertIsInstance(coltype, types.Map)
         self.assertEqual(coltype.key_type, types.String)
@@ -96,7 +109,7 @@ class ReflectionTestCase(BaseTestCase):
         enum_options = {'three': 3, "quoted' ": 9, 'comma, ': 14}
         coltype = self._type_round_trip(
             types.Enum8(enum.Enum('any8_enum', enum_options))
-        )[0]
+        )[0]['type']
 
         self.assertIsInstance(coltype, types.Enum8)
         self.assertEqual(
@@ -107,7 +120,7 @@ class ReflectionTestCase(BaseTestCase):
         enum_options = {'first': 1024, 'second': 2048}
         coltype = self._type_round_trip(
             types.Enum16(enum.Enum('any16_enum', enum_options))
-        )[0]
+        )[0]['type']
 
         self.assertIsInstance(coltype, types.Enum16)
         self.assertEqual(
@@ -115,7 +128,7 @@ class ReflectionTestCase(BaseTestCase):
         )
 
     def test_decimal(self):
-        coltype = self._type_round_trip(types.Decimal(38, 38))[0]
+        coltype = self._type_round_trip(types.Decimal(38, 38))[0]['type']
 
         self.assertIsInstance(coltype, types.Decimal)
         self.assertEqual(coltype.precision, 38)
