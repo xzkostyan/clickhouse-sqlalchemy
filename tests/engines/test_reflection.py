@@ -213,6 +213,17 @@ class EngineReflectionTestCase(BaseTestCase):
             table = Table('test_reflect', metadata, autoload=True)
             self.assertIsNone(getattr(table, 'engine', None))
 
+    def test_exists_describe_escaping(self):
+        metadata = self.metadata()
+        table = Table('.test', self.metadata(), Column('x', types.Int32),
+                      engines.Log())
+        table.exists()
+
+        with self.create_table(table):
+            metadata.clear()  # reflect from clean state
+            self.assertFalse(metadata.tables)
+            Table('.test', metadata, autoload=True)
+
 
 class EngineClassReflectionTestCase(BaseTestCase):
     def test_graphite_merge_tree(self):

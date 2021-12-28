@@ -822,10 +822,11 @@ class ClickHouseDialect(default.DefaultDialect):
         return [row.name for row in rows]
 
     def has_table(self, connection, table_name, schema=None):
+        quote = self._quote_table_name
         if schema:
-            qualified_name = schema + '.' + table_name
+            qualified_name = quote(schema) + '.' + quote(table_name)
         else:
-            qualified_name = table_name
+            qualified_name = quote(table_name)
         query = 'EXISTS TABLE {}'.format(qualified_name)
         for r in self._execute(connection, query):
             if r.result == 1:
@@ -879,12 +880,12 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @reflection.cache
     def get_columns(self, connection, table_name, schema=None, **kw):
+        quote = self._quote_table_name
         if schema:
-            qualified_name = schema + '.' + table_name
+            qualified_name = quote(schema) + '.' + quote(table_name)
         else:
-            qualified_name = table_name
-        query = text(
-            'DESCRIBE TABLE {}'.format(qualified_name))
+            qualified_name = quote(table_name)
+        query = 'DESCRIBE TABLE {}'.format(qualified_name)
         rows = self._execute(connection, query)
 
         return [self._get_column_info(row.name, row.type, row.default_type,
