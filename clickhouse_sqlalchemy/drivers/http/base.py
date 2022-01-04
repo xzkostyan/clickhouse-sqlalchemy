@@ -46,16 +46,13 @@ class ClickHouseDialect_http(ClickHouseDialect):
 
         return (db_url, db_name, url.username, url.password), kwargs
 
-    def _execute(self, connection, sql, **kwargs):
+    def _execute(self, connection, sql, scalar=False, **kwargs):
         if isinstance(sql, string_types):
             # Makes sure the query will go through the
             # `ClickHouseExecutionContext` logic.
             sql = sa.sql.elements.TextClause(sql)
-        return connection.execute(sql, **kwargs)
-
-    def _query_server_version_string(self, connection):
-        query = 'select version() {}'.format(FORMAT_SUFFIX)
-        return connection.scalar(query)
+        f = connection.scalar if scalar else connection.execute
+        return f(sql, **kwargs)
 
 
 dialect = ClickHouseDialect_http

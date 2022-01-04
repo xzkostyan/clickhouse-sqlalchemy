@@ -18,7 +18,8 @@ class MockedEngine(object):
 
     prev_do_execute = None
     prev_do_executemany = None
-    prev_query_server_version_string = None
+    prev_get_server_version_info = None
+    prev_get_default_schema_name = None
 
     def __init__(self, session=None):
         self._buffer = []
@@ -36,8 +37,10 @@ class MockedEngine(object):
     def __enter__(self):
         self.prev_do_execute = self.dialect_cls.do_execute
         self.prev_do_executemany = self.dialect_cls.do_executemany
-        self.prev_query_server_version_string = \
-            self.dialect_cls._query_server_version_string
+        self.prev_get_server_version_info = \
+            self.dialect_cls._get_server_version_info
+        self.prev_get_default_schema_name = \
+            self.dialect_cls._get_default_schema_name
 
         def do_executemany(
                 instance, cursor, statement, parameters, context=None):
@@ -46,21 +49,26 @@ class MockedEngine(object):
         def do_execute(instance, cursor, statement, parameters, context=None):
             self._buffer.append(statement)
 
-        def query_server_version_string(*args, **kwargs):
-            return '19.16.2.2'
+        def get_server_version_info(*args, **kwargs):
+            return (19, 16, 2, 2)
+
+        def get_default_schema_name(*args, **kwargs):
+            return 'test'
 
         self.dialect_cls.do_execute = do_execute
         self.dialect_cls.do_executemany = do_executemany
-        self.dialect_cls._query_server_version_string = \
-            query_server_version_string
+        self.dialect_cls._get_server_version_info = get_server_version_info
+        self.dialect_cls._get_default_schema_name = get_default_schema_name
 
         return self
 
     def __exit__(self, *exc_info):
         self.dialect_cls.do_execute = self.prev_do_execute
         self.dialect_cls.do_executemany = self.prev_do_executemany
-        self.dialect_cls._query_server_version_string = \
-            self.prev_query_server_version_string
+        self.dialect_cls._get_server_version_info = \
+            self.prev_get_server_version_info
+        self.dialect_cls._get_default_schema_name = \
+            self.prev_get_default_schema_name
 
 
 mocked_engine = MockedEngine

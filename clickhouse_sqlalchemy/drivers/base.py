@@ -824,7 +824,7 @@ class ClickHouseDialect(default.DefaultDialect):
         self.supports_update = version >= (18, 12, 14)
         self.supports_engine_reflection = version >= (18, 16, 0)
 
-    def _execute(self, connection, sql, **kwargs):
+    def _execute(self, connection, sql, scalar=False, **kwargs):
         raise NotImplementedError
 
     @reflection.cache
@@ -1130,14 +1130,17 @@ class ClickHouseDialect(default.DefaultDialect):
         version = self.forced_server_version_string
 
         if version is None:
-            version = self._query_server_version_string(connection)
-            assert version
+            version = self._execute(
+                connection, 'select version()', scalar=True
+            )
 
         # The first three are numeric, but the last is an alphanumeric build.
         return tuple(int(p) if p.isdigit() else p for p in version.split('.'))
 
-    def _query_server_version_string(self, connection):
-        raise NotImplementedError
+    def _get_default_schema_name(self, connection):
+        return self._execute(
+            connection, 'select currentDatabase()', scalar=True
+        )
 
     def connect(self, *cargs, **cparams):
         self.forced_server_version_string = cparams.pop(

@@ -53,11 +53,9 @@ class ClickHouseDialect_native(ClickHouseDialect):
 
         return (str(url), ), {}
 
-    def _execute(self, connection, sql, **kwargs):
-        return connection.execute(sql, **kwargs)
-
-    def _query_server_version_string(self, connection):
-        return connection.scalar('select version()')
+    def _execute(self, connection, sql, scalar=False, **kwargs):
+        f = connection.scalar if scalar else connection.execute
+        return f(sql, **kwargs)
 
 
 dialect = ClickHouseDialect_native
