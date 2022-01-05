@@ -1,9 +1,9 @@
 from contextlib import contextmanager
 
-from sqlalchemy import Column, text
+from sqlalchemy import Column, text, create_engine
 from mock import Mock
 
-from clickhouse_sqlalchemy import types, engines, Table
+from clickhouse_sqlalchemy import types, engines, Table, make_session
 from tests.testcase import BaseTestCase
 from tests.util import with_native_and_http_sessions
 
@@ -15,7 +15,7 @@ class EngineReflectionTestCase(BaseTestCase):
     @contextmanager
     def _test_table(self, engine, *columns):
         metadata = self.metadata()
-        columns = list(columns) + [Column('x', types.Int32)] + [engine]
+        columns = list(columns) + [Column('x', types.UInt32)] + [engine]
         table = Table('test_reflect', metadata, *columns)
 
         with self.create_table(table):
@@ -193,6 +193,36 @@ class EngineReflectionTestCase(BaseTestCase):
             table.create()
             exists = self.session.execute(exists_query).fetchall()
             self.assertEqual(exists, [(1, )])
+
+    def test_disable_engine_reflection(self):
+        engine = self.session.connection().engine
+        url = str(engine.url)
+        prefix = 'clickhouse+{}://'.format(engine.driver)
+        if not url.startswith(prefix):
+            url = prefix + url.split('://')[1]
+
+        session = make_session(create_engine(url + '?engine_reflection=no'))
+
+        metadata = self.metadata(session=session)
+        columns = [Column('x', types.Int32)] + [engines.Log()]
+        table = Table('test_reflect', metadata, *columns)
+
+        with self.create_table(table):
+            metadata.clear()  # reflect from clean state
+            self.assertFalse(metadata.tables)
+            table = Table('test_reflect', metadata, autoload=True)
+            self.assertIsNone(getattr(table, 'engine', None))
+
+    def test_exists_describe_escaping(self):
+        metadata = self.metadata()
+        table = Table('.test', self.metadata(), Column('x', types.Int32),
+                      engines.Log())
+        table.exists()
+
+        with self.create_table(table):
+            metadata.clear()  # reflect from clean state
+            self.assertFalse(metadata.tables)
+            Table('.test', metadata, autoload=True)
 
 
 class EngineClassReflectionTestCase(BaseTestCase):

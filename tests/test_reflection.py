@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, inspect
+from sqlalchemy import Column, inspect, types as sa_types
 
 from clickhouse_sqlalchemy import types, engines, Table
 from tests.testcase import BaseTestCase
@@ -8,6 +8,22 @@ from tests.util import require_server_version, with_native_and_http_sessions
 
 @with_native_and_http_sessions
 class ReflectionTestCase(BaseTestCase):
+    def test_server_default(self):
+        metadata = self.metadata()
+
+        args = (
+            [Column('x1', sa_types.String),
+             Column('x2', sa_types.String, server_default='')] +
+            [engines.Memory()]
+        )
+
+        table = Table('t', metadata, *args)
+        with self.create_table(table):
+            self.assertEqual([
+                c['default'] for c in inspect(metadata.bind
+                                              ).get_columns('t')
+            ], [None, "''"])
+
     def _type_round_trip(self, *types):
         metadata = self.metadata()
 

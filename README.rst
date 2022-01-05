@@ -19,8 +19,8 @@ ClickHouse dialect for SQLAlchemy to `ClickHouse database <https://clickhouse.ya
 .. image:: https://img.shields.io/pypi/dm/clickhouse-sqlalchemy.svg
     :target: https://pypi.org/project/clickhouse-sqlalchemy
 
-.. image:: https://img.shields.io/travis/xzkostyan/clickhouse-sqlalchemy.svg?branch=master
-   :target: https://travis-ci.org/xzkostyan/clickhouse-sqlalchemy
+.. image:: https://github.com/xzkostyan/clickhouse-sqlalchemy/actions/workflows/actions.yml/badge.svg
+   :target: https://github.com/xzkostyan/clickhouse-sqlalchemy/actions/workflows/actions.yml
 
 Installation
 ============

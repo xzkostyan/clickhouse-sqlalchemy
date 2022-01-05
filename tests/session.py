@@ -5,9 +5,11 @@ from sqlalchemy import create_engine
 from clickhouse_sqlalchemy import make_session
 from tests.config import http_uri, native_uri, system_native_uri
 
-http_session = make_session(create_engine(http_uri))
+http_engine = create_engine(http_uri)
+http_session = make_session(http_engine)
 http_stream_session = make_session(create_engine(http_uri + '?stream=1'))
-native_session = make_session(create_engine(native_uri))
+native_engine = create_engine(native_uri)
+native_session = make_session(native_engine)
 
 system_native_session = make_session(create_engine(system_native_uri))
 

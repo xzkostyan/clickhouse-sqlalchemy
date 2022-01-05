@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from responses import mock
@@ -97,6 +97,26 @@ class TransportCase(HttpSessionTestCase):
 
         rv = self.session.query(*table.c).first()
         self.assertEqual(rv, (date(2012, 10, 25), ))
+
+    @patch.object(ClickHouseDialect_http, '_get_server_version_info')
+    @mock.activate
+    def test_parse_date_time_type(self, patched_server_info):
+        mock.add(
+            mock.POST, self.url, status=200,
+            body=(
+                'a\n' +
+                'DateTime64(3)\n' +
+                '2012-10-25 00:00:00.0\n'
+            )
+        )
+
+        table = Table(
+            't1', self.metadata(),
+            Column('a', types.DateTime)
+        )
+
+        rv = self.session.query(*table.c).first()
+        self.assertEqual(rv, (datetime(2012, 10, 25), ))
 
     @mock.activate
     def test_parse_nullable_type(self):

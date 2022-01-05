@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [0.1.7] - 2021-11-18
+### Added
+- Support for distinctness comparisons (`is_distinct_from` / `isnot_distinct_from`). Pull request [#144](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/144) by [wlhjason](https://github.com/wlhjason). Solves issue [#143](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/143).
+- [HTTP] Cert auth. Pull request [#128](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/128) by [evgG](https://github.com/evgG).
+- [HTTP] Session factories. Pull request [#131](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/131) by [carlosefr](https://github.com/carlosefr).
+- [HTTP] Raw engine execute. Pull request [#134](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/134) by [FishermanZzhang](https://github.com/FishermanZzhang).
+- [HTTP] DateTime('timezone') support. Pull request [#141](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/141) by [lance-plusai](https://github.com/lance-plusai).
+- Optional disabling engine reflection. Solves issue [#140](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/140).
+- `AFTER` clause in `ALTER TABLE ... ADD COLUMN`. Pull request [#153](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/153) by [eivasch](https://github.com/eivasch).
+-  Column default reflection from `DESCRIBE TABLE` default_expression. Pull request [#153](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/153) by [eivasch](https://github.com/eivasch).
+
+### Fixed
+- SAMPLE BY reflection. Solves issue [#127](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/127).
+- [HTTP] `verify` behavior in requests. Pull request [#128](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/128) by [evgG](https://github.com/evgG).
+
 ## [0.1.6] - 2021-03-15
 ### Added
 - [HTTP] Optional custom `requests.Session`. Pull request [#119](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/119) by [carlosefr](https://github.com/carlosefr).
@@ -212,8 +227,9 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.6...HEAD
-[0.1.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.5...0.1.6
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.7...HEAD
+[0.1.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.6...0.1.7
+[0.1.6]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.5...0.1.6
 [0.1.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.4...0.1.5
 [0.1.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.3...0.1.4
 [0.1.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.2...0.1.3

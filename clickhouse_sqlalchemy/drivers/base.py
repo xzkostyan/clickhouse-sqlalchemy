@@ -72,6 +72,26 @@ class ClickHouseCompiler(compiler.SQLCompiler):
         return self.process(binary.left, **kw) + ' %% ' + \
             self.process(binary.right, **kw)
 
+    def visit_isnot_distinct_from_binary(self, binary, operator, **kw):
+        """
+        Implementation of distinctness comparison in ClickHouse SQL.
+
+        A distinctness comparison treats NULL as if it is a (singleton)
+        value and is what ClickHouse uses for `SELECT DISTINCT` and `GROUP BY`.
+        Some databases have direct support for a `IS DISTINCT` comparison, but
+        ClickHouse does not, so we rely on the `hasAny` array function here.
+        """
+
+        return "hasAny([%s], [%s])" % (
+            self.process(binary.left, **kw),
+            self.process(binary.right, **kw),
+        )
+
+    def visit_is_distinct_from_binary(self, binary, operator, **kw):
+        return "NOT %s" % self.visit_isnot_distinct_from_binary(
+            binary, operator, **kw
+        )
+
     def post_process_text(self, text):
         return text.replace('%', '%%')
 
@@ -461,6 +481,10 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             colspec += " ALIAS " + self._get_default_string(
                 opts['alias'], 'clickhouse_alias'
             )
+        elif opts['after'] is not None:
+            colspec += " AFTER " + self._get_default_string(
+                opts['after'], 'clickhouse_after'
+            )
 
         codec = opts['codec']
         if codec is not None:
@@ -761,6 +785,8 @@ class ClickHouseDialect(default.DefaultDialect):
     supports_update = True
     supports_engine_reflection = True
 
+    engine_reflection = True  # Disables engine reflection from URL.
+
     max_identifier_length = 127
     default_paramstyle = 'pyformat'
     colspecs = colspecs
@@ -784,7 +810,8 @@ class ClickHouseDialect(default.DefaultDialect):
         (schema.Column, {
             'codec': None,
             'materialized': None,
-            'alias': None
+            'alias': None,
+            'after': None,
         }),
     ]
 
@@ -812,10 +839,11 @@ class ClickHouseDialect(default.DefaultDialect):
         return [row.name for row in rows]
 
     def has_table(self, connection, table_name, schema=None):
+        quote = self._quote_table_name
         if schema:
-            qualified_name = schema + '.' + table_name
+            qualified_name = quote(schema) + '.' + quote(table_name)
         else:
-            qualified_name = table_name
+            qualified_name = quote(table_name)
         query = 'EXISTS TABLE {}'.format(qualified_name)
         for r in self._execute(connection, query):
             if r.result == 1:
@@ -848,18 +876,18 @@ class ClickHouseDialect(default.DefaultDialect):
         return rv
 
     def _reflect_engine(self, connection, table_name, table):
-        if not self.supports_engine_reflection:
+        if not self.supports_engine_reflection or not self.engine_reflection:
             return
         engine_cls_by_name = {e.__name__: e for e in engines.__all__}
 
-        for e in self.get_engines(connection, schema=table.schema):
-            if e['name'] == table_name:
-                engine_cls = engine_cls_by_name.get(e['engine'])
-                engine = engine_cls.reflect(table, **e)
-                engine._set_parent(table)
-                return
+        e = self.get_engine(connection, table_name, schema=table.schema)
+        if not e:
+            raise ValueError("Cannot find engine for table '%s'" % table_name)
 
-        raise ValueError("Cannot find engine for table '%s'" % table_name)
+        engine_cls = engine_cls_by_name.get(e['engine'])
+        if engine_cls is not None:
+            engine = engine_cls.reflect(table, **e)
+            engine._set_parent(table)
 
     def _quote_table_name(self, table_name):
         # Use case: `describe table (select ...)`, over a TextClause.
@@ -869,25 +897,35 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @reflection.cache
     def get_columns(self, connection, table_name, schema=None, **kw):
+        quote = self._quote_table_name
         if schema:
-            qualified_name = schema + '.' + table_name
+            qualified_name = quote(schema) + '.' + quote(table_name)
         else:
-            qualified_name = table_name
-        query = text(
-            'DESCRIBE TABLE {}'.format(qualified_name))
+            qualified_name = quote(table_name)
+        query = 'DESCRIBE TABLE {}'.format(qualified_name)
         rows = self._execute(connection, query)
 
-        return [self._get_column_info(row.name, row.type) for row in rows]
+        return [self._get_column_info(row.name, row.type, row.default_type,
+                                      row.default_expression)
+                for row in rows]
 
-    def _get_column_info(self, name, format_type):
+    def _get_column_info(self, name, format_type, default_type,
+                         default_expression):
         col_type = self._get_column_type(name, format_type)
+        col_default = self._get_column_default(default_type,
+                                               default_expression)
         result = {
             'name': name,
             'type': col_type,
             'nullable': True,
-            'default': None,
+            'default': col_default,
         }
         return result
+
+    def _get_column_default(self, default_type, default_expression):
+        if default_type == 'DEFAULT':
+            return default_expression
+        return None
 
     def _get_column_type(self, name, spec):
         if spec.startswith('Array'):
@@ -1035,7 +1073,7 @@ class ClickHouseDialect(default.DefaultDialect):
         return [row.name for row in rows]
 
     @reflection.cache
-    def get_engines(self, connection, schema=None, **kw):
+    def get_engine(self, connection, table_name, schema=None, **kw):
         columns = [
             'name', 'engine_full', 'engine', 'partition_key', 'sorting_key',
             'primary_key', 'sampling_key'
@@ -1047,12 +1085,19 @@ class ClickHouseDialect(default.DefaultDialect):
             database = connection.engine.url.database
 
         query = text(
-            'SELECT {} FROM system.tables WHERE database = :database'
+            'SELECT {} FROM system.tables '
+            'WHERE database = :database AND name = :name'
             .format(', '.join(columns))
         )
 
-        rows = self._execute(connection, query, database=database)
-        return [{x: getattr(row, x, None) for x in columns} for row in rows]
+        rows = self._execute(
+            connection, query, database=database, name=table_name
+        )
+
+        row = next(rows, None)
+
+        if row:
+            return {x: getattr(row, x, None) for x in columns}
 
     def do_rollback(self, dbapi_connection):
         # No support for transactions.
