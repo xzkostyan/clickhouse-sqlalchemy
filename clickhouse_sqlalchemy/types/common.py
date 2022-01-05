@@ -141,3 +141,20 @@ class Enum16(Enum):
 
 class Decimal(types.Numeric, ClickHouseTypeEngine):
     __visit_name__ = 'numeric'
+
+
+class Tuple(ClickHouseTypeEngine):
+    __visit_name__ = 'tuple'
+
+    def __init__(self, *nested_types):
+        self.nested_types = nested_types
+        super(Tuple, self).__init__()
+
+
+class Map(ClickHouseTypeEngine):
+    __visit_name__ = 'map'
+
+    def __init__(self, key_type, value_type):
+        self.key_type = key_type
+        self.value_type = value_type
+        super(Map, self).__init__()

@@ -269,6 +269,34 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    def test_create_table_tuple(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Tuple(types.Int8, types.Float32)),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'x Tuple(Int8, Float32)) '
+            'ENGINE = Memory'
+        )
+
+    def test_create_table_map(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Map(types.String, types.Float32)),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'x Map(String, Float32)) '
+            'ENGINE = Memory'
+        )
+
     def test_table_create_on_cluster(self):
         create_sql = (
             'CREATE TABLE t1 ON CLUSTER test_cluster '
