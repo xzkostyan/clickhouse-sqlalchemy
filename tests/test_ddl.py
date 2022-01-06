@@ -5,6 +5,7 @@ from clickhouse_sqlalchemy import types, engines, Table, get_declarative_base
 from clickhouse_sqlalchemy.sql.ddl import DropTable
 from tests.testcase import BaseTestCase
 from tests.session import mocked_engine
+from tests.util import require_server_version
 
 
 class DDLTestCase(BaseTestCase):
@@ -293,17 +294,18 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    @require_server_version(21, 1, 3)
     def test_create_table_map(self):
         table = Table(
             't1', self.metadata(),
-            Column('x', types.Map(types.String, types.Float32)),
+            Column('x', types.Map(types.String, types.String)),
             engines.Memory()
         )
 
         self.assertEqual(
             self.compile(CreateTable(table)),
             'CREATE TABLE t1 ('
-            'x Map(String, Float32)) '
+            'x Map(String, String)) '
             'ENGINE = Memory'
         )
 
