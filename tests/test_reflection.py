@@ -74,14 +74,18 @@ class ReflectionTestCase(BaseTestCase):
         self.assertEqual(coltype.nested_type, types.String)
 
     def test_tuple(self):
-        coltype = self._type_round_trip(types.Tuple(types.String, types.Int32))[0]
+        coltype = self._type_round_trip(
+            types.Tuple(types.String, types.Int32)
+        )[0]
 
         self.assertIsInstance(coltype, types.Tuple)
         self.assertEqual(coltype.nested_types[0], types.String)
         self.assertEqual(coltype.nested_types[1], types.Int32)
 
     def test_map(self):
-        coltype = self._type_round_trip(types.Map(types.String, types.Int32))[0]
+        coltype = self._type_round_trip(
+            types.Map(types.String, types.Int32)
+        )[0]
 
         self.assertIsInstance(coltype, types.Map)
         self.assertEqual(coltype.key_type, types.String)
