@@ -73,6 +73,25 @@ class ReflectionTestCase(BaseTestCase):
         self.assertIsInstance(coltype, types.LowCardinality)
         self.assertEqual(coltype.nested_type, types.String)
 
+    def test_tuple(self):
+        coltype = self._type_round_trip(
+            types.Tuple(types.String, types.Int32)
+        )[0]
+
+        self.assertIsInstance(coltype, types.Tuple)
+        self.assertEqual(coltype.nested_types[0], types.String)
+        self.assertEqual(coltype.nested_types[1], types.Int32)
+
+    @require_server_version(21, 1, 3)
+    def test_map(self):
+        coltype = self._type_round_trip(
+            types.Map(types.String, types.String)
+        )[0]
+
+        self.assertIsInstance(coltype, types.Map)
+        self.assertEqual(coltype.key_type, types.String)
+        self.assertEqual(coltype.value_type, types.String)
+
     def test_enum8(self):
         enum_options = {'three': 3, "quoted' ": 9, 'comma, ': 14}
         coltype = self._type_round_trip(

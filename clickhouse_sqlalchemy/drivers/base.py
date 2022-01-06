@@ -50,6 +50,8 @@ ischema_names = {
     '_array': types.Array,
     '_nullable': types.Nullable,
     '_lowcardinality': types.LowCardinality,
+    '_tuple': types.Tuple,
+    '_map': types.Map,
 }
 
 
@@ -741,6 +743,21 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_ipv6(self, type_, **kw):
         return 'IPv6'
 
+    def visit_tuple(self, type_, **kw):
+        cols = (
+            self.process(type_api.to_instance(nested_type), **kw)
+            for nested_type in type_.nested_types
+        )
+        return 'Tuple(%s)' % ', '.join(cols)
+
+    def visit_map(self, type_, **kw):
+        key_type = type_api.to_instance(type_.key_type)
+        value_type = type_api.to_instance(type_.value_type)
+        return 'Map(%s, %s)' % (
+            self.process(key_type, **kw),
+            self.process(value_type, **kw)
+        )
+
 
 class ClickHouseExecutionContextBase(default.DefaultExecutionContext):
     @sa_util.memoized_property
@@ -929,6 +946,24 @@ class ClickHouseDialect(default.DefaultDialect):
             inner = spec[15:-1]
             coltype = self.ischema_names['_lowcardinality']
             return coltype(self._get_column_type(name, inner))
+
+        elif spec.startswith('Tuple'):
+            inner = spec[6:-1]
+            coltype = self.ischema_names['_tuple']
+            inner_types = [
+                self._get_column_type(name, t.strip())
+                for t in inner.split(',')
+            ]
+            return coltype(*inner_types)
+
+        elif spec.startswith('Map'):
+            inner = spec[4:-1]
+            coltype = self.ischema_names['_map']
+            inner_types = [
+                self._get_column_type(name, t.strip())
+                for t in inner.split(',')
+            ]
+            return coltype(*inner_types)
 
         elif spec.startswith('Enum'):
             pos = spec.find('(')

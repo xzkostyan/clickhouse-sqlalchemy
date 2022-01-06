@@ -25,7 +25,9 @@ __all__ = [
     'Decimal',
     'IPv4',
     'IPv6',
-    'Nested'
+    'Nested',
+    'Tuple',
+    'Map',
 ]
 
 from .common import String
@@ -52,6 +54,8 @@ from .common import Enum
 from .common import Enum8
 from .common import Enum16
 from .common import Decimal
+from .common import Tuple
+from .common import Map
 from .ip import IPv4
 from .ip import IPv6
 from .nested import Nested
