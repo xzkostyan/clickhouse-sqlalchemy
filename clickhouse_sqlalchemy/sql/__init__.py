@@ -1,6 +1,6 @@
 
-from .schema import Table
+from .schema import Table, MaterializedView
 from .selectable import Select, select
 
 
-__all__ = ('Table', 'Select', 'select')
+__all__ = ('Table', 'MaterializedView', 'Select', 'select')

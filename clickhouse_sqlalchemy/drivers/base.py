@@ -626,6 +626,48 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
 
         return ' ENGINE = ' + self.process(engine)
 
+    def visit_create_materialized_view(self, create):
+        mv = create.element
+        text = '\nCREATE MATERIALIZED VIEW '
+
+        if create.if_not_exists:
+            text += 'IF NOT EXISTS '
+
+        text += self.preparer.format_table(mv.name)
+
+        if mv.cluster:
+            text += ' ON CLUSTER ' + self.preparer.quote(mv.cluster)
+
+        if mv.to:
+            text += ' TO ' + self.preparer.quote(mv.inner_table.name)
+
+        else:
+            text += ' ('
+
+            separator = ''
+
+            for column in mv.inner_table.columns:
+                processed = self.process(CreateColumn(column))
+                if processed is not None:
+                    text += separator
+                    separator = ', '
+                    text += processed
+
+            text += ')'
+
+            text += self.post_create_table(mv.inner_table)
+
+        text += ' '
+
+        if mv.populate:
+            text += 'POPULATE '
+
+        text += 'AS ' + self.sql_compiler.process(
+            mv.mv_selectable, literal_binds=True
+        )
+
+        return text
+
     def visit_drop_table(self, drop):
         text = '\nDROP TABLE '
 
@@ -1066,7 +1108,9 @@ class ClickHouseDialect(default.DefaultDialect):
     @reflection.cache
     def get_table_names(self, connection, schema=None, **kw):
         query = text(
-            "SELECT name FROM system.tables WHERE engine NOT LIKE '%View' "
+            "SELECT name FROM system.tables "
+            "WHERE engine NOT LIKE '%View' "
+            "AND name NOT LIKE '.inner%' "
             "AND database = :database"
         )
 
