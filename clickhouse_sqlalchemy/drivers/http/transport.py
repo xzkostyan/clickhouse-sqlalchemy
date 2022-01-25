@@ -108,7 +108,7 @@ class RequestsTransport(object):
             if key.startswith('header__')
         }
 
-        self.unicode_errors = kwargs.pop('unicode_errors', 'escape')
+        self.unicode_errors = kwargs.pop('unicode_errors', 'replace')
 
         ch_settings = dict(ch_settings or {})
         self.ch_settings = ch_settings
