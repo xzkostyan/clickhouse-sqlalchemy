@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [0.1.8] - 2022-02-03
+### Added
+- Tuple and Map types. Pull request [#163](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/163) by [joelynch](https://github.com/joelynch).
+- Materialized views alembic migrations autogeneration.
+
+### Fixed
+- Handle unsupported engines in table reflection.
+- `EXISTS` and `DESCRIBE` table quoting.
+- Default Unicode error handler to `replace`. Pull request [#166](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/166) by [cwurm](https://github.com/cwurm).
+- [Native] Inserts with `literal_column` values. Solves issue [#133](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/133).
+- Alembic nullable reflection.
+
+### Changed
+- Migrate from Travis CI to GitHub Actions.
+
 ## [0.1.7] - 2021-11-18
 ### Added
 - Support for distinctness comparisons (`is_distinct_from` / `isnot_distinct_from`). Pull request [#144](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/144) by [wlhjason](https://github.com/wlhjason). Solves issue [#143](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/143).
@@ -227,7 +242,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.7...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.8...HEAD
+[0.1.8]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.7...0.1.8
 [0.1.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.6...0.1.7
 [0.1.6]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.5...0.1.6
 [0.1.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.4...0.1.5
