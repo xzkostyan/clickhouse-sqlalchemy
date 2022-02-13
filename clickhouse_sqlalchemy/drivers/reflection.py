@@ -34,21 +34,20 @@ class ClickHouseInspector(reflection.Inspector):
 
         engine_cls_by_name = {e.__name__: e for e in engines.__all__}
 
-        for e in self.get_engines(schema=schema):
-            if e['name'] == table.name:
-                engine_cls = engine_cls_by_name.get(e['engine'])
-                if engine_cls is None:
-                    table.engine = None
-                    return
+        e = self.get_engine(table_name, schema=table.schema)
+        if not e:
+            raise ValueError("Cannot find engine for table '%s'" % table_name)
 
-                engine = engine_cls.reflect(table, **e)
-                engine._set_parent(table)
-                return
+        engine_cls = engine_cls_by_name.get(e['engine'])
+        if engine_cls is not None:
+            engine = engine_cls.reflect(table, **e)
+            engine._set_parent(table)
+        else:
+            table.engine = None
 
-        raise ValueError("Cannot find engine for table '%s'" % table.name)
-
-    def get_engines(self, schema=None, **kw):
+    def get_engine(self, table_name, schema=None, **kw):
         with self._operation_context() as conn:
-            return self.dialect.get_engines(
-                conn, schema=schema, info_cache=self.info_cache, **kw
+            return self.dialect.get_engine(
+                conn, table_name, schema=schema, info_cache=self.info_cache,
+                **kw
             )

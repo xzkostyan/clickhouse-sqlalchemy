@@ -3,11 +3,32 @@ from sqlalchemy.sql import compiler, elements, COLLECT_CARTESIAN_PRODUCTS, \
     WARN_LINTING, crud
 from sqlalchemy.util import inspect_getfullargspec
 
+from ... import types
+
 
 class ClickHouseSQLCompiler(compiler.SQLCompiler):
     def visit_mod_binary(self, binary, operator, **kw):
         return self.process(binary.left, **kw) + ' %% ' + \
             self.process(binary.right, **kw)
+
+    def visit_is_not_distinct_from_binary(self, binary, operator, **kw):
+        """
+        Implementation of distinctness comparison in ClickHouse SQL.
+        A distinctness comparison treats NULL as if it is a (singleton)
+        value and is what ClickHouse uses for `SELECT DISTINCT` and `GROUP BY`.
+        Some databases have direct support for a `IS DISTINCT` comparison, but
+        ClickHouse does not, so we rely on the `hasAny` array function here.
+        """
+
+        return "hasAny([%s], [%s])" % (
+            self.process(binary.left, **kw),
+            self.process(binary.right, **kw),
+        )
+
+    def visit_is_distinct_from_binary(self, binary, operator, **kw):
+        return "NOT %s" % self.visit_is_not_distinct_from_binary(
+            binary, operator, **kw
+        )
 
     def post_process_text(self, text):
         return text.replace('%', '%%')

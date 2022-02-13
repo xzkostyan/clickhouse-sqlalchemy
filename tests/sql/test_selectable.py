@@ -307,7 +307,7 @@ class SelectTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.compile(query),
-            'SELECT p.child1, p.child2, t1.parent.child1 '
+            'SELECT p.child1, p.child2, t1.parent.child1 AS child1_1 '
             'FROM t1 '
             'LEFT ARRAY JOIN t1.parent AS p'
         )
