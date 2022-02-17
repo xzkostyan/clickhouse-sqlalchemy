@@ -248,6 +248,18 @@ class ClickHouseCompiler(compiler.SQLCompiler):
             )
         )
 
+    def visit_left_array_join(self, array_join, **kwargs):
+        return ' \nLEFT ARRAY JOIN {columns}'.format(
+            columns=', '.join(
+                col._compiler_dispatch(self,
+                                       within_label_clause=False,
+                                       within_columns_clause=True,
+                                       **kwargs)
+                for col in array_join.clauses
+
+            )
+        )
+
     def visit_label(self,
                     label,
                     from_labeled_label=False,

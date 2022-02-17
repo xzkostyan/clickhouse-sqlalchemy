@@ -8,6 +8,7 @@ from sqlalchemy.orm.util import _ORMJoin as _StandardORMJoin
 
 from ..ext.clauses import (
     ArrayJoin,
+    LeftArrayJoin,
     LimitByClause,
     sample_clause,
 )
@@ -45,6 +46,10 @@ class Query(BaseQuery):
     @_generative()
     def array_join(self, *columns):
         self._array_join = ArrayJoin(*columns)
+
+    @_generative()
+    def left_array_join(self, *columns):
+        self._array_join = LeftArrayJoin(*columns)
 
     @_generative()
     def final(self):

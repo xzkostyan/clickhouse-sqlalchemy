@@ -59,3 +59,7 @@ class Lambda(ColumnElement):
 
 class ArrayJoin(ClauseList):
     __visit_name__ = 'array_join'
+
+
+class LeftArrayJoin(ClauseList):
+    __visit_name__ = 'left_array_join'

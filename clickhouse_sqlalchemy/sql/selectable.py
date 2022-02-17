@@ -6,6 +6,7 @@ from sqlalchemy.sql.selectable import (
 
 from ..ext.clauses import (
     ArrayJoin,
+    LeftArrayJoin,
     LimitByClause,
     sample_clause,
 )
@@ -56,6 +57,10 @@ class Select(StandardSelect):
     @_generative
     def array_join(self, *columns):
         self._array_join = ArrayJoin(*columns)
+
+    @_generative
+    def left_array_join(self, *columns):
+        self._array_join = LeftArrayJoin(*columns)
 
     def join(self, right, onclause=None, isouter=False, full=False, type=None,
              strictness=None, distribution=None):
