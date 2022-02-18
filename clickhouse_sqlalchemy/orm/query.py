@@ -43,7 +43,7 @@ class Query(BaseQuery):
 
         self._with_totals = True
 
-    def _add_array_join(self, *columns, left):
+    def _add_array_join(self, columns, left):
         if not left:
             join_type = ArrayJoin
         else:
@@ -51,12 +51,13 @@ class Query(BaseQuery):
         self._array_join = join_type(*columns)
 
     @_generative()
-    def array_join(self, *columns, left=False):
-        self._add_array_join(*columns, left=left)
+    def array_join(self, *columns, **kwargs):
+        left = kwargs.get("left", False)
+        self._add_array_join(columns, left=left)
 
     @_generative()
     def left_array_join(self, *columns):
-        self._add_array_join(*columns, left=True)
+        self._add_array_join(columns, left=True)
 
     @_generative()
     def final(self):
