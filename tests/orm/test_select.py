@@ -80,6 +80,46 @@ class SelectTestCase(CompilationTestCase):
             't1."nested.another_array_column"'
         )
 
+    def test_array_join_left(self):
+        table = self._make_table(
+            Column('nested.array_column', types.Array(types.Int8)),
+            Column('nested.another_array_column', types.Array(types.Int8))
+        )
+        first_label = table.c['nested.array_column'].label('from_array')
+        second_not_label = table.c['nested.another_array_column']
+        query = self.session.query(first_label, second_not_label)\
+            .array_join(first_label, second_not_label, left=True)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT '
+            't1."nested.array_column" AS from_array, '
+            't1."nested.another_array_column" '
+            'AS "t1_nested.another_array_column" '
+            'FROM t1 '
+            'LEFT ARRAY JOIN t1."nested.array_column" AS from_array, '
+            't1."nested.another_array_column"'
+        )
+
+    def test_left_array_join(self):
+        table = self._make_table(
+            Column('nested.array_column', types.Array(types.Int8)),
+            Column('nested.another_array_column', types.Array(types.Int8))
+        )
+        first_label = table.c['nested.array_column'].label('from_array')
+        second_not_label = table.c['nested.another_array_column']
+        query = self.session.query(first_label, second_not_label)\
+            .left_array_join(first_label, second_not_label)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT '
+            't1."nested.array_column" AS from_array, '
+            't1."nested.another_array_column" '
+            'AS "t1_nested.another_array_column" '
+            'FROM t1 '
+            'LEFT ARRAY JOIN t1."nested.array_column" AS from_array, '
+            't1."nested.another_array_column"'
+        )
+
     def test_sample(self):
         table = self._make_table()
 

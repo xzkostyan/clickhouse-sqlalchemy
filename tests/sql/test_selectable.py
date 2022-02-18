@@ -200,6 +200,118 @@ class SelectTestCase(BaseTestCase):
             'ARRAY JOIN t1.parent AS p'
         )
 
+    def test_nested_array_join_left(self):
+        table = self._make_table(
+            't1',
+            Column('x', types.Int32, primary_key=True),
+            Column('parent', types.Nested(
+                Column('child1', types.Int32),
+                Column('child2', types.String),
+            ))
+        )
+        query = select(
+            [
+                table.c.parent.child1,
+                table.c.parent.child2,
+            ]
+        ).array_join(
+            table.c.parent, left=True
+        )
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.parent.child1, t1.parent.child2 '
+            'FROM t1 '
+            'LEFT ARRAY JOIN t1.parent'
+        )
+
+    def test_nested_left_array_join(self):
+        table = self._make_table(
+            't1',
+            Column('x', types.Int32, primary_key=True),
+            Column('parent', types.Nested(
+                Column('child1', types.Int32),
+                Column('child2', types.String),
+            ))
+        )
+        query = select(
+            [
+                table.c.parent.child1,
+                table.c.parent.child2,
+            ]
+        ).left_array_join(
+            table.c.parent
+        )
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.parent.child1, t1.parent.child2 '
+            'FROM t1 '
+            'LEFT ARRAY JOIN t1.parent'
+        )
+
+        query = select(
+            [
+                table.c.parent.child1,
+                table.c.parent.child2,
+            ]
+        ).left_array_join(
+            table.c.parent.child1,
+        )
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.parent.child1, t1.parent.child2 '
+            'FROM t1 '
+            'LEFT ARRAY JOIN t1.parent.child1'
+        )
+
+        query = select(
+            [
+                table.c.parent.child1,
+                table.c.parent.child2,
+            ]
+        ).left_array_join(
+            table.c.parent.child1,
+            table.c.parent.child2,
+        )
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.parent.child1, t1.parent.child2 '
+            'FROM t1 '
+            'LEFT ARRAY JOIN t1.parent.child1, t1.parent.child2'
+        )
+
+        parent_labeled = table.c.parent.label('p')
+
+        query = select(
+            [
+                table.c.parent.child1,
+                table.c.parent.child2,
+            ]
+        ).left_array_join(
+            parent_labeled
+        )
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.parent.child1, t1.parent.child2 '
+            'FROM t1 '
+            'LEFT ARRAY JOIN t1.parent AS p'
+        )
+
+        query = select(
+            [
+                parent_labeled.child1,
+                parent_labeled.child2,
+                table.c.parent.child1,
+            ]
+        ).left_array_join(
+            parent_labeled
+        )
+        self.assertEqual(
+            self.compile(query),
+            'SELECT p.child1, p.child2, t1.parent.child1 '
+            'FROM t1 '
+            'LEFT ARRAY JOIN t1.parent AS p'
+        )
+
     def test_join(self):
         table_1 = self._make_table(
             'table_1', Column('x', types.UInt32, primary_key=True)
