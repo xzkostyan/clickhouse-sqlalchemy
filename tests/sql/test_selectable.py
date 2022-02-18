@@ -200,6 +200,30 @@ class SelectTestCase(BaseTestCase):
             'ARRAY JOIN t1.parent AS p'
         )
 
+    def test_nested_array_join_left(self):
+        table = self._make_table(
+            't1',
+            Column('x', types.Int32, primary_key=True),
+            Column('parent', types.Nested(
+                Column('child1', types.Int32),
+                Column('child2', types.String),
+            ))
+        )
+        query = select(
+            [
+                table.c.parent.child1,
+                table.c.parent.child2,
+            ]
+        ).array_join(
+            table.c.parent, left=True
+        )
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.parent.child1, t1.parent.child2 '
+            'FROM t1 '
+            'LEFT ARRAY JOIN t1.parent'
+        )
+
     def test_nested_left_array_join(self):
         table = self._make_table(
             't1',
