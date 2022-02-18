@@ -55,10 +55,7 @@ class Select(StandardSelect):
         self._limit_by_clause = LimitByClause(by_clauses, limit, offset)
 
     def _add_array_join(self, columns, left):
-        if not left:
-            join_type = ArrayJoin
-        else:
-            join_type = LeftArrayJoin
+        join_type = ArrayJoin if not left else LeftArrayJoin
         self._array_join = join_type(*columns)
 
     @_generative
