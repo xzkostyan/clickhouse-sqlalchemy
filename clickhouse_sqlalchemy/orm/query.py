@@ -44,7 +44,10 @@ class Query(BaseQuery):
         self._with_totals = True
 
     def _add_array_join(self, *columns, left):
-        join_type = ArrayJoin if not left else LeftArrayJoin
+        if not left:
+            join_type = ArrayJoin
+        else:
+            join_type = LeftArrayJoin
         self._array_join = join_type(*columns)
 
     @_generative()
