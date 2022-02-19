@@ -30,6 +30,17 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             binary, operator, **kw
         )
 
+    def visit_empty_set_expr(self, element_types):
+        return "SELECT %s WHERE 1!=1" % (
+            ", ".join(
+                "CAST(NULL AS %s)"
+                % self.dialect.type_compiler.process(
+                    t if isinstance(t, types.Nullable) else types.Nullable(t)
+                )
+                for t in element_types or [types.Int8()]
+            ),
+        )
+
     def post_process_text(self, text):
         return text.replace('%', '%%')
 
