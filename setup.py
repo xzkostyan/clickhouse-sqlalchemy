@@ -84,7 +84,7 @@ setup(
     keywords='ClickHouse db database cloud analytics',
 
     packages=find_packages('.', exclude=["tests*"]),
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
+    python_requires='>=3.6, <4',
     install_requires=[
         'sqlalchemy>=1.4,<1.5',
         'requests',

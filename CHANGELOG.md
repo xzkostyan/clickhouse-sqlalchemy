@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2022-02-20
+### Added
+- `LEFT ARRAY JOIN` clause. Pull request [#167](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/167) by [Fozar](https://github.com/Fozar).
+
+### Changed
+- Supported SQLAlchemy version is 1.4.
+
 ## [0.1.8] - 2022-02-03
 ### Added
 - Tuple and Map types. Pull request [#163](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/163) by [joelynch](https://github.com/joelynch).
@@ -242,7 +249,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.8...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.0...0.1.8
 [0.1.8]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.7...0.1.8
 [0.1.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.6...0.1.7
 [0.1.6]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.5...0.1.6
