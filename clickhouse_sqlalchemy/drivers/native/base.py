@@ -22,7 +22,7 @@ class ClickHouseNativeCompiler(ClickHouseCompiler):
         rv = super(ClickHouseNativeCompiler, self).visit_insert(
             insert_stmt, asfrom=asfrom, **kw)
 
-        if kw.get('literal_binds'):
+        if kw.get('literal_binds') or insert_stmt.parameters:
             return rv
 
         pos = rv.lower().rfind('values (')
