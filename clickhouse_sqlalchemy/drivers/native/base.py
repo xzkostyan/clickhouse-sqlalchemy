@@ -22,7 +22,7 @@ class ClickHouseNativeSQLCompiler(ClickHouseSQLCompiler):
         rv = super(ClickHouseNativeSQLCompiler, self).visit_insert(
             insert_stmt, asfrom=asfrom, **kw)
 
-        if kw.get('literal_binds'):
+        if kw.get('literal_binds') or insert_stmt._values:
             return rv
 
         pos = rv.lower().rfind('values (')
