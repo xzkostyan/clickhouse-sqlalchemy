@@ -138,10 +138,13 @@ class ReplicatedReplacingMergeTree(ReplicatedEngineMixin, ReplacingMergeTree):
     def reflect(cls, table, engine_full, **kwargs):
         args = cls._reflect_replicated(engine_full)
         table_path, replica_name = args[:2]
+        version = None
+        if len(args) > 2:
+            version = args[2]
 
         return cls(
             table_path.strip("'"), replica_name.strip("'"),
-            *args[2:],
+            version=version,
             **cls._reflect_merge_tree(table, **kwargs)
         )
 

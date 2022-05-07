@@ -336,7 +336,7 @@ class EngineClassReflectionTestCase(BaseTestCase):
         )
 
         engine.__init__.assert_called_with(
-            '/table/path', 'name', 'version',
+            '/table/path', 'name', version='version',
             partition_by=['x'], order_by=['x'], primary_key=['x']
         )
 
@@ -352,7 +352,7 @@ class EngineClassReflectionTestCase(BaseTestCase):
         )
 
         engine.__init__.assert_called_with(
-            '/table/path', 'name',
+            '/table/path', 'name', version=None,
             partition_by=['x'], order_by=['x'], primary_key=['x']
         )
 
