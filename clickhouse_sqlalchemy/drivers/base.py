@@ -481,16 +481,17 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             colspec += " ALIAS " + self._get_default_string(
                 opts['alias'], 'clickhouse_alias'
             )
-        elif opts['after'] is not None:
-            colspec += " AFTER " + self._get_default_string(
-                opts['after'], 'clickhouse_after'
-            )
 
         codec = opts['codec']
         if codec is not None:
             if isinstance(codec, (list, tuple)):
                 codec = ', '.join(codec)
             colspec += " CODEC({0})".format(codec)
+
+        if opts['after'] is not None:
+            colspec += " AFTER " + self._get_default_string(
+                opts['after'], 'clickhouse_after'
+            )
 
         return colspec
 
