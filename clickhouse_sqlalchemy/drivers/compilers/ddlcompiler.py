@@ -1,5 +1,6 @@
 from sqlalchemy import util as sa_util, types as sqltypes, exc
 from sqlalchemy.sql import compiler, ClauseElement, expression
+from sqlalchemy.sql.ddl import CreateColumn
 from sqlalchemy.sql.elements import TextClause
 from sqlalchemy.util import to_list
 
@@ -42,16 +43,17 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             colspec += " ALIAS " + self._get_default_string(
                 opts['alias'], 'clickhouse_alias'
             )
-        elif opts['after'] is not None:
-            colspec += " AFTER " + self._get_default_string(
-                opts['after'], 'clickhouse_after'
-            )
 
         codec = opts['codec']
         if codec is not None:
             if isinstance(codec, (list, tuple)):
                 codec = ', '.join(codec)
             colspec += " CODEC({0})".format(codec)
+
+        if opts['after'] is not None:
+            colspec += " AFTER " + self._get_default_string(
+                opts['after'], 'clickhouse_after'
+            )
 
         return colspec
 
@@ -187,7 +189,49 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
 
         return ' ENGINE = ' + self.process(engine)
 
-    def visit_drop_table(self, drop, **kw):
+    def visit_create_materialized_view(self, create):
+        mv = create.element
+        text = '\nCREATE MATERIALIZED VIEW '
+
+        if create.if_not_exists:
+            text += 'IF NOT EXISTS '
+
+        text += self.preparer.format_table(mv.name)
+
+        if mv.cluster:
+            text += ' ON CLUSTER ' + self.preparer.quote(mv.cluster)
+
+        if mv.to:
+            text += ' TO ' + self.preparer.quote(mv.inner_table.name)
+
+        else:
+            text += ' ('
+
+            separator = ''
+
+            for column in mv.inner_table.columns:
+                processed = self.process(CreateColumn(column))
+                if processed is not None:
+                    text += separator
+                    separator = ', '
+                    text += processed
+
+            text += ')'
+
+            text += self.post_create_table(mv.inner_table)
+
+        text += ' '
+
+        if mv.populate:
+            text += 'POPULATE '
+
+        text += 'AS ' + self.sql_compiler.process(
+            mv.mv_selectable, literal_binds=True
+        )
+
+        return text
+
+    def visit_drop_table(self, drop):
         text = '\nDROP TABLE '
 
         if getattr(drop, "if_exists", False):
