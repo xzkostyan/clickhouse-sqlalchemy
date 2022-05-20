@@ -634,7 +634,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         if create.if_not_exists:
             text += 'IF NOT EXISTS '
 
-        text += self.preparer.format_table(mv.name)
+        text += self.preparer.format_table(mv)
 
         if mv.cluster:
             text += ' ON CLUSTER ' + self.preparer.quote(mv.cluster)
