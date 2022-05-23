@@ -1,12 +1,13 @@
 from sqlalchemy.sql import ClauseElement
-from sqlalchemy.sql.base import SchemaEventTarget
-from sqlalchemy.sql.schema import ColumnCollectionMixin, SchemaItem
-from sqlalchemy.sql.visitors import Visitable
+from sqlalchemy.sql.schema import ColumnCollectionMixin, SchemaItem, Constraint
 from sqlalchemy.util import zip_longest
 
 
-class Engine(SchemaEventTarget, Visitable):
+class Engine(Constraint):
     __visit_name__ = 'engine'
+
+    def __init__(self, *args, **kwargs):
+        pass
 
     def get_parameters(self):
         return []
@@ -24,9 +25,9 @@ class Engine(SchemaEventTarget, Visitable):
     def name(self):
         return self.__class__.__name__
 
-    def _set_parent(self, table):
-        self.table = table
-        self.table.engine = self
+    def _set_parent(self, parent, **kw):
+        self.parent = parent
+        parent.engine = self
 
     @classmethod
     def reflect(cls, table, engine_full, **kwargs):
