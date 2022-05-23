@@ -9,6 +9,15 @@
 ### Changed
 - Supported SQLAlchemy version is 1.4.
 
+## [0.1.10] - 2022-06-06
+### Added
+- Documentation on Read the Docs: https://clickhouse-sqlalchemy.readthedocs.io
+
+### Fixed
+- ``AFTER`` clause rendering in ``ADD COLUMN``.
+- Broken Materialized views creation via ``.create()``.
+- Engine creation in migrations for alembic 1.6+. ``Engine`` is subclass of ``Constraint`` now.
+
 ## [0.1.9] - 2022-05-08
 ### Fixed
 - ReplicatedReplacingMergeTree reflection. Solves issue [#164](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/164).
@@ -254,8 +263,13 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
+<<<<<<< HEAD
 [Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.0...HEAD
 [0.2.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.9...0.2.0
+=======
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.10...HEAD
+[0.1.10]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.9...0.1.10
+>>>>>>> 4a3c3f4 (Version bumped to 0.1.10)
 [0.1.9]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.8...0.1.9
 [0.1.8]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.7...0.1.8
 [0.1.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.6...0.1.7
