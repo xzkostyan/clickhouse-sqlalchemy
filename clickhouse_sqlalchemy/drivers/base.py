@@ -83,6 +83,7 @@ class ClickHouseDialect(default.DefaultDialect):
     supports_sequences = False
     supports_native_enum = True  # Do not render check constraints on enums.
     supports_multivalues_insert = True
+    supports_statement_cache = True
 
     # Dialect related-features
     supports_delete = True

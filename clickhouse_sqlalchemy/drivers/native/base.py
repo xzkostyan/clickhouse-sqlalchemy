@@ -40,6 +40,8 @@ class ClickHouseDialect_native(ClickHouseDialect):
     execution_ctx_cls = ClickHouseExecutionContext
     statement_compiler = ClickHouseNativeSQLCompiler
 
+    supports_statement_cache = True
+
     @classmethod
     def dbapi(cls):
         return connector

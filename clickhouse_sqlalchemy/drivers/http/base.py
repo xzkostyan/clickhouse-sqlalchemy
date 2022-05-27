@@ -22,6 +22,8 @@ class ClickHouseDialect_http(ClickHouseDialect):
     driver = 'http'
     execution_ctx_cls = ClickHouseExecutionContext
 
+    supports_statement_cache = True
+
     @classmethod
     def dbapi(cls):
         return connector
