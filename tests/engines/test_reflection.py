@@ -1,7 +1,7 @@
 from contextlib import contextmanager
 from unittest.mock import Mock
 
-from sqlalchemy import Column, text, create_engine
+from sqlalchemy import Column, text, create_engine, inspect
 
 from clickhouse_sqlalchemy import types, engines, Table, make_session
 from tests.testcase import BaseTestCase
@@ -222,7 +222,7 @@ class EngineReflectionTestCase(BaseTestCase):
         metadata = self.metadata()
         table = Table('.test', self.metadata(), Column('x', types.Int32),
                       engines.Log())
-        table.exists()
+        inspect(self.session.connection()).has_table(table.name)
 
         with self.create_table(table):
             metadata.clear()  # reflect from clean state
