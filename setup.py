@@ -35,6 +35,8 @@ dialects = [
     ]
 ]
 
+github_url = 'https://github.com/xzkostyan/clickhouse-sqlalchemy'
+
 setup(
     name='clickhouse-sqlalchemy',
     version=read_version(),
@@ -42,7 +44,7 @@ setup(
     description='Simple ClickHouse SQLAlchemy Dialect',
     long_description=long_description,
 
-    url='https://github.com/xzkostyan/clickhouse-sqlalchemy',
+    url=github_url,
 
     author='Konstantin Lebedev',
     author_email='kostyan.lebedev@gmail.com',
@@ -84,6 +86,10 @@ setup(
 
     keywords='ClickHouse db database cloud analytics',
 
+    project_urls={
+        'Documentation': 'https://clickhouse-sqlalchemy.readthedocs.io',
+        'Changes': github_url + '/blob/master/CHANGELOG.md'
+    },
     packages=find_packages('.', exclude=["tests*"]),
     python_requires='>=3.6, <4',
     install_requires=[

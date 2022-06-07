@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2022-06-13
+### Fixed
+- Add `supports_statement_cache = True`. Solves issue [#169](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/169).
+- Add `cache_ok = True` for IP types.
+- Mixed `text()` and pure strings in engine parameters handling. Solves issue [#173](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/173).
+- Engine creation in alembic migrations.
+- `CREATE` and `DROP` Materialized views. Solves issue [#177](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/177).
+
+With changes from 0.1.9 and 0.1.10.
+
 ## [0.2.0] - 2022-02-20
 ### Added
 - `LEFT ARRAY JOIN` clause. Pull request [#167](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/167) by [Fozar](https://github.com/Fozar).
@@ -263,13 +273,10 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-<<<<<<< HEAD
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.1...HEAD
+[0.2.1]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.9...0.2.0
-=======
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.10...HEAD
 [0.1.10]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.9...0.1.10
->>>>>>> 4a3c3f4 (Version bumped to 0.1.10)
 [0.1.9]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.8...0.1.9
 [0.1.8]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.7...0.1.8
 [0.1.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.6...0.1.7
