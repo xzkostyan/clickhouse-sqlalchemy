@@ -94,6 +94,8 @@ class BaseIPComparator(UserDefinedType.Comparator):
 class IPv4(types.UserDefinedType):
     __visit_name__ = "ipv4"
 
+    cache_ok = True
+
     def bind_processor(self, dialect):
         def process(value):
             return str(value)
@@ -123,6 +125,8 @@ class IPv4(types.UserDefinedType):
 
 class IPv6(types.UserDefinedType):
     __visit_name__ = "ipv6"
+
+    cache_ok = True
 
     def bind_processor(self, dialect):
         def process(value):
