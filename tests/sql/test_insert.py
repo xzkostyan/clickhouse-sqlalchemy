@@ -1,4 +1,4 @@
-from sqlalchemy import Column, literal_column
+from sqlalchemy import Column, literal_column, select
 
 from clickhouse_sqlalchemy import types, Table, engines
 from tests.testcase import NativeSessionTestCase
@@ -18,5 +18,5 @@ class InsertTestCase(NativeSessionTestCase):
             query = table.insert().values(x=literal_column("'test'"))
             self.session.execute(query)
 
-            rv = self.session.execute(self.session.query(table.c.x)).scalar()
+            rv = self.session.execute(select(table.c.x)).scalar()
             self.assertEqual(rv, 'test')
