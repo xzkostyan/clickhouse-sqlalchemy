@@ -536,9 +536,9 @@ from two steps:
             Stat.date.label('date'),
             func.sum(Stat.metric1 * Stat.sign).label('metric1')
         ]).where(
-            Statistics.grouping > 42
+            Stat.grouping > 42
         ).group_by(
-            Statistics.date
+            Stat.date
         ))
 
         Stat.__table__.create()

@@ -13,6 +13,12 @@ class DropTable(DropTableBase):
                                         if_exists=if_exists)
 
 
+class DropView(DropTableBase):
+    def __init__(self, element, bind=None, if_exists=False):
+        self.on_cluster = element.cluster
+        super(DropView, self).__init__(element, bind=bind, if_exists=if_exists)
+
+
 class SchemaDropper(SchemaDropperBase):
     def __init__(self, dialect, connection, if_exists=False, **kwargs):
         self.if_exists = if_exists
@@ -20,6 +26,9 @@ class SchemaDropper(SchemaDropperBase):
 
     def visit_table(self, table, **kwargs):
         self.connection.execute(DropTable(table, if_exists=self.if_exists))
+
+    def visit_materialized_view(self, table, **kwargs):
+        self.connection.execute(DropView(table, if_exists=self.if_exists))
 
 
 class CreateMaterializedView(_CreateDropBase):

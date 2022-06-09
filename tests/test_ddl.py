@@ -1,7 +1,9 @@
-from sqlalchemy import Column, func, text
+from sqlalchemy import Column, func, text, select, inspect
 from sqlalchemy.sql.ddl import CreateTable, CreateColumn
 
-from clickhouse_sqlalchemy import types, engines, Table, get_declarative_base
+from clickhouse_sqlalchemy import (
+    types, engines, Table, get_declarative_base, MaterializedView
+)
 from clickhouse_sqlalchemy.sql.ddl import DropTable
 from tests.testcase import BaseTestCase
 from tests.session import mocked_engine
@@ -383,3 +385,51 @@ class DDLTestCase(BaseTestCase):
 
         metadata.create_all()
         metadata.drop_all()
+
+    def test_create_drop_mat_view(self):
+        Base = get_declarative_base(self.metadata())
+
+        class Statistics(Base):
+            date = Column(types.Date, primary_key=True)
+            sign = Column(types.Int8, nullable=False)
+            grouping = Column(types.Int32, nullable=False)
+            metric1 = Column(types.Int32, nullable=False)
+
+            __table_args__ = (
+                engines.CollapsingMergeTree(
+                    sign,
+                    partition_by=func.toYYYYMM(date),
+                    order_by=(date, grouping)
+                ),
+            )
+
+        # Define storage for Materialized View
+        class GroupedStatistics(Base):
+            date = Column(types.Date, primary_key=True)
+            metric1 = Column(types.Int32, nullable=False)
+
+            __table_args__ = (
+                engines.SummingMergeTree(
+                    partition_by=func.toYYYYMM(date),
+                    order_by=(date,)
+                ),
+            )
+
+        # Define SELECT for Materialized View
+        MatView = MaterializedView(GroupedStatistics, select([
+            Statistics.date.label('date'),
+            func.sum(Statistics.metric1 * Statistics.sign).label('metric1')
+        ]).where(
+            Statistics.grouping > 42
+        ).group_by(
+            Statistics.date
+        ))
+
+        Statistics.__table__.create()
+        MatView.create()
+
+        inspector = inspect(self.session.connection())
+
+        self.assertTrue(inspector.has_table(MatView.name))
+        MatView.drop()
+        self.assertFalse(inspector.has_table(MatView.name))

@@ -115,11 +115,11 @@ class MaterializedView(DialectKWArgs, SchemaItem, Immutable, FromClause):
     def create(self, bind=None, checkfirst=False, if_not_exists=False):
         if bind is None:
             bind = _bind_or_error(self)
-        bind._run_visitor(ddl.SchemaGenerator, self, checkfirst=checkfirst,
-                          if_not_exists=if_not_exists)
+        bind._run_ddl_visitor(ddl.SchemaGenerator, self, checkfirst=checkfirst,
+                              if_not_exists=if_not_exists)
 
     def drop(self, bind=None, checkfirst=False, if_exists=False):
         if bind is None:
             bind = _bind_or_error(self)
-        bind._run_visitor(ddl.SchemaDropper, self,
-                          checkfirst=checkfirst, if_exists=if_exists)
+        bind._run_ddl_visitor(ddl.SchemaDropper, self, checkfirst=checkfirst,
+                              if_exists=if_exists)

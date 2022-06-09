@@ -246,3 +246,19 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             )
 
         return rv
+
+    def visit_view(self, drop):
+        text = '\nDROP VIEW '
+
+        if getattr(drop, "if_exists", False):
+            text += 'IF EXISTS '
+
+        rv = text + self.preparer.format_table(drop.element)
+
+        if getattr(drop, "on_cluster", False):
+            rv += (
+                ' ON CLUSTER ' +
+                self.preparer.quote(drop.on_cluster)
+            )
+
+        return rv
