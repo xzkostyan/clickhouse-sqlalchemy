@@ -474,6 +474,30 @@ class MergeTreeTestCase(EngineTestCaseBase):
             'ORDER BY (date, x)'
         )
 
+    def test_order_by_text(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+            version = Column(types.Int32)
+
+            __table_args__ = (
+                engines.ReplacingMergeTree(
+                    version=version,
+                    partition_by=text('toYYYYMM(date)'),
+                    order_by=(text('toYYYYMM(date)'), 'x'),
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            'CREATE TABLE test_table '
+            '(date Date, x Int32, y String, version Int32) '
+            'ENGINE = ReplacingMergeTree(version) '
+            'PARTITION BY toYYYYMM(date) '
+            'ORDER BY (toYYYYMM(date), x)'
+        )
+
     def test_all_settings(self):
         class TestTable(self.base):
             date = Column(types.Date, primary_key=True)

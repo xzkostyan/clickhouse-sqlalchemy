@@ -1,7 +1,5 @@
-from sqlalchemy.sql import ClauseElement, roles
-from sqlalchemy.sql.coercions import expect_col_expression_collection
+from sqlalchemy.sql import ClauseElement
 from sqlalchemy.sql.schema import ColumnCollectionMixin, SchemaItem, Constraint
-from sqlalchemy.util import zip_longest
 
 
 class Engine(Constraint):
@@ -45,21 +43,24 @@ class TableCol(ColumnCollectionMixin, SchemaItem):
 
 class KeysExpressionOrColumn(ColumnCollectionMixin, SchemaItem):
     def __init__(self, *expressions, **kwargs):
-        columns = []
         self.expressions = []
-        items = expect_col_expression_collection(
-            roles.DDLConstraintColumnRole, expressions
-        )
-        for expr, column, strname, add_element in items:
-            if add_element is not None:
-                columns.append(add_element)
-            self.expressions.append(expr)
 
-        super(KeysExpressionOrColumn, self).__init__(*columns, **kwargs)
+        super(KeysExpressionOrColumn, self).__init__(
+            *expressions, _gather_expressions=self.expressions, **kwargs
+        )
+
+    def _set_parent(self, table, **kw):
+        ColumnCollectionMixin._set_parent(self, table)
+
+        self.table = table
+
+        expressions = self.expressions
+        col_expressions = self._col_expressions(table)
+        assert len(expressions) == len(col_expressions)
+        self.expressions = [
+            expr if isinstance(expr, ClauseElement) else colexpr
+            for expr, colexpr in zip(expressions, col_expressions)
+        ]
 
     def get_expressions_or_columns(self):
-        expr_columns = zip_longest(self.expressions, self.columns)
-        return [
-            (expr if isinstance(expr, ClauseElement) else colexpr)
-            for expr, colexpr in expr_columns
-        ]
+        return self.expressions
