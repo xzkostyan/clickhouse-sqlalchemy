@@ -11,6 +11,7 @@ jobs:
           - "3.8"
           - "3.9"
         clickhouse-version:
+          - 22.5.1.2079
           - 19.3.5
           - 18.14.9
 
@@ -42,6 +43,7 @@ jobs:
       - name: Start ClickHouse server container
         run: |
           echo "VERSION=${{ matrix.clickhouse-version }}" > tests/.env
+          if [[ "${{ matrix.clickhouse-version }}" > "21.7" ]]; then echo "ORG=clickhouse"; else echo "ORG=yandex" ; fi  >> tests/.env
           docker-compose -f tests/docker-compose.yml up -d
       - name: Run tests
         run: coverage run --source=clickhouse_sqlalchemy setup.py test
