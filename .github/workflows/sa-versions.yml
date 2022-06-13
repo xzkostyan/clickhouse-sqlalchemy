@@ -25,7 +25,12 @@ jobs:
 #          username: ${{ secrets.DOCKER_HUB_USERNAME }}
 #          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       - name: Install test requirements
-        run: pip install --upgrade pip setuptools wheel
+        run: |
+          pip install --upgrade pip setuptools wheel
+          python testsrequire.py
+          python setup.py develop
+          # Limit each test time execution.
+          pip install pytest-timeout
       - name: Install SQLAlchemy
         run: pip install sqlalchemy==1.4.${{ matrix.sa-version }}
       - name: Setup /etc/hosts
@@ -40,5 +45,5 @@ jobs:
           if [[ "${{ matrix.clickhouse-version }}" > "21.7" ]]; then echo "ORG=clickhouse"; else echo "ORG=yandex" ; fi  >> tests/.env
           docker-compose -f tests/docker-compose.yml up -d
       - name: Run tests
-        run: python setup.py test
+        run: py.test --timeout=10 -v
         timeout-minutes: 2

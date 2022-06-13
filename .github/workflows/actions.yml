@@ -10,6 +10,7 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
+          - "3.10"
         clickhouse-version:
           - 22.5.1.2079
           - 19.3.5
@@ -32,6 +33,10 @@ jobs:
         run: |
           pip install --upgrade pip setuptools wheel
           pip install flake8 flake8-print coverage
+          python testsrequire.py
+          python setup.py develop
+          # Limit each test time execution.
+          pip install pytest-timeout
       - name: Run flake8
         run: flake8
       - name: Setup /etc/hosts
@@ -46,7 +51,7 @@ jobs:
           if [[ "${{ matrix.clickhouse-version }}" > "21.7" ]]; then echo "ORG=clickhouse"; else echo "ORG=yandex" ; fi  >> tests/.env
           docker-compose -f tests/docker-compose.yml up -d
       - name: Run tests
-        run: coverage run --source=clickhouse_sqlalchemy setup.py test
+        run: coverage run --source=clickhouse_sqlalchemy -m py.test --timeout=10 -v
         timeout-minutes: 2
       - name: Set up Python for coverage submission
         if: ${{ matrix.python-version == '2.7' }}

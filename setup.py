@@ -101,12 +101,5 @@ setup(
     entry_points={
         'sqlalchemy.dialects': dialects
     },
-    test_suite='nose.collector',
-    tests_require=[
-        'nose',
-        'sqlalchemy>=1.4,<1.5',
-        'requests',
-        'responses',
-        'parameterized'
-    ],
+    test_suite='pytest'
 )

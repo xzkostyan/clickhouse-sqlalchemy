@@ -14,6 +14,12 @@ Running tests locally
 
 Install desired Python version with system package manager/pyenv/another manager.
 
+Install test requirements and build package:
+
+    .. code-block:: bash
+
+        python testsrequire.py && python setup.py develop
+
 ClickHouse on host machine
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -23,8 +29,7 @@ your machine.
 Run tests:
 
     .. code-block:: bash
-
-        python setup.py test
+        py.test -v
 
 ClickHouse in docker
 ^^^^^^^^^^^^^^^^^^^^
@@ -63,7 +68,7 @@ And run tests:
 
     .. code-block:: bash
 
-        python setup.py test
+        py.test -v
 
 ``pip`` will automatically install all required modules for testing.
 
