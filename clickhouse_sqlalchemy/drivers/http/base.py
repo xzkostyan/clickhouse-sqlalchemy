@@ -9,6 +9,10 @@ from . import connector
 # Export connector version
 VERSION = (0, 0, 2, None)
 
+class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
+    def pre_exec(self):
+        pass
+
 
 class ClickHouseDialect_http(ClickHouseDialect):
     driver = 'http'

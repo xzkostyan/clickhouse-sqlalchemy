@@ -113,7 +113,7 @@ class RequestsTransport(object):
         ch_settings = dict(ch_settings or {})
         self.ch_settings = ch_settings
 
-        self.ch_settings['default_format'] = 'TabSeparatedWithNamesAndTypes' 
+        self.ch_settings['default_format'] = 'TabSeparatedWithNamesAndTypes'
 
         ddl_timeout = kwargs.pop('ddl_timeout', DEFAULT_DDL_TIMEOUT)
         if ddl_timeout is not None:
