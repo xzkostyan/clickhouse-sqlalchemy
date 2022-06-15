@@ -1,9 +1,6 @@
 import codecs
 
 
-FORMAT_SUFFIX = 'FORMAT TabSeparatedWithNamesAndTypes'
-
-
 def unescape(value, errors=None):
     if errors is None:
         errors = 'replace'

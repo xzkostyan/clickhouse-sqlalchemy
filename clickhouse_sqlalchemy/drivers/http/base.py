@@ -2,20 +2,12 @@
 import sqlalchemy as sa
 from sqlalchemy.util import asbool
 
-from .utils import FORMAT_SUFFIX
 from ..base import ClickHouseDialect, ClickHouseExecutionContextBase
 from . import connector
 
 
 # Export connector version
 VERSION = (0, 0, 2, None)
-
-
-class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
-    def pre_exec(self):
-        # TODO: refactor
-        if not self.isinsert and not self.isddl:
-            self.statement += ' ' + FORMAT_SUFFIX
 
 
 class ClickHouseDialect_http(ClickHouseDialect):
