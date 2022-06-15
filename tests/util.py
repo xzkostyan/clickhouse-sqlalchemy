@@ -28,7 +28,7 @@ def require_server_version(*version_required):
             else:
                 cursor = conn.cursor()
                 cursor.execute(
-                    'SELECT version() FORMAT TabSeparatedWithNamesAndTypes'
+                    'SELECT version()'
                 )
                 version = cursor.fetchall()[0][0].split('.')
                 current = tuple(int(x) for x in version[:3])

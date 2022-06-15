@@ -1,4 +1,3 @@
-
 import sqlalchemy as sa
 from sqlalchemy.util import asbool
 
@@ -8,6 +7,7 @@ from . import connector
 
 # Export connector version
 VERSION = (0, 0, 2, None)
+
 
 class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
     def pre_exec(self):
