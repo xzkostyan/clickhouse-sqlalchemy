@@ -38,7 +38,7 @@ class FormatSectionTestCase(HttpSessionTestCase):
         statement = self.compile(self.session.query(table.c.x), bind=bind)
         self.assertEqual(
             statement,
-            'SELECT t1.x AS t1_x FROM t1 FORMAT TabSeparatedWithNamesAndTypes'
+            'SELECT t1.x AS t1_x FROM t1'
         )
 
     def test_insert_from_select_no_format_clause(self):
