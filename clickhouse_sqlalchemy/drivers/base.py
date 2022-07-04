@@ -85,10 +85,14 @@ class ClickHouseDialect(default.DefaultDialect):
     supports_multivalues_insert = True
     supports_statement_cache = True
 
+    supports_comments = True
+    inline_comments = True
+
     # Dialect related-features
     supports_delete = True
     supports_update = True
     supports_engine_reflection = True
+    supports_table_comment_reflection = True
 
     engine_reflection = True  # Disables engine reflection from URL.
 
@@ -129,7 +133,8 @@ class ClickHouseDialect(default.DefaultDialect):
 
         self.supports_delete = version >= (1, 1, 54388)
         self.supports_update = version >= (18, 12, 14)
-        self.supports_engine_reflection = version >= (18, 16, 0)
+        self.supports_engine_reflection = version >= (18, 16)
+        self.supports_table_comment_reflection = version >= (21, 6)
 
     def _execute(self, connection, sql, scalar=False, **kwargs):
         raise NotImplementedError
@@ -175,12 +180,13 @@ class ClickHouseDialect(default.DefaultDialect):
 
         return [
             self._get_column_info(
-                r.name, r.type, r.default_type, r.default_expression
+                r.name, r.type, r.default_type, r.default_expression,
+                getattr(r, 'comment', None)
             ) for r in rows
         ]
 
     def _get_column_info(self, name, format_type, default_type,
-                         default_expression):
+                         default_expression, comment):
         col_type = self._get_column_type(name, format_type)
         col_default = self._get_column_default(default_type,
                                                default_expression)
@@ -189,6 +195,7 @@ class ClickHouseDialect(default.DefaultDialect):
             'type': col_type,
             'nullable': format_type.startswith('Nullable('),
             'default': col_default,
+            'comment': comment or None
         }
         return result
 
@@ -351,10 +358,7 @@ class ClickHouseDialect(default.DefaultDialect):
             'primary_key', 'sampling_key'
         ]
 
-        if schema:
-            database = schema
-        else:
-            database = connection.engine.url.database
+        database = schema if schema else connection.engine.url.database
 
         query = text(
             'SELECT {} FROM system.tables '
@@ -370,6 +374,22 @@ class ClickHouseDialect(default.DefaultDialect):
 
         if row:
             return {x: getattr(row, x, None) for x in columns}
+
+    @reflection.cache
+    def get_table_comment(self, connection, table_name, schema=None, **kw):
+        if not self.supports_table_comment_reflection:
+            raise NotImplementedError()
+
+        database = schema if schema else connection.engine.url.database
+
+        query = text(
+            'SELECT comment FROM system.tables '
+            'WHERE database = :database AND name = :name'
+        )
+        comment = self._execute(
+            connection, query, database=database, name=table_name, scalar=True
+        )
+        return {'text': comment or None}
 
     def do_rollback(self, dbapi_connection):
         # No support for transactions.

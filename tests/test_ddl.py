@@ -433,3 +433,28 @@ class DDLTestCase(BaseTestCase):
         self.assertTrue(inspector.has_table(MatView.name))
         MatView.drop()
         self.assertFalse(inspector.has_table(MatView.name))
+
+    def test_create_table_with_comment(self):
+        table = Table(
+            't1', self.metadata(session=self.session),
+            Column('x', types.Int32, primary_key=True),
+            engines.Memory(),
+            comment='table_comment'
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            "CREATE TABLE t1 (x Int32) ENGINE = Memory COMMENT 'table_comment'"
+        )
+
+    def test_create_table_with_column_comment(self):
+        table = Table(
+            't1', self.metadata(session=self.session),
+            Column('x', types.Int32, primary_key=True, comment='col_comment'),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            "CREATE TABLE t1 (x Int32 COMMENT 'col_comment') ENGINE = Memory"
+        )

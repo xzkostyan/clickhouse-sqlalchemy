@@ -16,6 +16,7 @@ Autogenerate **will detect**:
 
 * Table and materialized view additions, removals.
 * Column additions, removals.
+* Column and table comment additions, removals.
 
 Example project with migrations https://github.com/xzkostyan/clickhouse-sqlalchemy-alembic-example.
 

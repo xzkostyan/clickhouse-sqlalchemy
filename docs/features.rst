@@ -28,11 +28,12 @@ Both declarative and constructor-style tables supported:
 
         class Rate(Base):
             day = Column(types.Date, primary_key=True)
-            value = Column(types.Int32)
+            value = Column(types.Int32, comment='Rate value')
             other_value = Column(types.DateTime)
 
             __table_args__ = (
                 engines.Memory(),
+                {'comment': 'Store rates'}
             )
 
         another_table = Table('another_rate', metadata,
