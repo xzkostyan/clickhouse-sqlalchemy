@@ -442,14 +442,14 @@ class SelectTestCase(BaseTestCase):
             self.compile(make_statement(isouter=True,
                                         full=True)),
             'SELECT table_1.x FROM table_1 '
-            'FULL LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
+            'FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
             self.compile(make_statement(isouter=False,
                                         full=True)),
             'SELECT table_1.x FROM table_1 '
-            'FULL INNER JOIN table_2 ON table_2.y = table_1.x'
+            'FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
@@ -507,11 +507,10 @@ class SelectTestCase(BaseTestCase):
 
         self.assertEqual(
             self.compile(make_statement(
-                isouter=True, full=True,
-                type='LEFT OUTER', strictness='ANY', distribution='GLOBAL'
+                type='FULL OUTER', strictness='ANY', distribution='GLOBAL'
             )),
             'SELECT table_1.x FROM table_1 GLOBAL '
-            'ANY FULL LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
+            'ANY FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
         )
 
         self.assertEqual(
