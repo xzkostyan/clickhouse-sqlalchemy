@@ -148,11 +148,13 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         # need to make a variable to prevent leaks in some debuggers
         join_type = flags.get('type')
         if join_type is None:
-            if join.isouter:
+            if flags.get('full'):
+                join_type = 'FULL OUTER'
+            elif join.isouter:
                 join_type = 'LEFT OUTER'
             else:
                 join_type = 'INNER'
-        elif join_type is not None:
+        else:
             join_type = join_type.upper()
             if join.isouter and 'INNER' in join_type:
                 raise exc.CompileError(
@@ -165,8 +167,6 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             #         "can't compile join with specified "
             #         "OUTER type and isouter=False"
             #     )
-        if flags.get('full') and 'FULL' not in join_type:
-            join_type = 'FULL ' + join_type
 
         strictness = flags.get('strictness')
         if strictness:

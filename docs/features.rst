@@ -857,7 +857,7 @@ becomes
 
     .. code-block:: sql
 
-        SELECT ... FROM ... FULL LEFT OUTER JOIN ... ON ...
+        SELECT ... FROM ... FULL OUTER JOIN ... ON ...
 
 ARRAY JOIN
 ++++++++++
