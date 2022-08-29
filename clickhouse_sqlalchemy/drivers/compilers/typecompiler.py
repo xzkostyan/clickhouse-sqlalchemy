@@ -45,6 +45,18 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_uint64(self, type_, **kw):
         return 'UInt64'
 
+    def visit_int128(self, type_, **kw):
+        return 'Int128'
+
+    def visit_uint128(self, type_, **kw):
+        return 'UInt128'
+
+    def visit_int256(self, type_, **kw):
+        return 'Int256'
+
+    def visit_uint256(self, type_, **kw):
+        return 'UInt256'
+
     def visit_date(self, type_, **kw):
         return 'Date'
 

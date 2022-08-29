@@ -96,6 +96,22 @@ class UInt64(Int):
     __visit_name__ = 'uint64'
 
 
+class Int128(Int):
+    __visit_name__ = 'int128'
+
+
+class UInt128(Int):
+    __visit_name__ = 'uint128'
+
+
+class Int256(Int):
+    __visit_name__ = 'int256'
+
+
+class UInt256(Int):
+    __visit_name__ = 'uint256'
+
+
 class Float32(Float):
     __visit_name__ = 'float32'
 

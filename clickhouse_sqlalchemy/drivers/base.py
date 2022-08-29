@@ -22,10 +22,14 @@ colspecs = {}
 
 # Type converters
 ischema_names = {
+    'Int256': types.Int256,
+    'Int128': types.Int128,
     'Int64': types.Int64,
     'Int32': types.Int32,
     'Int16': types.Int16,
     'Int8': types.Int8,
+    'UInt256': types.UInt256,
+    'UInt128': types.UInt128,
     'UInt64': types.UInt64,
     'UInt32': types.UInt32,
     'UInt16': types.UInt16,
