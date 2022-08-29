@@ -25,6 +25,8 @@ class Int128CompilationTestCase(CompilationTestCase):
 
 @with_native_and_http_sessions
 class Int128TestCase(BaseTestCase):
+    required_server_version = (21, 6, 0)
+
     table = Table(
         'test', BaseTestCase.metadata(),
         Column('x', types.Int128),
