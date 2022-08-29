@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [0.2.2] - 2022-08-24
+### Added
+- Table and column comments creation and reflection. Solves issue [#149](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/149).
+
+### Fixed
+- [HTTP] Use query params to specify clickhouse data format. Pull request [#180](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/180) by [save-my-heart](https://github.com/save-my-heart).
+
+### Changed
+- Switch from nose test runner to pytest.
+
 ## [0.2.1] - 2022-06-13
 ### Fixed
 - Add `supports_statement_cache = True`. Solves issue [#169](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/169).
@@ -273,7 +283,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.1...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.2...HEAD
+[0.2.2]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.1...0.2.2
 [0.2.1]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.9...0.2.0
 [0.1.10]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.9...0.1.10
