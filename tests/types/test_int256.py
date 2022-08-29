@@ -7,6 +7,8 @@ from tests.util import with_native_and_http_sessions
 
 
 class Int256CompilationTestCase(CompilationTestCase):
+    required_server_version = (21, 6, 0)
+
     table = Table(
         'test', CompilationTestCase.metadata(),
         Column('x', types.Int256),
