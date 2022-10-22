@@ -1,6 +1,7 @@
 from sqlalchemy import exc, literal_column
 from sqlalchemy.sql import compiler, elements, COLLECT_CARTESIAN_PRODUCTS, \
     WARN_LINTING, crud
+from sqlalchemy.sql import type_api
 from sqlalchemy.util import inspect_getfullargspec
 
 from ... import types
@@ -445,3 +446,17 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         self.stack.pop(-1)
 
         return text
+
+    def render_literal_value(self, value, type_):
+        if isinstance(value, list):
+            return (
+                '[' +
+                ', '.join(self.render_literal_value(
+                        x, type_api._resolve_value_to_type(x)
+                    ) for x in value) +
+                ']'
+            )
+        else:
+            return super(ClickHouseSQLCompiler, self).render_literal_value(
+                value, type_
+            )
