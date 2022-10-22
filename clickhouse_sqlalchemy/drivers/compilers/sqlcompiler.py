@@ -57,12 +57,13 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
                 self, **kwargs
             ) + ' THEN ' + result._compiler_dispatch(
                 self, **kwargs) + " "
-        if clause.else_ is None:
-            raise exc.CompileError('ELSE clause is required in CASE')
 
-        text += 'ELSE ' + clause.else_._compiler_dispatch(
-            self, **kwargs
-        ) + ' END'
+        if clause.else_ is not None:
+            text += 'ELSE ' + clause.else_._compiler_dispatch(
+                self, **kwargs
+            ) + ' '
+
+        text += 'END'
         return text
 
     def visit_if__func(self, func, **kw):

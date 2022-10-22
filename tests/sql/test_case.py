@@ -1,16 +1,15 @@
-from sqlalchemy import literal, exc, case
+from sqlalchemy import literal, case
 
 from tests.testcase import BaseTestCase
 
 
 class CaseTestCase(BaseTestCase):
     def test_else_required(self):
-        with self.assertRaises(exc.CompileError) as ex:
-            self.compile(case([(literal(1), 0)]))
+        expression = case([(literal(1), 0)])
 
         self.assertEqual(
-            str(ex.exception),
-            'ELSE clause is required in CASE'
+            self.compile(expression, literal_binds=True),
+            'CASE WHEN 1 THEN 0 END'
         )
 
     def test_case(self):
@@ -18,4 +17,10 @@ class CaseTestCase(BaseTestCase):
         self.assertEqual(
             self.compile(expression, literal_binds=True),
             'CASE WHEN 1 THEN 0 ELSE 1 END'
+        )
+
+        expression = case([(literal(1), 0), (literal(2), 1)], else_=1)
+        self.assertEqual(
+            self.compile(expression, literal_binds=True),
+            'CASE WHEN 1 THEN 0 WHEN 2 THEN 1 ELSE 1 END'
         )
