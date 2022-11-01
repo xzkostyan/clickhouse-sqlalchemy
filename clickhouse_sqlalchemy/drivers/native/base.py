@@ -1,6 +1,7 @@
+from importlib import import_module
+
 from sqlalchemy.util import asbool
 
-from . import connector
 from ..base import (
     ClickHouseDialect, ClickHouseExecutionContextBase, ClickHouseSQLCompiler,
 )
@@ -44,7 +45,10 @@ class ClickHouseDialect_native(ClickHouseDialect):
 
     @classmethod
     def dbapi(cls):
-        return connector
+        return import_module(
+            '.connector',
+            'clickhouse_sqlalchemy.drivers.native'
+        )
 
     def create_connect_args(self, url):
         url = url.set(drivername='clickhouse')
