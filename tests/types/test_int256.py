@@ -2,8 +2,9 @@ from sqlalchemy import Column
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
-from tests.testcase import BaseTestCase, CompilationTestCase
-from tests.util import with_native_and_http_sessions
+from tests.testcase import BaseTestCase, BaseAsynchTestCase, \
+    CompilationTestCase
+from tests.util import with_native_and_http_sessions, run_async
 
 
 class Int256CompilationTestCase(CompilationTestCase):
@@ -42,3 +43,36 @@ class Int256TestCase(BaseTestCase):
             self.session.execute(self.table.insert(), [{'x': x, 'y': y}])
             self.assertEqual(self.session.query(self.table.c.x).scalar(), x)
             self.assertEqual(self.session.query(self.table.c.y).scalar(), y)
+
+
+class Int256AsynchTestCase(BaseAsynchTestCase):
+    required_server_version = (21, 6, 0)
+
+    table = Table(
+        'test', BaseAsynchTestCase.metadata(),
+        Column('x', types.Int256),
+        Column('y', types.UInt256),
+        engines.Memory()
+    )
+
+    @run_async
+    async def test_select_insert(self):
+        x = -2 ** 255
+        y = 2 ** 256 - 1
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': x, 'y': y}])
+
+            def scalar(statement):
+                def wrapper(session):
+                    return session.query(statement).scalar()
+                return wrapper
+
+            self.assertEqual(
+                await self.session.run_sync(scalar(self.table.c.x)),
+                x
+            )
+            self.assertEqual(
+                await self.session.run_sync(scalar(self.table.c.y)),
+                y
+            )

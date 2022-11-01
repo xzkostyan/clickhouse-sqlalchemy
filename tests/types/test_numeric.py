@@ -1,14 +1,16 @@
 from decimal import Decimal
 
-from sqlalchemy import Column, Numeric
+from sqlalchemy import Column, Numeric, select
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
 from clickhouse_sqlalchemy.exceptions import DatabaseException
 from tests.testcase import (
     BaseTestCase, CompilationTestCase,
-    HttpSessionTestCase, NativeSessionTestCase
+    HttpSessionTestCase, NativeSessionTestCase,
+    AsynchSessionTestCase,
 )
+from tests.util import run_async
 
 
 class NumericCompilationTestCase(CompilationTestCase):
@@ -64,7 +66,8 @@ class NumericTestCase(BaseTestCase):
             # before the query is sent to CH.
             self.assertTrue(
                 'out of range' in str(ex.exception) or
-                'Too many digits' in str(ex.exception))
+                'Too many digits' in str(ex.exception)
+            )
 
 
 class NumericNativeTestCase(NativeSessionTestCase):
@@ -80,8 +83,37 @@ class NumericNativeTestCase(NativeSessionTestCase):
 
         with self.create_table(self.table):
             self.session.execute(self.table.insert(), [{'x': value}])
-            self.assertEqual(self.session.query(self.table.c.x).scalar(),
-                             expected)
+            self.assertEqual(
+                self.session.query(self.table.c.x).scalar(),
+                expected
+            )
+
+
+class NumericAsynchTestCase(AsynchSessionTestCase):
+    table = Table(
+        'test', AsynchSessionTestCase.metadata(),
+        Column('x', Numeric(10, 2)),
+        engines.Memory()
+    )
+
+    @run_async
+    async def test_insert_truncate(self):
+        value = Decimal('123.129999')
+        expected = Decimal('123.12')
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': value}])
+
+            conn = await self.session.connection()
+
+            res = (
+                await conn.execute(
+                    select([self.table.c.x])
+                    .select_from(self.table)
+                )
+            ).scalar()
+
+            self.assertEqual(res, expected)
 
 
 class NumericHttpTestCase(HttpSessionTestCase):
@@ -98,8 +130,10 @@ class NumericHttpTestCase(HttpSessionTestCase):
         with self.create_table(self.table):
             if self.server_version >= (20, 5, 2):
                 self.session.execute(self.table.insert(), [{'x': value}])
-                self.assertEqual(self.session.query(self.table.c.x).scalar(),
-                                 expected)
+                self.assertEqual(
+                    self.session.query(self.table.c.x).scalar(),
+                    expected
+                )
             else:
                 with self.assertRaises(DatabaseException) as ex:
                     self.session.execute(self.table.insert(), [{'x': value}])

@@ -1,5 +1,5 @@
 import re
-from contextlib import contextmanager
+from contextlib import contextmanager, asynccontextmanager
 from unittest import TestCase
 
 from sqlalchemy import MetaData
@@ -7,8 +7,8 @@ from sqlalchemy.orm import Query
 
 from tests.config import database, host, port, http_port, user, password
 from tests.session import http_session, native_session, \
-    system_native_session, http_engine
-from tests.util import skip_by_server_version
+    system_native_session, http_engine, asynch_session, system_asynch_session
+from tests.util import skip_by_server_version, run_async
 
 
 class BaseAbstractTestCase(object):
@@ -93,6 +93,51 @@ class BaseTestCase(BaseAbstractTestCase, TestCase):
             skip_by_server_version(self, self.required_server_version)
 
 
+class BaseAsynchTestCase(BaseTestCase):
+    session = asynch_session
+
+    @classmethod
+    @run_async
+    async def setUpClass(cls):
+        # System database is always present.
+        await system_asynch_session.execute(
+            'DROP DATABASE IF EXISTS {}'.format(cls.database)
+        )
+        await system_asynch_session.execute(
+            'CREATE DATABASE {}'.format(cls.database)
+        )
+
+        version = (
+            await system_asynch_session.execute('SELECT version()')
+        ).fetchall()
+        cls.server_version = tuple(int(x) for x in version[0][0].split('.'))
+
+        super(BaseTestCase, cls).setUpClass()
+
+    @asynccontextmanager
+    async def create_table(self, table):
+        await self.run_sync(table.metadata.drop_all)
+        await self.run_sync(table.metadata.create_all)
+
+        try:
+            yield
+        finally:
+            await self.run_sync(table.metadata.drop_all)
+
+    async def get_connection(self):
+        return await self.session.connection()
+
+    async def run_sync(self, f):
+        conn = await self.get_connection()
+        return await conn.run_sync(f)
+
+    async def session_scalar(self, statement):
+        def wrapper(session):
+            return session.query(statement).scalar()
+
+        return await self.session.run_sync(wrapper)
+
+
 class HttpSessionTestCase(BaseTestCase):
     """ Explicitly HTTP-based session Test Case """
 
@@ -112,6 +157,13 @@ class NativeSessionTestCase(BaseTestCase):
 
     port = port
     session = native_session
+
+
+class AsynchSessionTestCase(BaseAsynchTestCase):
+    """ Explicitly Native-protocol-based async session Test Case """
+
+    port = port
+    session = asynch_session
 
 
 class CompilationTestCase(BaseTestCase):

@@ -1,10 +1,10 @@
 from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network
-from sqlalchemy import Column, and_
+from sqlalchemy import Column, and_, select
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
-from tests.testcase import BaseTestCase
-from tests.util import with_native_and_http_sessions
+from tests.testcase import BaseTestCase, BaseAsynchTestCase
+from tests.util import with_native_and_http_sessions, run_async
 
 
 @with_native_and_http_sessions
@@ -680,3 +680,1139 @@ class IPv6TestCase(BaseTestCase):
                     (IPv6Address('beef::3'),),
                     (IPv6Address('f42e::ffff'),)
                 ])
+
+
+class IPv4AsynchTestCase(BaseAsynchTestCase):
+    required_server_version = (19, 3, 3)
+
+    table = Table(
+        'test', BaseAsynchTestCase.metadata(),
+        Column('x', types.IPv4),
+        engines.Memory()
+    )
+
+    @property
+    def select_statement(self):
+        return select([self.table.c.x]).select_from(self.table)
+
+    @run_async
+    async def test_select_insert(self):
+        a = IPv4Address('10.0.0.1')
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': a}])
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (await conn.execute(self.select_statement)).scalar(),
+                a
+            )
+
+    @run_async
+    async def test_select_insert_string(self):
+        a = '10.0.0.1'
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': a}])
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (await conn.execute(self.select_statement)).scalar(),
+                IPv4Address('10.0.0.1')
+            )
+
+    @run_async
+    async def test_select_where_address(self):
+        a = IPv4Address('10.0.0.1')
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': a}])
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x == IPv4Address('10.0.0.1'))
+                    )
+                ).scalar(),
+                a
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(
+                            IPv4Address('10.0.0.0') < self.table.c.x,
+                            self.table.c.x < IPv4Address('10.0.0.2')
+                        )
+                    )
+                ).scalar(),
+                a
+            )
+
+    @run_async
+    async def test_select_where_string(self):
+        a = IPv4Address('10.0.0.1')
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': a}])
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(
+                            '10.0.0.0' < self.table.c.x,
+                            self.table.c.x < '10.0.0.2'
+                        )
+                    )
+                ).scalar(),
+                a
+            )
+
+    @run_async
+    async def test_select_where_literal(self):
+        a = IPv4Address('10.0.0.1')
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': a}])
+
+            qs = (
+                self.select_statement
+                .where(self.table.c.x == IPv4Address('10.0.0.1'))
+            )
+            statement = self.compile(qs, literal_binds=True)
+
+            self.assertEqual(
+                statement,
+                "SELECT test.x FROM test "
+                "WHERE test.x = toIPv4('10.0.0.1')"
+            )
+
+    @run_async
+    async def test_select_in_network(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.0.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.in_(IPv4Network('10.0.0.0/8')))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.0.0.3'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_in_list_address(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.0.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(
+                            self.table.c.x.in_([
+                                IPv4Address('10.0.0.1'),
+                                IPv4Address('10.0.0.2'),
+                                '10.0.0.3'
+                            ])
+                        )
+                    )
+                ).all(),
+                [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.0.0.3'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_in_list_network(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.in_([
+                            '10.0.0.0/24',
+                            '10.1.0.0/24'
+                        ]))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.1.0.3'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_in_list_network_and_address(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.in_([
+                            '10.0.0.0/24',
+                            '10.1.0.3'
+                        ]))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.1.0.3'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_in_list_empty(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.in_([]))
+                    )
+                ).all(),
+                []
+            )
+
+    @run_async
+    async def test_select_in_string(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.0.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.in_('10.0.0.0/8'))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.0.0.3'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_network(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.0.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.notin_(
+                            IPv4Network('10.0.0.0/8')
+                        ))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_(
+                            IPv4Network('10.0.0.0/8')
+                        ))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_string(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.0.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.notin_('10.0.0.0/8'))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_('10.0.0.0/8'))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_list_address(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.notin_(['10.0.0.2', '10.1.0.3']))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_(['10.0.0.2', '10.1.0.3']))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_list_network(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.notin_([
+                            '10.0.0.0/24',
+                            '10.1.0.0/24'
+                        ]))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_([
+                            '10.0.0.0/24',
+                            '10.1.0.0/24'
+                        ]))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_list_network_address(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.notin_([
+                            '10.0.0.0/24',
+                            '10.1.0.3'
+                        ]))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_([
+                            '10.0.0.0/24', '10.1.0.3'
+                        ]))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_list_empty(self):
+        ips = [
+            IPv4Address('10.0.0.1'),
+            IPv4Address('10.0.0.2'),
+            IPv4Address('10.1.0.3'),
+            IPv4Address('192.168.0.1')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement.where(self.table.c.x.notin_([]))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.1.0.3'),),
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement.where(~self.table.c.x.in_([]))
+                    )
+                ).all(),
+                [
+                    (IPv4Address('10.0.0.1'),),
+                    (IPv4Address('10.0.0.2'),),
+                    (IPv4Address('10.1.0.3'),),
+                    (IPv4Address('192.168.0.1'),)
+                ]
+            )
+
+
+class IPv6AsynchTestCase(BaseAsynchTestCase):
+    required_server_version = (19, 3, 3)
+
+    table = Table(
+        'test', BaseAsynchTestCase.metadata(),
+        Column('x', types.IPv6),
+        engines.Memory()
+    )
+
+    @property
+    def select_statement(self):
+        return select([self.table.c.x]).select_from(self.table)
+
+    @run_async
+    async def test_select_insert(self):
+        a = IPv6Address('79f4:e698:45de:a59b:2765:28e3:8d3a:35ae')
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': a}])
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (await conn.execute(self.select_statement)).scalar(),
+                a
+            )
+
+    @run_async
+    async def test_select_insert_string(self):
+        a = '79f4:e698:45de:a59b:2765:28e3:8d3a:35ae'
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': a}])
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (await conn.execute(self.select_statement)).scalar(),
+                IPv6Address(a)
+            )
+
+    @run_async
+    async def test_select_where_address(self):
+        a = IPv6Address('42e::2')
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': a}])
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x == IPv6Address('42e::2'))
+                    )
+                ).scalar(),
+                a
+            )
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(and_(
+                            IPv6Address('42e::1') < self.table.c.x,
+                            self.table.c.x < IPv6Address('42e::3')
+                        ))
+                    )
+                ).scalar(),
+                a
+            )
+
+    @run_async
+    async def test_select_where_string(self):
+        a = IPv6Address('42e::2')
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': a}])
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement.where(self.table.c.x == '42e::2')
+                    )
+                ).scalar(),
+                a
+            )
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(and_(
+                            '42e::1' < self.table.c.x,
+                            self.table.c.x < '42e::3'
+                        ))
+                    )
+                ).scalar(),
+                a
+            )
+
+    @run_async
+    async def test_select_where_literal(self):
+        a = IPv6Address('42e::2')
+
+        async with self.create_table(self.table):
+            await self.session.execute(self.table.insert(), [{'x': a}])
+
+            qs = self.select_statement.where(self.table.c.x == '42e::2')
+            statement = self.compile(qs, literal_binds=True)
+
+            self.assertEqual(
+                statement,
+                "SELECT test.x FROM test "
+                "WHERE test.x = toIPv6('42e::2')"
+            )
+
+    @run_async
+    async def test_select_in_network(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.in_(IPv6Network('42e::/64')))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('42e::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('42e::3'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_in_list_address(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('7::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(
+                            self.table.c.x.in_([
+                                '42e::1',
+                                '42e::2',
+                                'f42e::ffff'
+                            ])
+                        )
+                    )
+                ).all(),
+                [
+                    (IPv6Address('42e::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_in_list_network(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('a42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(
+                            self.table.c.x.in_([
+                                IPv6Network('42e::/64'),
+                                IPv6Network('a42e::/48')
+                            ])
+                        )
+                    )
+                ).all(),
+                [
+                    (IPv6Address('42e::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('a42e::3'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_in_list_network_address(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('a42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.in_(['42e::/64', 'a42e::3']))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('42e::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('a42e::3'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_in_list_empty(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('a42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.in_([]))
+                    )
+                ).all(),
+                []
+            )
+
+    @run_async
+    async def test_select_in_string(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.in_('42e::/64'))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('42e::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('42e::3'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_network(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.notin_(IPv6Network('42e::/64')))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_(IPv6Network('42e::/64')))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_string(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.notin_('42e::/64'))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_('42e::/64'))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_list_address(self):
+        ips = [
+            IPv6Address('42e::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('42e::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.notin_(['42e::1', '42e::3'])))
+                ).all(),
+                [
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('f42e::ffff'),),
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_(['42e::1', '42e::3']))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('f42e::ffff'),),
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_list_network(self):
+        ips = [
+            IPv6Address('1234::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('beef::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(
+                            self.table.c.x.notin_(['42e::/64', 'beef::/64'])
+                        )
+                    )
+                ).all(),
+                [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_(['42e::/64', 'beef::/64']))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_list_network_address(self):
+        ips = [
+            IPv6Address('1234::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('beef::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.notin_(['42e::/64', 'beef::3']))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_(['42e::/64', 'beef::3']))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
+
+    @run_async
+    async def test_select_not_in_list_empty(self):
+        ips = [
+            IPv6Address('1234::1'),
+            IPv6Address('42e::2'),
+            IPv6Address('beef::3'),
+            IPv6Address('f42e::ffff')
+        ]
+
+        async with self.create_table(self.table):
+            await self.session.execute(
+                self.table.insert(),
+                [{'x': ip} for ip in ips]
+            )
+
+            conn = await self.session.connection()
+
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(self.table.c.x.notin_([]))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('beef::3'),),
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
+            self.assertEqual(
+                (
+                    await conn.execute(
+                        self.select_statement
+                        .where(~self.table.c.x.in_([]))
+                    )
+                ).all(),
+                [
+                    (IPv6Address('1234::1'),),
+                    (IPv6Address('42e::2'),),
+                    (IPv6Address('beef::3'),),
+                    (IPv6Address('f42e::ffff'),)
+                ]
+            )
