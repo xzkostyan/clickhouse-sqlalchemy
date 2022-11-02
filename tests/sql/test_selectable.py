@@ -20,13 +20,25 @@ class SelectTestCase(BaseTestCase):
             *columns
         )
 
-    def test_group_by_with_totals(self):
+    def test_group_by_with_modifiers(self):
         table = self._make_table()
 
         query = select([table.c.x]).group_by(table.c.x)
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x FROM t1 GROUP BY t1.x'
+        )
+
+        query = select([table.c.x]).group_by(table.c.x).with_cube()
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x FROM t1 GROUP BY t1.x WITH CUBE'
+        )
+
+        query = select([table.c.x]).group_by(table.c.x).with_rollup()
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x FROM t1 GROUP BY t1.x WITH ROLLUP'
         )
 
         query = select([table.c.x]).group_by(table.c.x).with_totals()

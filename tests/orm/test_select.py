@@ -51,6 +51,28 @@ class SelectTestCase(CompilationTestCase):
             'SELECT t1.x AS t1_x FROM t1 GROUP BY t1.x'
         )
 
+        query = self.session.query(table.c.x).group_by(table.c.x).with_cube()
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 GROUP BY t1.x WITH CUBE'
+        )
+
+        with self.assertRaises(exc.InvalidRequestError) as ex:
+            self.session.query(table.c.x).with_cube()
+
+        self.assertIn('with_cube', str(ex.exception))
+
+        query = self.session.query(table.c.x).group_by(table.c.x).with_rollup()
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 GROUP BY t1.x WITH ROLLUP'
+        )
+
+        with self.assertRaises(exc.InvalidRequestError) as ex:
+            self.session.query(table.c.x).with_rollup()
+
+        self.assertIn('with_rollup', str(ex.exception))
+
         query = self.session.query(table.c.x).group_by(table.c.x).with_totals()
         self.assertEqual(
             self.compile(query),

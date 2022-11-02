@@ -350,6 +350,12 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         if group_by:
             text = " GROUP BY " + group_by
 
+            if getattr(select, '_with_cube', False):
+                text += " WITH CUBE"
+
+            if getattr(select, '_with_rollup', False):
+                text += " WITH ROLLUP"
+
             if getattr(select, '_with_totals', False):
                 text += " WITH TOTALS"
 

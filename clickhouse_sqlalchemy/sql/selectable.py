@@ -16,11 +16,21 @@ __all__ = ('Select', 'select')
 
 
 class Select(StandardSelect):
+    _with_cube = False
+    _with_rollup = False
     _with_totals = False
     _final_clause = None
     _sample_clause = None
     _limit_by_clause = None
     _array_join = None
+
+    @_generative
+    def with_cube(self):
+        self._with_cube = True
+
+    @_generative
+    def with_rollup(self):
+        self._with_rollup = True
 
     @_generative
     def with_totals(self):
