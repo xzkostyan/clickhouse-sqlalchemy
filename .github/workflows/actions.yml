@@ -51,7 +51,7 @@ jobs:
           if [[ "${{ matrix.clickhouse-version }}" > "21.7" ]]; then echo "ORG=clickhouse"; else echo "ORG=yandex" ; fi  >> tests/.env
           docker-compose -f tests/docker-compose.yml up -d
       - name: Run tests
-        run: coverage run --source=clickhouse_sqlalchemy -m py.test --timeout=10 -v
+        run: coverage run --source=clickhouse_sqlalchemy -m pytest --timeout=10 -v
         timeout-minutes: 2
       - name: Set up Python for coverage submission
         if: ${{ matrix.python-version == '2.7' }}

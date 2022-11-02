@@ -29,7 +29,7 @@ your machine.
 Run tests:
 
     .. code-block:: bash
-        py.test -v
+        pytest -v
 
 ClickHouse in docker
 ^^^^^^^^^^^^^^^^^^^^
@@ -68,7 +68,7 @@ And run tests:
 
     .. code-block:: bash
 
-        py.test -v
+        pytest -v
 
 ``pip`` will automatically install all required modules for testing.
 

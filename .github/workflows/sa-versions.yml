@@ -45,5 +45,5 @@ jobs:
           if [[ "${{ matrix.clickhouse-version }}" > "21.7" ]]; then echo "ORG=clickhouse"; else echo "ORG=yandex" ; fi  >> tests/.env
           docker-compose -f tests/docker-compose.yml up -d
       - name: Run tests
-        run: py.test --timeout=10 -v
+        run: pytest --timeout=10 -v
         timeout-minutes: 2
