@@ -11,6 +11,8 @@ from ..ext.clauses import (
 
 
 class Query(BaseQuery):
+    _with_cube = False
+    _with_rollup = False
     _with_totals = False
     _final = None
     _sample = None
@@ -21,6 +23,8 @@ class Query(BaseQuery):
         context = super(Query, self)._compile_context(*args, **kwargs)
         query = context.query
 
+        query._with_cube = self._with_cube
+        query._with_rollup = self._with_rollup
         query._with_totals = self._with_totals
         query._final_clause = self._final
         query._sample_clause = sample_clause(self._sample)
@@ -28,6 +32,36 @@ class Query(BaseQuery):
         query._array_join = self._array_join
 
         return context
+
+    @_generative
+    def with_cube(self):
+        if not self._group_by_clauses:
+            raise exc.InvalidRequestError(
+                "Query.with_cube() can be used only with specified "
+                "GROUP BY, call group_by()"
+            )
+        if self._with_rollup:
+            raise exc.InvalidRequestError(
+                "Query.with_cube() and Query.with_rollup() are mutually "
+                "exclusive"
+            )
+
+        self._with_cube = True
+
+    @_generative
+    def with_rollup(self):
+        if not self._group_by_clauses:
+            raise exc.InvalidRequestError(
+                "Query.with_rollup() can be used only with specified "
+                "GROUP BY, call group_by()"
+            )
+        if self._with_cube:
+            raise exc.InvalidRequestError(
+                "Query.with_cube() and Query.with_rollup() are mutually "
+                "exclusive"
+            )
+
+        self._with_rollup = True
 
     @_generative
     def with_totals(self):

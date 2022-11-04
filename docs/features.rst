@@ -878,23 +878,29 @@ becomes
 
         SELECT ... FROM ... ARRAY JOIN ...
 
-WITH TOTALS
-+++++++++++
+WITH CUBE/ROLLUP/TOTALS
++++++++++++++++++++++++
 
     .. code-block:: python
 
+        session.query(table.c.x).group_by(table.c.x).with_cube()
+        session.query(table.c.x).group_by(table.c.x).with_rollup()
         session.query(table.c.x).group_by(table.c.x).with_totals()
 
 or
 
     .. code-block:: python
 
+        select([table.c.x]).group_by(table.c.x).with_cube()
+        select([table.c.x]).group_by(table.c.x).with_rollup()
         select([table.c.x]).group_by(table.c.x).with_totals()
 
-becomes
+becomes (respectively)
 
     .. code-block:: sql
 
+        SELECT ... FROM ... GROUP BY ... WITH CUBE
+        SELECT ... FROM ... GROUP BY ... WITH ROLLUP
         SELECT ... FROM ... GROUP BY ... WITH TOTALS
 
 FINAL
