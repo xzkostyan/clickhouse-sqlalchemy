@@ -56,10 +56,10 @@ class SelectTestCase(CompilationTestCase):
             self.compile(query),
             'SELECT t1.x AS t1_x FROM t1 GROUP BY t1.x WITH CUBE'
         )
-
         with self.assertRaises(exc.InvalidRequestError) as ex:
             self.session.query(table.c.x).with_cube()
-
+        with self.assertRaises(exc.InvalidRequestError) as ex:
+            self.session.query(table.c.x).with_cube().with_rollup()
         self.assertIn('with_cube', str(ex.exception))
 
         query = self.session.query(table.c.x).group_by(table.c.x).with_rollup()
@@ -67,10 +67,10 @@ class SelectTestCase(CompilationTestCase):
             self.compile(query),
             'SELECT t1.x AS t1_x FROM t1 GROUP BY t1.x WITH ROLLUP'
         )
-
         with self.assertRaises(exc.InvalidRequestError) as ex:
             self.session.query(table.c.x).with_rollup()
-
+        with self.assertRaises(exc.InvalidRequestError) as ex:
+            self.session.query(table.c.x).with_rollup().with_cube()
         self.assertIn('with_rollup', str(ex.exception))
 
         query = self.session.query(table.c.x).group_by(table.c.x).with_totals()
@@ -78,10 +78,8 @@ class SelectTestCase(CompilationTestCase):
             self.compile(query),
             'SELECT t1.x AS t1_x FROM t1 GROUP BY t1.x WITH TOTALS'
         )
-
         with self.assertRaises(exc.InvalidRequestError) as ex:
             self.session.query(table.c.x).with_totals()
-
         self.assertIn('with_totals', str(ex.exception))
 
     def test_array_join(self):
