@@ -1,4 +1,4 @@
-from sqlalchemy import Column, func, text, select, inspect
+from sqlalchemy import Column, func, text, select, inspect, ForeignKey
 from sqlalchemy.sql.ddl import CreateTable, CreateColumn
 
 from clickhouse_sqlalchemy import (
@@ -457,4 +457,16 @@ class DDLTestCase(BaseTestCase):
         self.assertEqual(
             self.compile(CreateTable(table)),
             "CREATE TABLE t1 (x Int32 COMMENT 'col_comment') ENGINE = Memory"
+        )
+
+    def test_do_not_render_fk(self):
+        table = Table(
+            't1', self.metadata(session=self.session),
+            Column('x', types.Int32, ForeignKey('t2.x'), primary_key=True),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            "CREATE TABLE t1 (x Int32) ENGINE = Memory"
         )

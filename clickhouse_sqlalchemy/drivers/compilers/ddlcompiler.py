@@ -79,7 +79,11 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
 
     def visit_primary_key_constraint(self, constraint, **kw):
         # Do not render PKs.
-        return ''
+        return None
+
+    def visit_foreign_key_constraint(self, constraint, **kw):
+        # Do not render FKs.
+        return None
 
     def _compile_param(self, expr, opt_list=False):
         compiler = self.sql_compiler
