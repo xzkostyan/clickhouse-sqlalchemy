@@ -79,7 +79,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         return 'Decimal(%s, %s)' % (type_.precision, type_.scale)
 
     def visit_boolean(self, type_, **kw):
-        return 'UInt8'
+        return 'Bool'
 
     def visit_nested(self, nested, **kwargs):
         ddl_compiler = self.dialect.ddl_compiler(self.dialect, None)
