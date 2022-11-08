@@ -41,6 +41,8 @@ ischema_names = {
     'Float32': FLOAT,
     'Decimal': types.Decimal,
     'String': types.String,
+    'Bool': types.Boolean,
+    'Boolean': types.Boolean,
     'UUID': types.UUID,
     'IPv4': types.IPv4,
     'IPv6': types.IPv6,
