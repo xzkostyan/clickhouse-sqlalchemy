@@ -83,7 +83,7 @@ class ClickHouseDialect(default.DefaultDialect):
     supports_sane_rowcount = False
     supports_sane_multi_rowcount = False
     supports_native_decimal = True
-    supports_native_boolean = False
+    supports_native_boolean = True
     non_native_boolean_check_constraint = False
     supports_alter = True
     supports_sequences = False
