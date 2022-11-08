@@ -15,12 +15,12 @@ class BooleanCompilationTestCase(CompilationTestCase):
     def test_create_table(self):
         self.assertEqual(
             self.compile(CreateTable(self.table)),
-            'CREATE TABLE test (x UInt8) ENGINE = Memory'
+            'CREATE TABLE test (x Bool) ENGINE = Memory'
         )
 
     def test_literals(self):
         query = self.session.query(self.table.c.x).filter(self.table.c.x)
         self.assertEqual(
             self.compile(query),
-            'SELECT test.x AS test_x FROM test WHERE test.x = 1'
+            'SELECT test.x AS test_x FROM test WHERE test.x'
         )
