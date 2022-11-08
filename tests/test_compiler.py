@@ -7,8 +7,8 @@ from tests.testcase import CompilationTestCase, NativeSessionTestCase
 
 class VisitTestCase(CompilationTestCase):
     def test_true_false(self):
-        self.assertEqual(self.compile(sql.false()), '0')
-        self.assertEqual(self.compile(sql.true()), '1')
+        self.assertEqual(self.compile(sql.false()), 'false')
+        self.assertEqual(self.compile(sql.true()), 'true')
 
     def test_array(self):
         self.assertEqual(
