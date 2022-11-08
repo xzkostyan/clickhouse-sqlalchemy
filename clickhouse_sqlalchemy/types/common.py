@@ -23,6 +23,10 @@ class Float(types.Float, ClickHouseTypeEngine):
     pass
 
 
+class Boolean(types.Boolean, ClickHouseTypeEngine):
+    pass
+
+
 class Array(ClickHouseTypeEngine):
     __visit_name__ = 'array'
 

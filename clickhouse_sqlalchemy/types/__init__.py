@@ -2,6 +2,7 @@ __all__ = [
     'String',
     'Int',
     'Float',
+    'Boolean',
     'Array',
     'Nullable',
     'UUID',
@@ -37,6 +38,7 @@ __all__ = [
 from .common import String
 from .common import Int
 from .common import Float
+from .common import Boolean
 from .common import Array
 from .common import Nullable
 from .common import UUID
