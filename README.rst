@@ -34,7 +34,8 @@ Usage
 
 Supported interfaces:
 
-- **native** [recommended] (TCP) via `clickhouse-driver <https://github.com/mymarilyn/clickhouse-driver>`_
+- **native** [recommended] (TCP) via `clickhouse-driver <https://github.com/mymarilyn/clickhouse-driver>`
+- **async native** (TCP) via `asynch <https://github.com/long2ice/asynch>`
 - **http** via requests
 
 Define table
