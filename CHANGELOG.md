@@ -1,6 +1,19 @@
 # Changelog
 
 ## [Unreleased]
+## [0.2.3] - 2022-11-24
+### Added
+- [U]Int128/256 types. Pull request [#184](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/184) by [akolov](https://github.com/akolov). Solves issue [#176](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/176).
+- `WITH CUBE`/`WITH ROLLUP` modifiers for `GROUP BY`. Pull request [#210](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/210) by [reflection](https://github.com/reflection).
+- Boolean type. Pull request [#213](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/213) by [AntonFriberg](https://github.com/AntonFriberg). Solves issue [#212](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/212).
+
+### Fixed
+- `FULL JOIN` sql generation. Pull request [#144](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/196) by [poofeg](https://github.com/poofeg). Solves issue [#193](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/193).
+- Allow `CASE` without `ELSE` clause.
+- Arrays compilation in `has*` functions. Solves issue [#205](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/205).
+- Do not render foreign key constraints. Solves issue [#208](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/208).
+- Inconsistency in `ischema_names` type converters. Pull request [#216](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/216) by [AntonFriberg](https://github.com/AntonFriberg). Solves issue [#215](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/215).
+- LowCardinality and Nullable alembic autogeneration. Solves issue [#217](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/217).
 
 ## [0.2.2] - 2022-08-24
 ### Added
@@ -283,7 +296,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.2...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.3...HEAD
+[0.2.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.2...0.2.3
 [0.2.2]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.1...0.2.2
 [0.2.1]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.9...0.2.0
