@@ -52,7 +52,7 @@ class Nullable(ClickHouseTypeEngine):
     __visit_name__ = 'nullable'
 
     def __init__(self, nested_type):
-        self.nested_type = nested_type
+        self.nested_type = to_instance(nested_type)
         super(Nullable, self).__init__()
 
 
@@ -64,7 +64,7 @@ class LowCardinality(ClickHouseTypeEngine):
     __visit_name__ = 'lowcardinality'
 
     def __init__(self, nested_type):
-        self.nested_type = nested_type
+        self.nested_type = to_instance(nested_type)
         super(LowCardinality, self).__init__()
 
 

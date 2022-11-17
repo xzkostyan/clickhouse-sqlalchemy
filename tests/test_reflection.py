@@ -62,7 +62,7 @@ class ReflectionTestCase(BaseTestCase):
 
         self.assertIsInstance(col['type'], types.Nullable)
         self.assertTrue(col['nullable'])
-        self.assertEqual(col['type'].nested_type, types.Int32)
+        self.assertIsInstance(col['type'].nested_type, types.Int32)
 
     def test_not_null(self):
         metadata = self.metadata()
@@ -84,7 +84,7 @@ class ReflectionTestCase(BaseTestCase):
         )[0]['type']
 
         self.assertIsInstance(coltype, types.LowCardinality)
-        self.assertEqual(coltype.nested_type, types.String)
+        self.assertIsInstance(coltype.nested_type, types.String)
 
     def test_tuple(self):
         coltype = self._type_round_trip(
