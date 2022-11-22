@@ -279,7 +279,7 @@ class DDLTestCase(BaseTestCase):
 
         self.assertEqual(
             self.compile(CreateColumn(col)),
-            'x2 Int8 AFTER x1'
+            'x2 Int8'
         )
 
     def test_create_table_tuple(self):
