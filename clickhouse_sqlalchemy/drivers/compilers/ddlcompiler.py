@@ -70,6 +70,9 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         # All columns including synthetic PKs must be 'nullable'
         column.nullable = True
 
+        # Remove invalid column options for create table statements
+        column.dialect_options['clickhouse']["after"] = None
+
         rv = super(ClickHouseDDLCompiler, self).visit_create_column(
             create, **kw
         )
