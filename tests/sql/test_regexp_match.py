@@ -1,12 +1,12 @@
 from sqlalchemy import Column, not_
 from clickhouse_sqlalchemy import types, Table
 
-
 from tests.testcase import BaseTestCase
+
 
 class RegexpMatch(BaseTestCase):
     table = Table(
-        't1', 
+        't1',
         BaseTestCase.metadata(),
         Column('x', types.Int32, primary_key=True),
         Column('y', types.String)
