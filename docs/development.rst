@@ -29,6 +29,7 @@ your machine.
 Run tests:
 
     .. code-block:: bash
+
         pytest -v
 
 ClickHouse in docker
