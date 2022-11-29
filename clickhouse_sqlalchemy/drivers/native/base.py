@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 from sqlalchemy.util import asbool
 
 from . import connector
@@ -48,6 +50,12 @@ class ClickHouseDialect_native(ClickHouseDialect):
 
     def create_connect_args(self, url):
         url = url.set(drivername='clickhouse')
+
+        if url.username:
+            url = url.set(username=quote(url.username))
+
+        if url.password:
+            url = url.set(password=quote(url.password))
 
         self.engine_reflection = asbool(
             url.query.get('engine_reflection', 'true')
