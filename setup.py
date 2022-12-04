@@ -94,7 +94,7 @@ setup(
     packages=find_packages('.', exclude=["tests*"]),
     python_requires='>=3.6, <4',
     install_requires=[
-        'sqlalchemy>=1.4,<1.5',
+        'sqlalchemy>=1.4.24,<1.5',
         'greenlet>=2.0.1',
         'requests',
         'clickhouse-driver>=0.1.2',
