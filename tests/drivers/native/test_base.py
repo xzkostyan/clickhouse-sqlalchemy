@@ -1,4 +1,6 @@
-from sqlalchemy.engine.url import URL
+from urllib.parse import quote
+
+from sqlalchemy.engine.url import URL, make_url
 
 from clickhouse_sqlalchemy.drivers.native.base import ClickHouseDialect_native
 from tests.testcase import BaseTestCase
@@ -45,4 +47,14 @@ class TestConnectArgs(BaseTestCase):
         connect_args = self.dialect.create_connect_args(url)
         self.assertEqual(
             str(connect_args[0][0]), 'clickhouse://localhost:9001/default'
+        )
+
+    def test_quoting(self):
+        user = quote('us#er')
+        password = quote(' pass#word')
+        part = '{}:{}@host/database'.format(user, password)
+        url = make_url('clickhouse+native://' + part)
+        connect_args = self.dialect.create_connect_args(url)
+        self.assertEqual(
+            str(connect_args[0][0]), 'clickhouse://' + part
         )

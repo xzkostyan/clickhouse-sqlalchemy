@@ -466,3 +466,19 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             return super(ClickHouseSQLCompiler, self).render_literal_value(
                 value, type_
             )
+
+    def _get_regexp_args(self, binary, kw):
+        string = self.process(binary.left, **kw)
+        pattern = self.process(binary.right, **kw)
+        return string, pattern
+
+    def visit_regexp_match_op_binary(self, binary, operator, **kw):
+        string, pattern = self._get_regexp_args(binary, kw)
+        return "MATCH(%s, %s)" % (string, pattern)
+
+    def visit_not_regexp_match_op_binary(self, binary, operator, **kw):
+        return "NOT %s" % self.visit_regexp_match_op_binary(
+            binary,
+            operator,
+            **kw
+        )
