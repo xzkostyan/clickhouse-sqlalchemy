@@ -97,7 +97,7 @@ Simple DSN example:
         clickhouse+native://host/db
 
 All connection string parameters are proxied to ``clickhouse-driver``.
-See it's `parameters <https://clickhouse-driver.readthedocs.io/en/latest/api.html#clickhouse_driver.connection.Connection>`_.
+See it's `parameters <https://clickhouse-driver.readthedocs.io/en/latest/api.html#clickhouse_driver.connection.Connection>`__.
 
 Example DSN with LZ4 compression secured with Let's Encrypt certificate on server side:
 
@@ -129,4 +129,4 @@ Simple DSN example:
         clickhouse+asynch://host/db
 
 All connection string parameters are proxied to ``asynch``.
-See it's `parameters <https://github.com/long2ice/asynch/blob/dev/asynch/connection.py>`_.
+See it's `parameters <https://github.com/long2ice/asynch/blob/dev/asynch/connection.py>`__.
