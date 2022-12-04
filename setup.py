@@ -92,7 +92,7 @@ setup(
         'Changes': github_url + '/blob/master/CHANGELOG.md'
     },
     packages=find_packages('.', exclude=["tests*"]),
-    python_requires='>=3.6, <4',
+    python_requires='>=3.7, <4',
     install_requires=[
         'sqlalchemy>=1.4.24,<1.5',
         'greenlet>=2.0.1',
