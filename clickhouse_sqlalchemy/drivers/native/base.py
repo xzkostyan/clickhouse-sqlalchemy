@@ -1,8 +1,8 @@
-from importlib import import_module
 from urllib.parse import quote
 
 from sqlalchemy.util import asbool
 
+from . import connector
 from ..base import (
     ClickHouseDialect, ClickHouseExecutionContextBase, ClickHouseSQLCompiler,
 )
@@ -46,10 +46,7 @@ class ClickHouseDialect_native(ClickHouseDialect):
 
     @classmethod
     def dbapi(cls):
-        return import_module(
-            '.connector',
-            'clickhouse_sqlalchemy.drivers.native'
-        )
+        return connector
 
     def create_connect_args(self, url):
         url = url.set(drivername='clickhouse')

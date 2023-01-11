@@ -1,4 +1,4 @@
-from importlib import import_module
+import asynch
 
 from sqlalchemy.sql.elements import TextClause
 from sqlalchemy.pool import AsyncAdaptedQueuePool
@@ -18,7 +18,7 @@ class ClickHouseDialect_asynch(ClickHouseDialect_native):
 
     @classmethod
     def dbapi(cls):
-        return AsyncAdapt_asynch_dbapi(import_module('asynch'))
+        return AsyncAdapt_asynch_dbapi(asynch)
 
     @classmethod
     def get_pool_class(cls, url):
