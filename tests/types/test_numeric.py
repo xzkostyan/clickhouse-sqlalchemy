@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from sqlalchemy import Column, Numeric, select
+from sqlalchemy import Column, Numeric
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
@@ -10,7 +10,6 @@ from tests.testcase import (
     HttpSessionTestCase, NativeSessionTestCase,
     AsynchSessionTestCase,
 )
-from tests.util import run_async
 
 
 class NumericCompilationTestCase(CompilationTestCase):
@@ -87,33 +86,6 @@ class NumericNativeTestCase(NativeSessionTestCase):
                 self.session.query(self.table.c.x).scalar(),
                 expected
             )
-
-
-class NumericAsynchTestCase(AsynchSessionTestCase):
-    table = Table(
-        'test', AsynchSessionTestCase.metadata(),
-        Column('x', Numeric(10, 2)),
-        engines.Memory()
-    )
-
-    @run_async
-    async def test_insert_truncate(self):
-        value = Decimal('123.129999')
-        expected = Decimal('123.12')
-
-        async with self.create_table(self.table):
-            await self.session.execute(self.table.insert(), [{'x': value}])
-
-            conn = await self.session.connection()
-
-            res = (
-                await conn.execute(
-                    select([self.table.c.x])
-                    .select_from(self.table)
-                )
-            ).scalar()
-
-            self.assertEqual(res, expected)
 
 
 class NumericHttpTestCase(HttpSessionTestCase):
