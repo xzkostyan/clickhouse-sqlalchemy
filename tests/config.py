@@ -11,6 +11,9 @@ registry.register(
 registry.register(
     "clickhouse.native", "clickhouse_sqlalchemy.drivers.native.base", "dialect"
 )
+registry.register(
+    "clickhouse.asynch", "clickhouse_sqlalchemy.drivers.asynch.base", "dialect"
+)
 
 file_config = configparser.ConfigParser()
 file_config.read(['setup.cfg'])
@@ -32,10 +35,16 @@ http_uri = uri_template.format(
 native_uri = uri_template.format(
     schema='clickhouse+native', user=user, password=password, host=host,
     port=port, database=database)
+asynch_uri = uri_template.format(
+    schema='clickhouse+asynch', user=user, password=password, host=host,
+    port=port, database=database)
 
 system_http_uri = uri_template.format(
     schema='clickhouse+http', user=user, password=password, host=host,
     port=http_port, database='system')
 system_native_uri = uri_template.format(
     schema='clickhouse+native', user=user, password=password, host=host,
+    port=port, database='system')
+system_asynch_uri = uri_template.format(
+    schema='clickhouse+asynch', user=user, password=password, host=host,
     port=port, database='system')

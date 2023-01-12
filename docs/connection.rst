@@ -11,8 +11,8 @@ ClickHouse SQLAlchemy uses the following syntax for the connection string:
 
 Where:
 
-- **driver** is driver to use. Possible choices: ``http``, ``native``. ``http``
-  is default. When you omit driver http is used.
+- **driver** is driver to use. Possible choices: ``http``, ``native``, ``asynch``.
+  ``http`` is default. When you omit driver http is used.
 - **database** is database connect to. Default is ``default``.
 - **user** is database user. Defaults to ``'default'``.
 - **password** of the user. Defaults to ``''`` (no password).
@@ -49,20 +49,20 @@ HTTP
 
 Simple DSN example:
 
-    .. code-block::
+    .. code-block:: RST
 
          clickhouse+http://host/db
 
 DSN example for ClickHouse https port:
 
-    .. code-block::
+    .. code-block:: RST
 
          clickhouse+http://user:password@host:8443/db?protocol=https
 
 When you are using `nginx` as proxy server for ClickHouse server connection
 string might look like:
 
-    .. code-block::
+    .. code-block:: RST
 
          clickhouse+http://user:password@host:8124/test?protocol=https
 
@@ -92,12 +92,12 @@ SSH or VPN (for example) while communicating over untrusted network.
 
 Simple DSN example:
 
-    .. code-block::
+    .. code-block:: RST
 
-        clickhouse+http://host/db
+        clickhouse+native://host/db
 
 All connection string parameters are proxied to ``clickhouse-driver``.
-See it's `parameters <https://clickhouse-driver.readthedocs.io/en/latest/api.html#clickhouse_driver.connection.Connection>`_.
+See it's `parameters <https://clickhouse-driver.readthedocs.io/en/latest/api.html#clickhouse_driver.connection.Connection>`__.
 
 Example DSN with LZ4 compression secured with Let's Encrypt certificate on server side:
 
@@ -112,6 +112,21 @@ Example DSN with LZ4 compression secured with Let's Encrypt certificate on serve
 
 Example with multiple hosts
 
-    .. code-block::
+    .. code-block:: RST
 
         clickhouse+native://wronghost/default?alt_hosts=localhost:9000
+
+
+Asynch
+~~~~~~
+
+Same as Native.
+
+Simple DSN example:
+
+    .. code-block:: RST
+
+        clickhouse+asynch://host/db
+
+All connection string parameters are proxied to ``asynch``.
+See it's `parameters <https://github.com/long2ice/asynch/blob/dev/asynch/connection.py>`__.

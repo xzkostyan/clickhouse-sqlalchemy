@@ -14,7 +14,7 @@ ClickHouse server provides a lot of interfaces. This dialect supports:
 Each interface has it's own support by corresponding "driver":
 
 - **http** via ``requests``
-- **native** via ``clickhouse-driver``
+- **native** via ``clickhouse-driver`` or via ``asynch`` for async support
 
 Native driver is recommended due to rich ``clickhouse-driver`` support. HTTP
 driver has poor development support compare to native driver.

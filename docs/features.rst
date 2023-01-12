@@ -983,7 +983,7 @@ To avoid this side effect you should create another session
 Execution options
 +++++++++++++++++
 
-.. attention:: This supported only in native driver.
+.. attention:: This supported only in native and asynch drivers.
 
 You can override default ClickHouse server settings and pass desired settings
 with  ``execution_options``. Set lower priority to query and limit max number

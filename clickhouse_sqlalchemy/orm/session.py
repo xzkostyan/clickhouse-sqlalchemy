@@ -1,9 +1,14 @@
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .query import Query
 
 
-def make_session(engine):
-    Session = sessionmaker(bind=engine)
+def make_session(engine, is_async=False):
+    session_class = Session
+    if is_async:
+        session_class = AsyncSession
 
-    return Session(query_cls=Query)
+    factory = sessionmaker(bind=engine, class_=session_class)
+
+    return factory(query_cls=Query)

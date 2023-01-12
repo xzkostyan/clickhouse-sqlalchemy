@@ -31,7 +31,8 @@ dialects = [
     for driver, d_path in [
         ('', 'http.base:ClickHouseDialect_http'),
         ('.http', 'http.base:ClickHouseDialect_http'),
-        ('.native', 'native.base:ClickHouseDialect_native')
+        ('.native', 'native.base:ClickHouseDialect_native'),
+        ('.asynch', 'asynch.base:ClickHouseDialect_asynch'),
     ]
 ]
 
@@ -91,11 +92,13 @@ setup(
         'Changes': github_url + '/blob/master/CHANGELOG.md'
     },
     packages=find_packages('.', exclude=["tests*"]),
-    python_requires='>=3.6, <4',
+    python_requires='>=3.7, <4',
     install_requires=[
-        'sqlalchemy>=1.4,<1.5',
+        'sqlalchemy>=1.4.24,<1.5',
+        'greenlet>=2.0.1',
         'requests',
-        'clickhouse-driver>=0.1.2'
+        'clickhouse-driver>=0.1.2',
+        'asynch>=0.2.2',
     ],
     # Registering `clickhouse` as dialect.
     entry_points={
