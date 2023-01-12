@@ -3,8 +3,8 @@ from sqlalchemy import Column, and_
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
-from tests.testcase import BaseTestCase, BaseAsynchTestCase
-from tests.util import with_native_and_http_sessions, run_async
+from tests.testcase import BaseTestCase
+from tests.util import with_native_and_http_sessions
 
 
 @with_native_and_http_sessions

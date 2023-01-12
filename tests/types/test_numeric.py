@@ -8,7 +8,6 @@ from clickhouse_sqlalchemy.exceptions import DatabaseException
 from tests.testcase import (
     BaseTestCase, CompilationTestCase,
     HttpSessionTestCase, NativeSessionTestCase,
-    AsynchSessionTestCase,
 )
 
 
