@@ -9,16 +9,28 @@ from tests.util import with_native_and_http_sessions
 
 
 class DateTimeCompilationTestCase(CompilationTestCase):
-    table = Table(
-        'test', CompilationTestCase.metadata(),
-        Column('x', types.DateTime, primary_key=True),
-        engines.Memory()
-    )
-
     def test_create_table(self):
+        table = Table(
+            'test', CompilationTestCase.metadata(),
+            Column('x', types.DateTime, primary_key=True),
+            engines.Memory()
+        )
+
         self.assertEqual(
-            self.compile(CreateTable(self.table)),
+            self.compile(CreateTable(table)),
             'CREATE TABLE test (x DateTime) ENGINE = Memory'
+        )
+
+    def test_create_table_with_timezone(self):
+        table = Table(
+            'test', CompilationTestCase.metadata(),
+            Column('x', types.DateTime('Europe/Moscow'), primary_key=True),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            "CREATE TABLE test (x DateTime('Europe/Moscow')) ENGINE = Memory"
         )
 
 

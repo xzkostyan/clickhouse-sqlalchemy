@@ -61,11 +61,14 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         return 'Date'
 
     def visit_datetime(self, type_, **kw):
-        return 'DateTime'
+        if type_.timezone:
+            return "DateTime('%s')" % type_.timezone
+        else:
+            return 'DateTime'
 
     def visit_datetime64(self, type_, **kw):
         if type_.timezone:
-            return 'DateTime64(%s, \'%s\')' % (type_.precision, type_.timezone)
+            return "DateTime64(%s, '%s')" % (type_.precision, type_.timezone)
         else:
             return 'DateTime64(%s)' % type_.precision
 

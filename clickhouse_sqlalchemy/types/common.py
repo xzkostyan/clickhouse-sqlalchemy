@@ -128,8 +128,12 @@ class Date(types.Date, ClickHouseTypeEngine):
     __visit_name__ = 'date'
 
 
-class DateTime(types.Date, ClickHouseTypeEngine):
+class DateTime(types.DateTime, ClickHouseTypeEngine):
     __visit_name__ = 'datetime'
+
+    def __init__(self, timezone=None):
+        super(DateTime, self).__init__()
+        self.timezone = timezone
 
 
 class DateTime64(DateTime, ClickHouseTypeEngine):
@@ -137,8 +141,7 @@ class DateTime64(DateTime, ClickHouseTypeEngine):
 
     def __init__(self, precision=3, timezone=None):
         self.precision = precision
-        self.timezone = timezone
-        super(DateTime64, self).__init__()
+        super(DateTime64, self).__init__(timezone=timezone)
 
 
 class Enum(types.Enum, ClickHouseTypeEngine):
