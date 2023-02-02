@@ -105,11 +105,13 @@ class Query(BaseQuery):
             'distribution': kwargs.pop('distribution', None)
         }
         rv = super(Query, self).join(*props, **kwargs)
-        for x in rv._legacy_setup_joins:
-            x_spec = dict(spec)
-            # use 'full' key to pass extra flags
-            x_spec['full'] = x[-1]['full']
-            x[-1]['full'] = x_spec
+
+        x = rv._legacy_setup_joins[-1]
+        x_spec = dict(spec)
+        # use 'full' key to pass extra flags
+        x_spec['full'] = x[-1]['full']
+        x[-1]['full'] = x_spec
+
         return rv
 
     def outerjoin(self, *props, **kwargs):

@@ -312,6 +312,25 @@ class JoinTestCase(CompilationTestCase):
             "ALL FULL OUTER JOIN t2 USING (x, y)"
         )
 
+    def test_multiple_joins(self):
+        t1, t2, t3 = [Table(
+            't{}'.format(i), self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            Column('y', types.Int32, primary_key=True),
+            engines.Memory()
+        ) for i in range(1, 4)]
+
+        query = self.session.query(t1.c.x, t2.c.x) \
+            .join(t2, t1.c.x == t2.c.y, strictness='any') \
+            .join(t3, t1.c.x == t3.c.y, strictness='any')
+
+        self.assertEqual(
+            self.compile(query),
+            "SELECT t1.x AS t1_x, t2.x AS t2_x FROM t1 "
+            "ANY INNER JOIN t2 ON t1.x = t2.y "
+            "ANY INNER JOIN t3 ON t1.x = t3.y"
+        )
+
 
 class YieldTest(NativeSessionTestCase):
     def test_yield_per_and_execution_options(self):
