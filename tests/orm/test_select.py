@@ -331,6 +331,17 @@ class JoinTestCase(CompilationTestCase):
             "ANY INNER JOIN t3 ON t1.x = t3.y"
         )
 
+        query = self.session.query(t1.c.x, t2.c.x) \
+            .join(t2, t1.c.x == t2.c.y, strictness='any') \
+            .outerjoin(t3, t1.c.x == t3.c.y, strictness='any')
+
+        self.assertEqual(
+            self.compile(query),
+            "SELECT t1.x AS t1_x, t2.x AS t2_x FROM t1 "
+            "ANY INNER JOIN t2 ON t1.x = t2.y "
+            "ANY LEFT OUTER JOIN t3 ON t1.x = t3.y"
+        )
+
 
 class YieldTest(NativeSessionTestCase):
     def test_yield_per_and_execution_options(self):
