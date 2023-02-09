@@ -9,17 +9,13 @@ from ... import types
 
 
 class ClickHouseSQLCompiler(compiler.SQLCompiler):
-    def visit_mod_binary(self, binary, operator, **kw):
-        return self.process(binary.left, **kw) + ' %% ' + \
-            self.process(binary.right, **kw)
-    
     def visit_select(
         self,
         select_stmt,
         **kwargs,
     ):
         orig_compile_state_factory = select_stmt._compile_state_factory
-        
+
         def f(self, *args, **kwargs):
             tmp = orig_compile_state_factory(self, *args, **kwargs)
 
@@ -35,9 +31,12 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
 
         select_stmt._compile_state_factory = f
         tmp_select = super().visit_select(select_stmt=select_stmt, **kwargs)
-        
+
         return tmp_select
-        
+
+    def visit_mod_binary(self, binary, operator, **kw):
+        return self.process(binary.left, **kw) + ' %% ' + \
+            self.process(binary.right, **kw)
 
     def visit_is_not_distinct_from_binary(self, binary, operator, **kw):
         """
@@ -508,4 +507,19 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             binary,
             operator,
             **kw
+        )
+
+    def visit_ilike_case_insensitive_operand(self, element, **kw):
+        return element.element._compiler_dispatch(self, **kw)
+
+    def visit_ilike_op_binary(self, binary, operator, **kw):
+        return "%s ILIKE %s" % (
+            self.process(binary.left, **kw),
+            self.process(binary.right, **kw)
+        )
+
+    def visit_not_ilike_op_binary(self, binary, operator, **kw):
+        return "%s NOT ILIKE %s" % (
+            self.process(binary.left, **kw),
+            self.process(binary.right, **kw)
         )
