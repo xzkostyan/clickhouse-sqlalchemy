@@ -23,12 +23,13 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         def f(self, *args, **kwargs):
             tmp = orig_compile_state_factory(self, *args, **kwargs)
 
-            # Fix missed attributes
-            for attr in ["_with_cube", "_with_rollup", "_with_totals", "_final_clause", "_sample_clause", "_limit_by_clause", "_array_join"]:
-                val = getattr(tmp.select_statement, attr, None)
+            if hasattr(tmp, 'select_statement'):
+                # Fix missed attributes
+                for attr in ["_with_cube", "_with_rollup", "_with_totals", "_final_clause", "_sample_clause", "_limit_by_clause", "_array_join"]:
+                    val = getattr(tmp.select_statement, attr, None)
 
-                if val:
-                    setattr(tmp.statement, attr, val)
+                    if val:
+                        setattr(tmp.statement, attr, val)
 
             return tmp
 
