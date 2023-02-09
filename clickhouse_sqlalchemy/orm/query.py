@@ -19,6 +19,21 @@ class Query(BaseQuery):
     _limit_by = None
     _array_join = None
 
+    def _statement_20(self, for_statement=False, use_legacy_query_style=True):
+        orig_smt = super(Query, self)._statement_20(for_statement=for_statement,
+                                                    use_legacy_query_style=use_legacy_query_style)
+
+        orig_smt._with_cube = self._with_cube
+        orig_smt._with_rollup = self._with_rollup
+        orig_smt._with_totals = self._with_totals
+        orig_smt._final_clause = self._final
+        orig_smt._sample_clause = sample_clause(self._sample)
+        orig_smt._limit_by_clause = self._limit_by
+        orig_smt._array_join = self._array_join
+
+        return orig_smt
+
+
     def _compile_context(self, *args, **kwargs):
         context = super(Query, self)._compile_context(*args, **kwargs)
         query = context.query
