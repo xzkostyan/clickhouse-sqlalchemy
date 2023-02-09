@@ -3,7 +3,6 @@ from sqlalchemy.sql import compiler, elements, COLLECT_CARTESIAN_PRODUCTS, \
     WARN_LINTING, crud
 from sqlalchemy.sql import type_api
 from sqlalchemy.util import inspect_getfullargspec
-import operator
 
 from ... import types
 
