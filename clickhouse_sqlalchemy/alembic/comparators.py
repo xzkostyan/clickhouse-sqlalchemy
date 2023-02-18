@@ -21,7 +21,7 @@ def _extract_to_table_name(create_table_query):
     return inner_name.split('.')[1] if '.' in inner_name else inner_name
 
 
-@comparators.dispatch_for('schema')
+@comparators.dispatch_for('schema', 'clickhouse')
 def compare_mat_view(autogen_context, upgrade_ops, schemas):
     connection = autogen_context.connection
     dialect = autogen_context.dialect
