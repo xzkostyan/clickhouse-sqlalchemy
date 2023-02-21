@@ -21,6 +21,14 @@ def _extract_to_table_name(create_table_query):
     return inner_name.split('.')[1] if '.' in inner_name else inner_name
 
 
+# Direct call .dispatch_for('schema', 'clickhouse') override an Alembic
+# default ('schema', 'default') comparator. To avoid it (as we have own
+# implementation only for a materialized views ) register default "schema"
+# comparators as "clickhouse" comparators too.
+for default_comparator in comparators._registry[('schema', 'default')]:
+    comparators.dispatch_for('schema', 'clickhouse')(default_comparator)
+
+
 @comparators.dispatch_for('schema', 'clickhouse')
 def compare_mat_view(autogen_context, upgrade_ops, schemas):
     connection = autogen_context.connection
