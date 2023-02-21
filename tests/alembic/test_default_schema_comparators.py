@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from clickhouse_sqlalchemy.alembic.comparators import comparators, compare_mat_view
 
 
