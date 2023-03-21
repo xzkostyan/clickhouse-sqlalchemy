@@ -155,6 +155,57 @@ class SelectTestCase(CompilationTestCase):
             'SELECT t1.x AS t1_x FROM t1 SAMPLE 0.1 GROUP BY t1.x'
         )
 
+    def test_array_join_with_sample(self):
+        table = self._make_table(
+            Column('nested.array_column', types.Array(types.Int8)),
+            Column('nested.another_array_column', types.Array(types.Int8)),
+            engines.MergeTree(
+                order_by="x",
+                sample_by="x",
+            )
+        )
+        first_label = table.c['nested.array_column'].label('from_array')
+        second_not_label = table.c['nested.another_array_column']
+        query = self.session.query(first_label, second_not_label).sample(0.1)\
+            .array_join(first_label, second_not_label)
+
+        self.assertEqual(
+            self.compile(query),
+            'SELECT '
+            't1."nested.array_column" AS from_array, '
+            't1."nested.another_array_column" '
+            'AS "t1_nested.another_array_column" '
+            'FROM t1 '
+            'SAMPLE %(param_1)s '
+            'ARRAY JOIN t1."nested.array_column" AS from_array, '
+            't1."nested.another_array_column"'
+        )
+
+    def test_array_join_left_with_sample(self):
+        table = self._make_table(
+            Column('nested.array_column', types.Array(types.Int8)),
+            Column('nested.another_array_column', types.Array(types.Int8)),
+            engines.MergeTree(
+                order_by="x",
+                sample_by="x",
+            )
+        )
+        first_label = table.c['nested.array_column'].label('from_array')
+        second_not_label = table.c['nested.another_array_column']
+        query = self.session.query(first_label, second_not_label).sample(0.3)\
+            .array_join(first_label, second_not_label, left=True)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT '
+            't1."nested.array_column" AS from_array, '
+            't1."nested.another_array_column" '
+            'AS "t1_nested.another_array_column" '
+            'FROM t1 '
+            'SAMPLE %(param_1)s '
+            'LEFT ARRAY JOIN t1."nested.array_column" AS from_array, '
+            't1."nested.another_array_column"'
+        )
+
     def test_final(self):
         table = self._make_table()
 
