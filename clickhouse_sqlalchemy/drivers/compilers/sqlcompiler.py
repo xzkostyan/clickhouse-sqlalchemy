@@ -286,13 +286,13 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         else:
             text += self.default_from()
 
-        if getattr(select, '_array_join', None) is not None:
-            text += select._array_join._compiler_dispatch(self, **kwargs)
-
         sample_clause = getattr(select, '_sample_clause', None)
 
         if sample_clause is not None:
             text += self.sample_clause(select, **kwargs)
+
+        if getattr(select, '_array_join', None) is not None:
+            text += select._array_join._compiler_dispatch(self, **kwargs)
 
         final_clause = getattr(select, '_final_clause', None)
 
