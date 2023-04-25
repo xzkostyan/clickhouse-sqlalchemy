@@ -25,7 +25,15 @@ class ClickHouseDialectImpl(impl.DefaultImpl):
     transactional_ddl = False
 
     def drop_table(self, table):
+        table.dispatch.before_drop(
+            table, self.connection, checkfirst=False, _ddl_runner=self
+        )
+
         self._exec(DropTable(table))
+
+        table.dispatch.after_drop(
+            table, self.connection, checkfirst=False, _ddl_runner=self
+        )
 
 
 def patch_alembic_version(context, **kwargs):
