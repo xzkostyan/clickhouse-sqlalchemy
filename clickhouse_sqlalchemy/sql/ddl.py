@@ -25,7 +25,21 @@ class SchemaDropper(SchemaDropperBase):
         super(SchemaDropper, self).__init__(dialect, connection, **kwargs)
 
     def visit_table(self, table, **kwargs):
+        table.dispatch.before_drop(
+            table,
+            self.connection,
+            checkfirst=self.checkfirst,
+            _ddl_runner=self,
+        )
+
         self.connection.execute(DropTable(table, if_exists=self.if_exists))
+
+        table.dispatch.after_drop(
+            table,
+            self.connection,
+            checkfirst=self.checkfirst,
+            _ddl_runner=self,
+        )
 
     def visit_materialized_view(self, table, **kwargs):
         self.connection.execute(DropView(table, if_exists=self.if_exists))
