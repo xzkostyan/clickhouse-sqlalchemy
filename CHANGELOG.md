@@ -1,6 +1,20 @@
 # Changelog
 
 ## [Unreleased]
+## [0.2.4] - 2023-05-02
+### Added
+- [Native] DateTime('timezone'). Solves issue [#230](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/230).
+- Async driver support via ``asynch``. Pull request [#214](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/214) by [randomowo](https://github.com/randomowo).
+- ``ILIKE`` clause compilation. Pull request [#229](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/229) by [howbownotnow](https://github.com/howbownotnow).
+- ``MATCH`` clause via ``Column.regexp_match``. Pull request [#221](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/221) by [TeddyCr](https://github.com/TeddyCr).
+
+### Fixed
+- Trigger ``after_drop`` and ``before_drop`` events while dropping table. Pull request [#246](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/246) by [vanchaxy](https://github.com/vanchaxy). Solves issue [#245](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/245).
+- ``SAMPLE`` with ``ARRAY JOIN``. Pull request [#241](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/241) by [dpaluch-piw](https://github.com/dpaluch-piw). Solves issue [#45](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/45).
+- Alembic comparators respect non-ClickHouse engines for multi-db. Pull request [#236](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/236) by [Skorpyon](https://github.com/Skorpyon).
+- INNER/OUTER joins strictness on multiple joins.
+- [Native] Handle quoted passwords. Solves issue [#185](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/185).
+
 ## [0.2.3] - 2022-11-24
 ### Added
 - [U]Int128/256 types. Pull request [#184](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/184) by [akolov](https://github.com/akolov). Solves issue [#176](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/176).
@@ -296,7 +310,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.3...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.4...HEAD
+[0.2.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.3...0.2.4
 [0.2.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.2...0.2.3
 [0.2.2]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.1...0.2.2
 [0.2.1]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.0...0.2.1
