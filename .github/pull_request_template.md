@@ -18,4 +18,4 @@ Checklist:
 - [ ] Add or update relevant docs, in the docs folder and in code.
 - [ ] Ensure PR doesn't contain untouched code reformatting: spaces, etc.
 - [ ] Run `flake8` and fix issues.
-- [ ] Run `pytest` no tests failed. See https://clickhouse-driver.readthedocs.io/en/latest/development.html.
+- [ ] Run `pytest` no tests failed. See https://clickhouse-sqlalchemy.readthedocs.io/en/latest/development.html.
