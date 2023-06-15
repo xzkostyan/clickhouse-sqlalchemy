@@ -53,6 +53,10 @@ ischema_names = {
     '_lowcardinality': types.LowCardinality,
     '_tuple': types.Tuple,
     '_map': types.Map,
+    'Point': types.Point,
+    'Ring': types.Ring,
+    'Polygon': types.Polygon,
+    'MultiPolygon': types.MultiPolygon
 }
 
 

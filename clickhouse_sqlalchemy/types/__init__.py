@@ -33,6 +33,10 @@ __all__ = [
     'Nested',
     'Tuple',
     'Map',
+    'Point',
+    'Ring',
+    'Polygon',
+    'MultiPolygon'
 ]
 
 from .common import String
@@ -69,3 +73,8 @@ from .common import Map
 from .ip import IPv4
 from .ip import IPv6
 from .nested import Nested
+from .geo import Point
+from .geo import Ring
+from .geo import Polygon
+from .geo import MultiPolygon
+

@@ -46,6 +46,22 @@ def nullable_converter(subtype_str, x):
 def nothing_converter(x):
     return None
 
+POINT_RE = re.compile(r'(-?\d*\.?\d+)')
+RING_RE = re.compile(r'(\(.*?\))')
+POLYGON_RE = re.compile(r'(\[.*?\])')
+MULTIPOLYGON_RE = re.compile(r'\[\[.*?\]\]')
+
+def point_converter(x):
+    return tuple([float(f) for f in POINT_RE.findall(x[1:-1])])
+
+def ring_converter(x):
+    return [point_converter(f) for f in RING_RE.findall(x[1:-1])]
+
+def polygon_converter(x):
+    return [ring_converter(f) for f in POLYGON_RE.findall(x[1:-1])]
+
+def multipolygon_converter(x):
+    return [polygon_converter(f) for f in MULTIPOLYGON_RE.findall(x[1:-1])]
 
 converters = {
     'Int8': int,
@@ -70,6 +86,10 @@ converters = {
     'IPv6': IPv6Address,
     'Nullable': nullable_converter,
     'Nothing': nothing_converter,
+    'Point': point_converter,
+    'Ring': ring_converter,
+    'Polygon': polygon_converter,
+    'MultiPolygon': multipolygon_converter
 }
 
 
