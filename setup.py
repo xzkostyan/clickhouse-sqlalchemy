@@ -97,7 +97,7 @@ setup(
         'sqlalchemy>=1.4.24,<1.5',
         'greenlet>=2.0.1',
         'requests',
-        'clickhouse-driver>=0.1.2',
+        'clickhouse-driver>=0.2.4',
         'asynch>=0.2.2',
     ],
     # Registering `clickhouse` as dialect.
