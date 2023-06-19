@@ -77,4 +77,3 @@ from .geo import Point
 from .geo import Ring
 from .geo import Polygon
 from .geo import MultiPolygon
-

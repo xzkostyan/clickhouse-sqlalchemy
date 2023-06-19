@@ -131,7 +131,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
             self.process(key_type, **kw),
             self.process(value_type, **kw)
         )
-    
+
     def visit_point(self, type_, **kw):
         return 'Point'
 
@@ -143,4 +143,3 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_multipolygon(self, type_, *kw):
         return 'MultiPolygon'
-    

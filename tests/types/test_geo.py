@@ -5,6 +5,7 @@ from clickhouse_sqlalchemy import types, engines, Table
 from tests.testcase import BaseTestCase
 from tests.util import with_native_and_http_sessions
 
+
 @with_native_and_http_sessions
 class GeoPointTestCase(BaseTestCase):
     table = Table(
@@ -18,7 +19,7 @@ class GeoPointTestCase(BaseTestCase):
             self.compile(CreateTable(self.table)),
             'CREATE TABLE test (p Point) ENGINE = Memory'
         )
-    
+
     def test_select_insert(self):
         a = (10.1, 12.3)
 
@@ -38,8 +39,6 @@ class GeoPointTestCase(BaseTestCase):
                 self.table.c.p == (10.1, 12.3)).scalar(), a)
 
 
-
-
 @with_native_and_http_sessions
 class GeoRingTestCase(BaseTestCase):
     table = Table(
@@ -53,7 +52,7 @@ class GeoRingTestCase(BaseTestCase):
             self.compile(CreateTable(self.table)),
             'CREATE TABLE test (r Ring) ENGINE = Memory'
         )
-    
+
     def test_select_insert(self):
         a = [(0, 0), (10, 0), (10, 10), (0, 10)]
 
@@ -79,15 +78,14 @@ class GeoPolygonTestCase(BaseTestCase):
         )
 
     def test_select_insert(self):
-        a = [[(20, 20), (50, 20), (50, 50), (20, 50)], [(30, 30), (50, 50), (50, 30)]]
+        a = [[(20, 20), (50, 20), (50, 50), (20, 50)],
+             [(30, 30), (50, 50), (50, 30)]]
 
         with self.create_table(self.table):
             self.session.execute(self.table.insert(), [{'pg': a}])
             qres = self.session.query(self.table.c.pg)
             res = qres.scalar()
             self.assertEqual(res, a)
-
-
 
 
 @with_native_and_http_sessions
@@ -104,16 +102,13 @@ class GeoMultiPolygonTestCase(BaseTestCase):
             'CREATE TABLE test (mpg MultiPolygon) ENGINE = Memory'
         )
 
-
     def test_select_insert(self):
-        a = [[[(0, 0), (10, 0), (10, 10), (0, 10)]], [[(20, 20), (50, 20), (50, 50), (20, 50)],[(30, 30), (50, 50), (50, 30)]]]
+        a = [[[(0, 0), (10, 0), (10, 10), (0, 10)]],
+             [[(20, 20), (50, 20), (50, 50), (20, 50)],
+              [(30, 30), (50, 50), (50, 30)]]]
 
         with self.create_table(self.table):
             self.session.execute(self.table.insert(), [{'mpg': a}])
             qres = self.session.query(self.table.c.mpg)
             res = qres.scalar()
             self.assertEqual(res, a)
-
-
-
-
