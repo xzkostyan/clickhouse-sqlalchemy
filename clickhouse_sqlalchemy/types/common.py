@@ -30,10 +30,16 @@ class Boolean(types.Boolean, ClickHouseTypeEngine):
 class Array(ClickHouseTypeEngine):
     __visit_name__ = 'array'
 
+    hashable = False
+
     def __init__(self, item_type):
         self.item_type = item_type
         self.item_type_impl = to_instance(item_type)
         super(Array, self).__init__()
+
+    @property
+    def python_type(self):
+        return list
 
     def literal_processor(self, dialect):
         item_processor = self.item_type_impl.literal_processor(dialect)
