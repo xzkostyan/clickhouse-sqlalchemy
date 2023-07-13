@@ -21,7 +21,11 @@ class EngineReflectionTestCase(BaseTestCase):
         with self.create_table(table):
             metadata.clear()  # reflect from clean state
             self.assertFalse(metadata.tables)
-            table = Table('test_reflect', metadata, autoload_with=self.session.bind)
+            table = Table(
+                'test_reflect',
+                metadata,
+                autoload_with=self.session.bind
+            )
             yield table, table.engine
 
     def assertColumns(self, first, second, msg=None):
@@ -188,7 +192,11 @@ class EngineReflectionTestCase(BaseTestCase):
         with self.create_table(table):
             metadata.clear()  # reflect from clean state
             self.assertFalse(metadata.tables)
-            table = Table('test_reflect', metadata, autoload_with=self.session.connection())
+            table = Table(
+                'test_reflect',
+                metadata,
+                autoload_with=self.session.connection()
+            )
 
             exists_query = text('EXISTS TABLE test_reflect')
             table.drop(bind=self.session.bind)
@@ -215,7 +223,11 @@ class EngineReflectionTestCase(BaseTestCase):
         with self.create_table(table):
             metadata.clear()  # reflect from clean state
             self.assertFalse(metadata.tables)
-            table = Table('test_reflect', metadata, autoload_with=session.connection())
+            table = Table(
+                'test_reflect',
+                metadata,
+                autoload_with=session.connection()
+            )
             self.assertIsNone(getattr(table, 'engine', None))
 
     def test_exists_describe_escaping(self):

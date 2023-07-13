@@ -459,7 +459,7 @@ class DDLTestCase(BaseTestCase):
 
     def test_create_table_with_comment(self):
         table = Table(
-            't1', self.metadata(session=self.session),
+            't1', self.metadata(),
             Column('x', types.Int32, primary_key=True),
             engines.Memory(),
             comment='table_comment'
@@ -472,7 +472,7 @@ class DDLTestCase(BaseTestCase):
 
     def test_create_table_with_column_comment(self):
         table = Table(
-            't1', self.metadata(session=self.session),
+            't1', self.metadata(),
             Column('x', types.Int32, primary_key=True, comment='col_comment'),
             engines.Memory()
         )
@@ -484,7 +484,7 @@ class DDLTestCase(BaseTestCase):
 
     def test_do_not_render_fk(self):
         table = Table(
-            't1', self.metadata(session=self.session),
+            't1', self.metadata(),
             Column('x', types.Int32, ForeignKey('t2.x'), primary_key=True),
             engines.Memory()
         )

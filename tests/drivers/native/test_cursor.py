@@ -18,5 +18,7 @@ class CursorTestCase(NativeSessionTestCase):
         self.assertEqual(len(rv.fetchall()), 1)
 
     def test_check_iter_cursor(self):
-        rv = self.session.execute(text('SELECT number FROM system.numbers LIMIT 5'))
+        rv = self.session.execute(
+            text('SELECT number FROM system.numbers LIMIT 5')
+        )
         self.assertListEqual(list(rv), [(x,) for x in range(5)])

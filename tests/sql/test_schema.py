@@ -82,7 +82,11 @@ class SchemaTestCase(BaseTestCase):
         metadata.clear()  # reflect from clean state
         self.assertFalse(metadata.tables)
 
-        table = Table('test_reflect', metadata, autoload_with=self.session.bind)
+        table = Table(
+            'test_reflect',
+            metadata,
+            autoload_with=self.session.bind
+        )
         self.assertListEqual([c.name for c in table.columns], ['x'])
 
     def test_reflect_subquery(self):
@@ -90,7 +94,6 @@ class SchemaTestCase(BaseTestCase):
             '(select arrayJoin([1, 2]) as a, arrayJoin([3, 4]) as b)')
         table_node = TextClause(table_node_sql)
 
-        metadata = self.metadata()
         # Cannot use `Table` as it only works with a simple string.
         columns = inspect(self.session.bind).get_columns(table_node)
         self.assertListEqual(
