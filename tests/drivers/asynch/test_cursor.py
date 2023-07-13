@@ -22,7 +22,9 @@ class CursorTestCase(AsynchSessionTestCase):
 
     @run_async
     async def test_execute_with_context(self):
-        rv = await self.session.execute(text('SELECT * FROM system.numbers LIMIT 1'))
+        rv = await self.session.execute(
+            text('SELECT * FROM system.numbers LIMIT 1')
+        )
 
         self.assertEqual(len(rv.fetchall()), 1)
 

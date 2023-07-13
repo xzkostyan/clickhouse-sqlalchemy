@@ -77,7 +77,9 @@ class BaseTestCase(BaseAbstractTestCase, TestCase):
             text('CREATE DATABASE {}'.format(cls.database))
         )
 
-        version = system_native_session.execute(text('SELECT version()')).fetchall()
+        version = system_native_session.execute(
+            text('SELECT version()')
+        ).fetchall()
         cls.server_version = tuple(int(x) for x in version[0][0].split('.'))
 
         super().setUpClass()
