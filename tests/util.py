@@ -92,7 +92,11 @@ def run_async(f):
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:
-            loop = asyncio.get_event_loop_policy().get_event_loop()
+            try:
+                loop = asyncio.get_event_loop_policy().get_event_loop()
+            except DeprecationWarning:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
 
         return loop.run_until_complete(coro)
     return g

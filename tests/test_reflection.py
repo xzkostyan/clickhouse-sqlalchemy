@@ -20,7 +20,7 @@ class ReflectionTestCase(BaseTestCase):
         table = Table('t', metadata, *args)
         with self.create_table(table):
             self.assertEqual([
-                c['default'] for c in inspect(metadata.bind
+                c['default'] for c in inspect(self.session.bind
                                               ).get_columns('t')
             ], [None, "''"])
 
@@ -34,7 +34,7 @@ class ReflectionTestCase(BaseTestCase):
 
         table = Table('t', metadata, *args)
         with self.create_table(table):
-            return inspect(metadata.bind).get_columns('t')
+            return inspect(self.session.bind).get_columns('t')
 
     def test_array(self):
         coltype = self._type_round_trip(types.Array(types.Int32))[0]['type']
@@ -72,7 +72,7 @@ class ReflectionTestCase(BaseTestCase):
             engines.Memory()
         )
         with self.create_table(table):
-            col = inspect(metadata.bind).get_columns('t')[0]
+            col = inspect(self.session.bind).get_columns('t')[0]
 
         self.assertIsInstance(col['type'], types.Int32)
         self.assertFalse(col['nullable'])

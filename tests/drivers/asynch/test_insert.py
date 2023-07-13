@@ -1,4 +1,4 @@
-from sqlalchemy import Column, func
+from sqlalchemy import Column, func, text
 
 from clickhouse_sqlalchemy import engines, types, Table
 from asynch.errors import TypeMismatchError
@@ -10,7 +10,7 @@ from tests.util import run_async
 class NativeInsertTestCase(AsynchSessionTestCase):
     @run_async
     async def test_rowcount_return1(self):
-        metadata = self.metadata(self.session)
+        metadata = self.metadata()
         table = Table(
             'test', metadata,
             Column('x', types.UInt32, primary_key=True),
@@ -33,13 +33,13 @@ class NativeInsertTestCase(AsynchSessionTestCase):
         )
 
         rv = await self.session.execute(
-            'INSERT INTO test SELECT * FROM system.numbers LIMIT 5'
+            text('INSERT INTO test SELECT * FROM system.numbers LIMIT 5')
         )
         self.assertEqual(rv.rowcount, -1)
 
     @run_async
     async def test_types_check(self):
-        metadata = self.metadata(self.session)
+        metadata = self.metadata()
         table = Table(
             'test', metadata,
             Column('x', types.UInt32, primary_key=True),

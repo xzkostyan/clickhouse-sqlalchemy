@@ -36,7 +36,7 @@ class SelectTestCase(CompilationTestCase):
     def test_very_simple_select(self):
         # A non-CH specific select statement should work too.
 
-        query = select([literal(1).label('col1')])
+        query = select(literal(1).label('col1'))
         self.assertEqual(
             self.compile(query),
             'SELECT %(param_1)s AS col1'

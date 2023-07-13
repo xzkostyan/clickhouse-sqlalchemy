@@ -1,5 +1,6 @@
 from urllib.parse import quote
 
+from sqlalchemy.sql.elements import TextClause
 from sqlalchemy.util import asbool
 
 from . import connector
@@ -64,8 +65,12 @@ class ClickHouseDialect_native(ClickHouseDialect):
         return (str(url), ), {}
 
     def _execute(self, connection, sql, scalar=False, **kwargs):
+        if isinstance(sql, str):
+            # Makes sure the query will go through the
+            # `ClickHouseExecutionContext` logic.
+            sql = TextClause(sql)
         f = connection.scalar if scalar else connection.execute
-        return f(sql, **kwargs)
+        return f(sql, kwargs)
 
 
 dialect = ClickHouseDialect_native

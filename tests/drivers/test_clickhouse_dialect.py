@@ -1,4 +1,4 @@
-from sqlalchemy import Column, create_engine, inspect
+from sqlalchemy import Column, create_engine, inspect, text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from clickhouse_sqlalchemy import make_session, engines, types, Table
@@ -82,7 +82,7 @@ class ClickHouseDialectTestCase(BaseTestCase):
         meta = self.metadata()
         insp = inspect(self.session.bind)
         reflected_table = Table(self.table.name, meta)
-        insp.reflecttable(reflected_table, None)
+        insp.reflect_table(reflected_table, None)
 
         self.assertEqual(self.table.name, reflected_table.name)
 
@@ -92,7 +92,7 @@ class ClickHouseDialectTestCase(BaseTestCase):
         meta = self.metadata()
         insp = inspect(self.session.bind)
         reflected_table = Table('columns', meta, schema='system')
-        insp.reflecttable(reflected_table, None)
+        insp.reflect_table(reflected_table, None)
 
         self.assertEqual(reflected_table.name, 'columns')
         self.assertEqual(reflected_table.schema, 'system')
@@ -130,17 +130,18 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
     @run_async
     async def setUp(self):
         super().setUp()
+        self.test_metadata = self.metadata()
         self.table = Table(
             'test_exists_table',
-            self.metadata(),
+            self.test_metadata,
             Column('x', types.Int32, primary_key=True),
             engines.Memory()
         )
-        await self.run_sync(self.table.metadata.drop_all)
+        await self.run_sync(self.test_metadata.drop_all)
 
     @run_async
     async def tearDown(self):
-        await self.run_sync(self.table.metadata.drop_all)
+        await self.run_sync(self.test_metadata.drop_all)
         super().tearDown()
 
     async def run_inspector_method(self, method, *args, **kwargs):
@@ -156,7 +157,7 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
             await self.run_inspector_method('has_table', self.table.name)
         )
 
-        await self.run_sync(self.table.metadata.create_all)
+        await self.run_sync(self.test_metadata.create_all)
 
         self.assertTrue(
             await self.run_inspector_method('has_table', self.table.name)
@@ -181,7 +182,7 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
     @run_async
     async def test_get_table_names(self):
-        await self.run_sync(self.table.metadata.create_all)
+        await self.run_sync(self.test_metadata.create_all)
 
         db_tables = await self.run_inspector_method('get_table_names')
 
@@ -189,7 +190,7 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
     @run_async
     async def test_get_table_names_with_schema(self):
-        await self.run_sync(self.table.metadata.create_all)
+        await self.run_sync(self.test_metadata.create_all)
 
         db_tables = await self.run_inspector_method(
             'get_table_names',
@@ -200,7 +201,7 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
     @run_async
     async def test_get_view_names(self):
-        await self.run_sync(self.table.metadata.create_all)
+        await self.run_sync(self.test_metadata.create_all)
 
         db_views = await self.run_inspector_method('get_view_names')
 
@@ -208,7 +209,7 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
     @run_async
     async def test_get_view_names_with_schema(self):
-        await self.run_sync(self.table.metadata.create_all)
+        await self.run_sync(self.test_metadata.create_all)
 
         db_views = await self.run_inspector_method(
             'get_view_names',
@@ -219,11 +220,11 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
     @run_async
     async def test_reflecttable(self):
-        await self.run_sync(self.table.metadata.create_all)
+        await self.run_sync(self.test_metadata.create_all)
         meta = self.metadata()
 
         reflected_table = Table(self.table.name, meta)
-        await self.run_inspector_method('reflecttable', reflected_table, None)
+        await self.run_inspector_method('reflect_table', reflected_table, None)
 
         self.assertEqual(self.table.name, reflected_table.name)
 
@@ -233,7 +234,7 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
         # across schemas.
         meta = self.metadata()
         reflected_table = Table('columns', meta, schema='system')
-        await self.run_inspector_method('reflecttable', reflected_table, None)
+        await self.run_inspector_method('reflect_table', reflected_table, None)
 
         self.assertEqual(reflected_table.name, 'columns')
         self.assertEqual(reflected_table.schema, 'system')
@@ -280,7 +281,7 @@ class CachedServerVersionTestCase(BaseTestCase):
             connect_args=dict(server_version='123.45.67.89')
         ))
         # Connection and version get initialized on first query:
-        engine_session.scalar('select 1')
+        engine_session.scalar(text('select 1'))
         ver = engine_session.get_bind().dialect.server_version_info
         self.assertEqual(ver, (123, 45, 67, 89))
 
@@ -296,7 +297,7 @@ class CachedServerVersionTestCase(BaseTestCase):
             system_asynch_uri,
             connect_args=dict(server_version='123.45.67.89')
         ), is_async=True)
-        await engine_session.scalar('select 1')
+        await engine_session.scalar(text('select 1'))
         ver = engine_session.get_bind().dialect.server_version_info
         self.assertEqual(ver, (123, 45, 67, 89))
 

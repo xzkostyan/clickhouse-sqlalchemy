@@ -1,4 +1,4 @@
-from sqlalchemy import Column, func
+from sqlalchemy import Column, func, text
 
 from clickhouse_sqlalchemy import engines, types, Table
 from clickhouse_sqlalchemy.exceptions import DatabaseException
@@ -12,8 +12,8 @@ class NativeInsertTestCase(NativeSessionTestCase):
             Column('x', types.Int32, primary_key=True),
             engines.Memory()
         )
-        table.drop(if_exists=True)
-        table.create()
+        table.drop(bind=self.session.bind, if_exists=True)
+        table.create(bind=self.session.bind)
 
         rv = self.session.execute(table.insert(), [{'x': x} for x in range(5)])
         self.assertEqual(rv.rowcount, 5)
@@ -22,7 +22,7 @@ class NativeInsertTestCase(NativeSessionTestCase):
         )
 
         rv = self.session.execute(
-            'INSERT INTO test SELECT * FROM system.numbers LIMIT 5'
+            text('INSERT INTO test SELECT * FROM system.numbers LIMIT 5')
         )
         self.assertEqual(rv.rowcount, -1)
 
@@ -32,8 +32,8 @@ class NativeInsertTestCase(NativeSessionTestCase):
             Column('x', types.UInt32, primary_key=True),
             engines.Memory()
         )
-        table.drop(if_exists=True)
-        table.create()
+        table.drop(bind=self.session.bind, if_exists=True)
+        table.create(bind=self.session.bind)
 
         with self.assertRaises(DatabaseException) as ex:
             self.session.execute(
