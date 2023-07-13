@@ -49,7 +49,7 @@ class ClickHouseDialect_http(ClickHouseDialect):
             # `ClickHouseExecutionContext` logic.
             sql = sa.sql.elements.TextClause(sql)
         f = connection.scalar if scalar else connection.execute
-        return f(sql, **kwargs)
+        return f(sql, kwargs)
 
 
 dialect = ClickHouseDialect_http

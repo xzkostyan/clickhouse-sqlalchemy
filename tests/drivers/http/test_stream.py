@@ -1,3 +1,4 @@
+from sqlalchemy import text
 
 from tests.testcase import HttpSessionTestCase
 from tests.session import http_stream_session
@@ -25,14 +26,14 @@ class StreamingHttpTestCase(HttpSessionTestCase):
     def test_streaming(self):
         power = self.power
         query = self.make_query(power=power)
-        res = self.session.execute(query)
+        res = self.session.execute(text(query))
         count = sum(1 for _ in res)
         self.assertEqual(count, 10 ** power)
 
     def test_fetchmany(self):
         power = self.power - 1
         query = self.make_query(power=power)
-        res = self.session.execute(query)
+        res = self.session.execute(text(query))
 
         count = 0
         while True:
@@ -50,7 +51,7 @@ class StreamingHttpTestCase(HttpSessionTestCase):
                 "Misconfigured test case:"
                 " `power` should be at least 3.")
         query = self.make_query(power=power)
-        res = self.session.execute(query)
+        res = self.session.execute(text(query))
 
         count = 0
 

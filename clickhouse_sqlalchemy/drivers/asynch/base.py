@@ -30,7 +30,7 @@ class ClickHouseDialect_asynch(ClickHouseDialect_native):
             # `ClickHouseExecutionContext` logic.
             sql = TextClause(sql)
         f = connection.scalar if scalar else connection.execute
-        return f(sql, parameters=kwargs)
+        return f(sql, kwargs)
 
     def do_execute(self, cursor, statement, parameters, context=None):
         cursor.execute(statement, parameters, context)
