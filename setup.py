@@ -95,7 +95,6 @@ setup(
     python_requires='>=3.7, <4',
     install_requires=[
         'sqlalchemy>=1.4.24,<1.5',
-        'greenlet>=2.0.1',
         'requests',
         'clickhouse-driver>=0.1.2',
         'asynch>=0.2.2',
