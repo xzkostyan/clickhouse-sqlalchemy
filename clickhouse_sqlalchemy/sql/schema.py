@@ -1,6 +1,6 @@
 from sqlalchemy import Table as TableBase
 from sqlalchemy.sql.base import (
-    _bind_or_error, DialectKWArgs, Immutable
+    DialectKWArgs, Immutable
 )
 from sqlalchemy.sql.schema import SchemaItem
 from sqlalchemy.sql.selectable import FromClause
@@ -14,7 +14,7 @@ from . import ddl
 class Table(TableBase):
     def drop(self, bind=None, checkfirst=False, if_exists=False):
         if bind is None:
-            bind = _bind_or_error(self)
+            bind = self.bind
         bind._run_ddl_visitor(ddl.SchemaDropper, self,
                               checkfirst=checkfirst, if_exists=if_exists)
 
@@ -117,12 +117,12 @@ class MaterializedView(DialectKWArgs, SchemaItem, Immutable, FromClause):
 
     def create(self, bind=None, checkfirst=False, if_not_exists=False):
         if bind is None:
-            bind = _bind_or_error(self)
+            bind = self.bind
         bind._run_ddl_visitor(ddl.SchemaGenerator, self, checkfirst=checkfirst,
                               if_not_exists=if_not_exists)
 
     def drop(self, bind=None, checkfirst=False, if_exists=False):
         if bind is None:
-            bind = _bind_or_error(self)
+            bind = self.bind
         bind._run_ddl_visitor(ddl.SchemaDropper, self, checkfirst=checkfirst,
                               if_exists=if_exists)

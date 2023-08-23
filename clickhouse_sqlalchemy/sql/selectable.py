@@ -73,4 +73,4 @@ class Select(StandardSelect):
                     full=flags)
 
 
-select = Select._create
+select = Select
