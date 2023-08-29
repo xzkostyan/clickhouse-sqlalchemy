@@ -49,7 +49,7 @@ class Lambda(ColumnElement):
     __visit_name__ = 'lambda'
 
     def __init__(self, func):
-        if not util.callable(func):
+        if not callable(func):
             raise exc.ArgumentError('func must be callable')
 
         self.type = type_api.NULLTYPE
