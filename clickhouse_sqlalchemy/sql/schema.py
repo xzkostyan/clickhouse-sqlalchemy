@@ -12,9 +12,7 @@ from . import ddl
 
 
 class Table(TableBase):
-    def drop(self, bind=None, checkfirst=False, if_exists=False):
-        if bind is None:
-            bind = self.bind
+    def drop(self, bind, checkfirst=False, if_exists=False):
         bind._run_ddl_visitor(ddl.SchemaDropper, self,
                               checkfirst=checkfirst, if_exists=if_exists)
 
@@ -115,14 +113,10 @@ class MaterializedView(DialectKWArgs, SchemaItem, Immutable, FromClause):
 
         return 'MaterializedView(%s)' % ', '.join(args)
 
-    def create(self, bind=None, checkfirst=False, if_not_exists=False):
-        if bind is None:
-            bind = self.bind
+    def create(self, bind, checkfirst=False, if_not_exists=False):
         bind._run_ddl_visitor(ddl.SchemaGenerator, self, checkfirst=checkfirst,
                               if_not_exists=if_not_exists)
 
-    def drop(self, bind=None, checkfirst=False, if_exists=False):
-        if bind is None:
-            bind = self.bind
+    def drop(self, bind, checkfirst=False, if_exists=False):
         bind._run_ddl_visitor(ddl.SchemaDropper, self, checkfirst=checkfirst,
                               if_exists=if_exists)
