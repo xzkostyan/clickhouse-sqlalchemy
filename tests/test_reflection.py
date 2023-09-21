@@ -133,3 +133,36 @@ class ReflectionTestCase(BaseTestCase):
         self.assertIsInstance(coltype, types.Decimal)
         self.assertEqual(coltype.precision, 38)
         self.assertEqual(coltype.scale, 38)
+
+    @require_server_version(20, 1, 2)
+    def test_datetime64(self):
+        coltype = self._type_round_trip(
+            types.DateTime64(2, 'Europe/Moscow')
+        )[0]['type']
+
+        self.assertIsInstance(coltype, types.DateTime64)
+        self.assertEqual(coltype.precision, 2)
+        self.assertEqual(coltype.timezone, "'Europe/Moscow'")
+
+        coltype = self._type_round_trip(
+            types.DateTime64()
+        )[0]['type']
+
+        self.assertIsInstance(coltype, types.DateTime64)
+        self.assertEqual(coltype.precision, 3)
+        self.assertIsNone(coltype.timezone)
+
+    def test_datetime(self):
+        coltype = self._type_round_trip(
+            types.DateTime('Europe/Moscow')
+        )[0]['type']
+
+        self.assertIsInstance(coltype, types.DateTime)
+        self.assertEqual(coltype.timezone, "'Europe/Moscow'")
+
+        coltype = self._type_round_trip(
+            types.DateTime()
+        )[0]['type']
+
+        self.assertIsInstance(coltype, types.DateTime)
+        self.assertIsNone(coltype.timezone)

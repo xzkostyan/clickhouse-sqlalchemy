@@ -13,6 +13,7 @@ from .compilers.ddlcompiler import ClickHouseDDLCompiler
 from .compilers.sqlcompiler import ClickHouseSQLCompiler
 from .compilers.typecompiler import ClickHouseTypeCompiler
 from .reflection import ClickHouseInspector
+from .util import get_inner_spec
 from .. import types
 
 # Column specifications
@@ -263,9 +264,15 @@ class ClickHouseDialect(default.DefaultDialect):
             type_enum = enum.Enum('%s_enum' % name, options)
             return lambda: coltype(type_enum)
 
-        elif spec.lower().startswith('decimal'):
+        elif spec.startswith('Decimal'):
             coltype = self.ischema_names['Decimal']
             return coltype(*self._parse_decimal_params(spec))
+        elif spec.startswith('DateTime64'):
+            coltype = self.ischema_names['DateTime64']
+            return coltype(*self._parse_detetime64_params(spec))
+        elif spec.startswith('DateTime'):
+            coltype = self.ischema_names['DateTime']
+            return coltype(*self._parse_detetime_params(spec))
         else:
             try:
                 return self.ischema_names[spec]
@@ -276,9 +283,27 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @staticmethod
     def _parse_decimal_params(spec):
-        ints = spec.split('(')[-1].split(')')[0]  # get all data in brackets
-        precision, scale = ints.split(',')
+        inner_spec = get_inner_spec(spec)
+        precision, scale = inner_spec.split(',')
         return int(precision.strip()), int(scale.strip())
+
+    @staticmethod
+    def _parse_detetime64_params(spec):
+        inner_spec = get_inner_spec(spec)
+        if not inner_spec:
+            return []
+        params = inner_spec.split(',', 1)
+        params[0] = int(params[0])
+        if len(params) > 1:
+            params[1] = params[1].strip()
+        return params
+
+    @staticmethod
+    def _parse_detetime_params(spec):
+        inner_spec = get_inner_spec(spec)
+        if not inner_spec:
+            return []
+        return [inner_spec]
 
     @staticmethod
     def _parse_options(option_string):
