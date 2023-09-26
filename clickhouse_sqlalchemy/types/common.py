@@ -152,12 +152,13 @@ class DateTime64(DateTime, ClickHouseTypeEngine):
 
 class Enum(types.Enum, ClickHouseTypeEngine):
     __visit_name__ = 'enum'
+    native_enum = True
 
     def __init__(self, *enums, **kw):
         if not enums:
             enums = kw.get('_enums', ())  # passed as keyword
 
-        super(Enum, self).__init__(*enums, **kw)
+        super(Enum, self).__init__(*enums, **kw, convert_unicode=False)
 
 
 class Enum8(Enum):
