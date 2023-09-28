@@ -24,7 +24,8 @@ class Enum8CompilationTestCase(CompilationTestCase):
 
         self.assertEqual(
             self.compile(CreateTable(table)),
-            "CREATE TABLE test (x Enum8('First' = 1, 'Second' = 2)) ENGINE = Memory"
+            "CREATE TABLE test (x Enum8('First' = 1, 'Second' = 2)) "
+            "ENGINE = Memory"
         )
 
 
