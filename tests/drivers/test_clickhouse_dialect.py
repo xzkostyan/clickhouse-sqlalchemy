@@ -2,6 +2,7 @@ from sqlalchemy import Column, create_engine, inspect
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from clickhouse_sqlalchemy import make_session, engines, types, Table
+from clickhouse_sqlalchemy.drivers.base import ClickHouseDialect
 from tests.testcase import BaseTestCase, BaseAsynchTestCase
 from tests.config import (
     system_http_uri, system_native_uri, system_asynch_uri,
@@ -16,7 +17,7 @@ from tests.util import with_native_and_http_sessions, require_server_version, \
 class ClickHouseDialectTestCase(BaseTestCase):
 
     @property
-    def dialect(self):
+    def dialect(self) -> ClickHouseDialect:
         return self.session.bind.dialect
 
     @property
@@ -29,7 +30,7 @@ class ClickHouseDialectTestCase(BaseTestCase):
             'test_exists_table',
             self.metadata(),
             Column('x', types.Int32, primary_key=True),
-            engines.Memory()
+            engines.MergeTree(primary_key=['x'])
         )
         self.table.drop(self.session.bind, if_exists=True)
 
@@ -107,6 +108,13 @@ class ClickHouseDialectTestCase(BaseTestCase):
         # should not raise UnsupportedCompilationError
         col = Column('x', types.Nullable(types.Int32))
         self.assertEqual(str(col.type), 'Nullable(Int32)')
+
+    def test_primary_keys(self):
+        self.table.create(self.session.bind)
+        con = self.dialect.get_pk_constraint(self.session, self.table.name)
+        self.assertIsNotNone(con, "Table should contain primary key constrain")
+        self.assertTrue("constrained_columns" in con)
+        self.assertEqual(("x",), con["constrained_columns"])
 
     @require_server_version(19, 16, 2)
     def test_empty_set_expr(self):
