@@ -117,7 +117,8 @@ class ClickHouseDialectTestCase(BaseTestCase):
         if self.server_version < (18, 16, 0):
             self.assertEqual({}, con)
         else:
-            self.assertIsNotNone(con, "Table should contain primary key constrain")
+            self.assertIsNotNone(con,
+                                 "Table should contain primary key constrain")
             self.assertTrue("constrained_columns" in con)
             self.assertEqual(("x",), con["constrained_columns"])
 
