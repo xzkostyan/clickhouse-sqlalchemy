@@ -360,6 +360,9 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @reflection.cache
     def get_pk_constraint(self, connection, table_name, schema=None, **kw):
+        if not self.supports_engine_reflection:
+            return {}
+
         if schema:
             query = (("SELECT primary_key FROM system.tables "
                      "WHERE database='{}' AND name='{}'")
