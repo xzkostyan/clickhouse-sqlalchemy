@@ -30,6 +30,12 @@ class ClickHouseDialectTestCase(BaseTestCase):
             'test_exists_table',
             self.metadata(),
             Column('x', types.Int32, primary_key=True),
+            engines.Memory()
+        )
+        self.table_with_primary = Table(
+            'test_primary_table',
+            self.metadata(),
+            Column('x', types.Int32, primary_key=True),
             engines.MergeTree(
                 primary_key=['x']
             )
@@ -111,16 +117,14 @@ class ClickHouseDialectTestCase(BaseTestCase):
         col = Column('x', types.Nullable(types.Int32))
         self.assertEqual(str(col.type), 'Nullable(Int32)')
 
+    @require_server_version(18, 16, 0)
     def test_primary_keys(self):
-        self.table.create(self.session.bind)
-        con = self.dialect.get_pk_constraint(self.session, self.table.name)
-        if self.server_version < (18, 16, 0):
-            self.assertEqual({}, con)
-        else:
-            self.assertIsNotNone(con,
-                                 "Table should contain primary key constrain")
-            self.assertTrue("constrained_columns" in con)
-            self.assertEqual(("x",), con["constrained_columns"])
+        self.table_with_primary.create(self.session.bind)
+        con = self.dialect.get_pk_constraint(self.session, self.table_with_primary.name)
+        self.assertIsNotNone(con,
+                             "Table should contain primary key constrain")
+        self.assertTrue("constrained_columns" in con)
+        self.assertEqual(("x",), con["constrained_columns"])
 
     @require_server_version(19, 16, 2)
     def test_empty_set_expr(self):
