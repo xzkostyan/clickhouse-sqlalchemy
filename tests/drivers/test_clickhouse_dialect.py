@@ -120,7 +120,8 @@ class ClickHouseDialectTestCase(BaseTestCase):
     @require_server_version(18, 16, 0)
     def test_primary_keys(self):
         self.table_with_primary.create(self.session.bind)
-        con = self.dialect.get_pk_constraint(self.session, self.table_with_primary.name)
+        con = self.dialect.get_pk_constraint(self.session,
+                                             self.table_with_primary.name)
         self.assertIsNotNone(con,
                              "Table should contain primary key constrain")
         self.assertTrue("constrained_columns" in con)
