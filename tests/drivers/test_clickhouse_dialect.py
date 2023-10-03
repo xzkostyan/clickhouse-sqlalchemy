@@ -30,7 +30,9 @@ class ClickHouseDialectTestCase(BaseTestCase):
             'test_exists_table',
             self.metadata(),
             Column('x', types.Int32, primary_key=True),
-            engines.MergeTree(primary_key=['x'])
+            engines.MergeTree(
+                primary_key=['x']
+            )
         )
         self.table.drop(self.session.bind, if_exists=True)
 
