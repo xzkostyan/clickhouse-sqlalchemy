@@ -66,6 +66,13 @@ class Escaper(object):
             return "[" + ", ".join(
                 [str(self.escape_item(x)) for x in item]
             ) + "]"
+        elif isinstance(item, dict):
+            return "{" + ", ".join(
+                ["{}: {}".format(
+                    self.escape_item(k),
+                    self.escape_item(v)
+                ) for k, v in item.items()]
+            ) + "}"
         elif isinstance(item, enum.Enum):
             return self.escape_string(item.name)
         else:
