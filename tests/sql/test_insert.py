@@ -21,7 +21,7 @@ class InsertTestCase(NativeSessionTestCase):
             rv = self.session.execute(select(table.c.x)).scalar()
             self.assertEqual(rv, 'test')
 
-    @require_server_version(19, 3, 3)
+    @require_server_version(21, 1, 3)
     def test_insert_map(self):
         table = Table(
             't', self.metadata(),
