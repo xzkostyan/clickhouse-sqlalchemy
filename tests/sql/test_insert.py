@@ -25,7 +25,8 @@ class InsertTestCase(NativeSessionTestCase):
     def test_insert_map(self):
         table = Table(
             't', self.metadata(),
-            Column('x', types.Map(types.String, types.Int32), primary_key=True),
+            Column('x', types.Map(types.String, types.Int32),
+                   primary_key=True),
             engines.Memory()
         )
 
