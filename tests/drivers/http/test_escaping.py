@@ -28,7 +28,7 @@ class EscapingTestCase(HttpSessionTestCase):
         self.assertEqual(e.escape([Decimal('10')]), '[10.0]')
         self.assertEqual(e.escape([10.0]), '[10.0]')
         self.assertEqual(e.escape([date(2017, 1, 2)]), "['2017-01-02']")
-
+        self.assertEqual(e.escape(dict(x=10, y=20)), {'x': 10, 'y': 20})
         with self.assertRaises(Exception) as ex:
             e.escape([object()])
 
