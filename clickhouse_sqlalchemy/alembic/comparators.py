@@ -107,7 +107,7 @@ def compare_mat_view(autogen_context, upgrade_ops, schemas):
             )
         else:
             table = Table(name, existing_metadata)
-            _reflect_table(inspector, table, None)
+            _reflect_table(inspector, table)
 
             drop = operations.DropMatViewOp(
                 name, params.as_select, params.engine_full, *table.columns
@@ -124,7 +124,7 @@ def compare_mat_view(autogen_context, upgrade_ops, schemas):
             inner_name = '.inner.' + name
 
         conn_table = Table(inner_name, existing_metadata)
-        _reflect_table(inspector, conn_table, None)
+        _reflect_table(inspector, conn_table)
 
         if not autogen_context.run_object_filters(
             view, name, 'mat_view', False, conn_table
