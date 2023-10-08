@@ -1,9 +1,10 @@
 import logging
 
+from alembic import __version__ as alembic_version
 from alembic.autogenerate import comparators
 from alembic.autogenerate.compare import _compare_columns
 from alembic.operations.ops import ModifyTableOps
-from alembic.util.sqla_compat import _reflect_table
+from alembic.util.sqla_compat import _reflect_table as _alembic_reflect_table
 from sqlalchemy import schema as sa_schema
 from sqlalchemy import text
 
@@ -11,6 +12,10 @@ from clickhouse_sqlalchemy.sql.schema import Table
 from . import operations
 
 logger = logging.getLogger(__name__)
+
+alembic_version = tuple(
+    (int(x) if x.isdigit() else x) for x in alembic_version.split('.')
+)
 
 
 def _extract_to_table_name(create_table_query):
@@ -27,6 +32,13 @@ def _extract_to_table_name(create_table_query):
 # comparators as "clickhouse" comparators too.
 for default_comparator in comparators._registry[('schema', 'default')]:
     comparators.dispatch_for('schema', 'clickhouse')(default_comparator)
+
+
+def _reflect_table(inspector, table):
+    if alembic_version >= (1, 11, 0):
+        return _alembic_reflect_table(inspector, table)
+    else:
+        return _alembic_reflect_table(inspector, table)
 
 
 @comparators.dispatch_for('schema', 'clickhouse')
