@@ -129,6 +129,14 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
                 )
             )
         if engine.primary_key:
+            if not engine.order_by:
+                text += ' ORDER BY {0}\n'.format(
+                    self._compile_param(
+                        engine.primary_key.get_expressions_or_columns(),
+                        opt_list=True
+                    )
+                )
+
             text += ' PRIMARY KEY {0}\n'.format(
                 self._compile_param(
                     engine.primary_key.get_expressions_or_columns(),

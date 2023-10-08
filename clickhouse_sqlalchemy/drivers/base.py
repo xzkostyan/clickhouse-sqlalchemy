@@ -360,8 +360,26 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @reflection.cache
     def get_pk_constraint(self, connection, table_name, schema=None, **kw):
-        # No support for primary keys.
-        return []
+        if not self.supports_engine_reflection:
+            return {}
+
+        if schema:
+            query = (("SELECT primary_key FROM system.tables "
+                     "WHERE database='{}' AND name='{}'")
+                     .format(schema, table_name))
+        else:
+            query = (
+                "SELECT primary_key FROM system.tables WHERE name='{}'"
+            ).format(table_name)
+
+        rows = self._execute(connection, query)
+        for r in rows:
+            primary_keys = r.primary_key
+            if primary_keys:
+                return {
+                    "constrained_columns": tuple(primary_keys.split(", ")),
+                }
+        return {}
 
     @reflection.cache
     def get_indexes(self, connection, table_name, schema=None, **kw):
