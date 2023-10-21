@@ -1,4 +1,4 @@
-from sqlalchemy import util, exc
+from sqlalchemy import exc
 from sqlalchemy.sql import type_api, roles
 from sqlalchemy.sql.elements import (
     BindParameter,
