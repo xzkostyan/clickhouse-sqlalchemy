@@ -3,15 +3,15 @@ from sqlalchemy.sql import compiler, ClauseElement, expression
 from sqlalchemy.sql.ddl import CreateColumn
 from sqlalchemy.sql.elements import TextClause
 from sqlalchemy.util import to_list
-
+from sqlalchemy.types import String
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def _get_default_string(self, default, name):
         sa_util.assert_arg_type(
-            default, (sa_util.string_types[0], ClauseElement, TextClause), name
+            default, (String, ClauseElement, TextClause), name
         )
 
-        if isinstance(default, sa_util.string_types):
+        if isinstance(default, String):
             return self.sql_compiler.render_literal_value(
                 default, sqltypes.STRINGTYPE
             )
