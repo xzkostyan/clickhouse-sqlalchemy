@@ -48,7 +48,7 @@ class Query(BaseQuery):
 
         self._with_cube = True
         return self
-    
+
     @_generative
     def with_rollup(self):
         if not self._group_by_clauses:
@@ -64,7 +64,7 @@ class Query(BaseQuery):
 
         self._with_rollup = True
         return self
-    
+
     @_generative
     def with_totals(self):
         if not self._group_by_clauses:
@@ -85,7 +85,7 @@ class Query(BaseQuery):
         left = kwargs.get("left", False)
         self._add_array_join(columns, left=left)
         return self
-    
+
     @_generative
     def left_array_join(self, *columns):
         self._add_array_join(columns, left=True)
