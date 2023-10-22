@@ -153,7 +153,6 @@ class Cursor(object):
                 **execute_kwargs
             )
 
-
         except DriverError as orig:
             raise DatabaseException(orig)
 

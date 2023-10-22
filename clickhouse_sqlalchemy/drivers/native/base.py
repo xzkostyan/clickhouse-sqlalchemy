@@ -7,6 +7,7 @@ from . import connector
 from ..base import (
     ClickHouseDialect, ClickHouseExecutionContextBase, ClickHouseSQLCompiler,
 )
+from sqlalchemy.engine.interfaces import ExecuteStyle
 
 # Export connector version
 VERSION = (0, 0, 2, None)
@@ -16,7 +17,7 @@ class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
     def pre_exec(self):
         # Always do executemany on INSERT with VALUES clause.
         if self.isinsert and self.compiled.statement.select is None:
-            self.executemany = True
+            self.execute_style = ExecuteStyle.EXECUTEMANY
 
 
 class ClickHouseNativeSQLCompiler(ClickHouseSQLCompiler):
