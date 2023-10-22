@@ -5,6 +5,7 @@ from sqlalchemy.sql.elements import TextClause
 from sqlalchemy.util import to_list
 from sqlalchemy.types import String
 
+
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def _get_default_string(self, default, name):
         sa_util.assert_arg_type(
