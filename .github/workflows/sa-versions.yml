@@ -1,17 +1,17 @@
 on: [push, pull_request]
-name: "SQLAlchemy >=2.0.20 versions"
+name: "SQLAlchemy >=2.0.18 versions"
 jobs:
   tests:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version:
-          - "3.8"
+          - "3.11"
         clickhouse-version:
-          - 19.16.2.2
-        sa-version: [20, 21, 22]
+          - 23.8.4.69
+        sa-version: [18, 19, 20, 21, 22]
 
-    name: ${{ matrix.python-version }} SA=1.4.${{ matrix.sa-version }}
+    name: ${{ matrix.python-version }} SA=2.0.${{ matrix.sa-version }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -32,7 +32,7 @@ jobs:
           # Limit each test time execution.
           pip install pytest-timeout
       - name: Install SQLAlchemy
-        run: pip install sqlalchemy==1.4.${{ matrix.sa-version }}
+        run: pip install sqlalchemy==2.0.${{ matrix.sa-version }}
       - name: Setup /etc/hosts
         run: |
           # Overriding setup.cfg. Set host=clickhouse-server
