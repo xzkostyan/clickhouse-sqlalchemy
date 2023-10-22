@@ -21,7 +21,7 @@ class ClickHouseDialect_http(ClickHouseDialect):
     supports_statement_cache = True
 
     @classmethod
-    def dbapi(cls):
+    def import_dbapi(cls):
         return connector
 
     def create_connect_args(self, url):

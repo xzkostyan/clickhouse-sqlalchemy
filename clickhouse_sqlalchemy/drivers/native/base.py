@@ -46,12 +46,11 @@ class ClickHouseDialect_native(ClickHouseDialect):
     supports_statement_cache = True
 
     @classmethod
-    def dbapi(cls):
+    def import_dbapi(cls):
         return connector
 
     def create_connect_args(self, url):
         url = url.set(drivername='clickhouse')
-
         if url.username:
             url = url.set(username=quote(url.username))
 
@@ -62,7 +61,7 @@ class ClickHouseDialect_native(ClickHouseDialect):
             url.query.get('engine_reflection', 'true')
         )
 
-        return (str(url), ), {}
+        return (url.render_as_string(hide_password=False), ), {}
 
     def _execute(self, connection, sql, scalar=False, **kwargs):
         if isinstance(sql, str):

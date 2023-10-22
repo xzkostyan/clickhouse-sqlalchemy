@@ -148,11 +148,11 @@ class Cursor(object):
 
         try:
             execute, execute_kwargs = self._prepare(context)
-
             response = execute(
                 operation, params=parameters, with_column_types=True,
                 **execute_kwargs
             )
+
 
         except DriverError as orig:
             raise DatabaseException(orig)

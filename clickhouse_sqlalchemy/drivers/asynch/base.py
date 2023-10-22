@@ -17,7 +17,7 @@ class ClickHouseDialect_asynch(ClickHouseDialect_native):
     supports_statement_cache = True
 
     @classmethod
-    def dbapi(cls):
+    def import_dbapi(cls):
         return AsyncAdapt_asynch_dbapi(asynch)
 
     @classmethod
