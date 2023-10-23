@@ -31,8 +31,8 @@ class Table(TableBase):
 
     def select(self, whereclause=None, **params):
         if whereclause:
-            return Select._create(self, whereclause, **params)
-        return Select._create(self, **params)
+            return Select(self, whereclause, **params)
+        return Select(self, **params)
 
     @classmethod
     def _make_from_standard(cls, std_table, _extend_on=None):

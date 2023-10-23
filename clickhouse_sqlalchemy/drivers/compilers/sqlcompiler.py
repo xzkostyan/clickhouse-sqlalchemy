@@ -437,7 +437,9 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
 
         text += table_text
         text += " UPDATE "
-        text += ", ".join(expr + "=" + value for c, expr, value, _ in crud_params.single_params)
+        text += ", ".join(
+            expr + "=" + value for c,
+            expr, value, _ in crud_params.single_params)
 
         if update_stmt._where_criteria:
             t = self._generate_delimited_and_list(

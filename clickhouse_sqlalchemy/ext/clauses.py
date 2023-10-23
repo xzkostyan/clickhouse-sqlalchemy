@@ -34,7 +34,7 @@ class LimitByClause:
 
     def __init__(self, by_clauses, limit, offset):
         self.by_clauses = ClauseList(
-            *by_clauses, _literal_as_text=roles.ByOfRole
+            *by_clauses, _literal_as_text_role=roles.ByOfRole
         )
         self.offset = _offset_or_limit_clause(offset)
         self.limit = _offset_or_limit_clause(limit)

@@ -106,15 +106,14 @@ class Query(BaseQuery):
         self._limit_by = LimitByClause(by_clauses, limit, offset)
         return self
 
-    def join(self, *props, **kwargs):
+    def join(self, target, onclause=None, **kwargs):
         spec = {
             'type': kwargs.pop('type', None),
             'strictness': kwargs.pop('strictness', None),
             'distribution': kwargs.pop('distribution', None)
         }
-        rv = super(Query, self).join(*props, **kwargs)
-
-        x = rv._legacy_setup_joins[-1]
+        rv = super().join(target, onclause, **kwargs)
+        x = rv._setup_joins[-1]
         x_spec = dict(spec)
         # use 'full' key to pass extra flags
         x_spec['full'] = x[-1]['full']

@@ -8,6 +8,8 @@ from sqlalchemy.types import String
 
 class ClickHouseDDLCompiler(compiler.DDLCompiler):
     def _get_default_string(self, default, name):
+        if default == "":
+            return "''"
         sa_util.assert_arg_type(
             default, (String, ClauseElement, TextClause), name
         )

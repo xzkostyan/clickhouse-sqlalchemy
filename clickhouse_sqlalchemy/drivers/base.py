@@ -156,7 +156,7 @@ class ClickHouseDialect(default.DefaultDialect):
         rows = self._execute(connection, query, database=database)
         return [row.name for row in rows]
 
-    def has_table(self, connection, table_name, schema=None):
+    def has_table(self, connection, table_name, schema=None, **kw):
         quote = self._quote_table_name
         if schema:
             qualified_name = quote(schema) + '.' + quote(table_name)

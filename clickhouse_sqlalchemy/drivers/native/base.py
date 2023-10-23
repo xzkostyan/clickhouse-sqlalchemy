@@ -16,7 +16,8 @@ VERSION = (0, 0, 2, None)
 class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
     def pre_exec(self):
         # Always do executemany on INSERT with VALUES clause.
-        if self.isinsert and self.compiled.statement.select is None:
+        if (self.isinsert and self.compiled.statement.select is None and
+                self.parameters != [{}]):
             self.execute_style = ExecuteStyle.EXECUTEMANY
 
 
