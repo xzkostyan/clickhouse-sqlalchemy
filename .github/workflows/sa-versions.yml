@@ -46,4 +46,4 @@ jobs:
           docker-compose -f tests/docker-compose.yml up -d
       - name: Run tests
         run: pytest --timeout=10 -v
-        timeout-minutes: 20
+        timeout-minutes: 2
