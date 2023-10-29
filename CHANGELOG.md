@@ -1,6 +1,21 @@
 # Changelog
 
 ## [Unreleased]
+## [0.2.5] - 2023-10-29
+### Added
+- Table primary key reflection. Pull request [#265](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/265) by [akurdyukov](https://github.com/akurdyukov). Solves issue [#264](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/264).
+- Python 3.11, 3.12 in Travis CI build matrix.
+
+### Fixed
+- Missing Array attributes. Pull request [#255](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/255) by [jonburdo](https://github.com/jonburdo). Solves issue [#254](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/254).
+- DateTime and DateTime64 reflection. Solves issue [#148](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/148).
+- Enum8 and Enum16 Unicode conversion. Pull request [#263](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/263) by [akurdyukov](https://github.com/akurdyukov). Solves issue [#192](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/192).
+- [HTTP] Map type escaping. Pull request [#266](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/266) by [subkanthi](https://github.com/subkanthi). Solves issue [#148](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/148).
+- Guess number of `_reflect_table` alembic argsPull request [#249](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/249) by [9bany](https://github.com/9bany). Solves issue [#250](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/250).
+
+### Removed
+- greenlet dependency. Pull request [#257](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/257) by [mrcljx](https://github.com/mrcljx).
+
 ## [0.2.4] - 2023-05-02
 ### Added
 - [Native] DateTime('timezone'). Solves issue [#230](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/230).
@@ -310,7 +325,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.4...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.5...HEAD
+[0.2.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.4...0.2.5
 [0.2.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.3...0.2.4
 [0.2.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.2...0.2.3
 [0.2.2]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.1...0.2.2
