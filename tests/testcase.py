@@ -2,7 +2,7 @@ import re
 from contextlib import contextmanager, asynccontextmanager
 from unittest import TestCase
 
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, text
 from sqlalchemy.orm import Query
 
 from tests.config import database, host, port, http_port, user, password
@@ -26,10 +26,8 @@ class BaseAbstractTestCase(object):
     session = native_session
 
     @classmethod
-    def metadata(cls, session=None):
-        if session is None:
-            session = cls.session
-        return MetaData(bind=session.bind)
+    def metadata(cls):
+        return MetaData()
 
     def _compile(self, clause, bind=None, literal_binds=False,
                  render_postcompile=False):
@@ -73,16 +71,18 @@ class BaseTestCase(BaseAbstractTestCase, TestCase):
     def setUpClass(cls):
         # System database is always present.
         system_native_session.execute(
-            'DROP DATABASE IF EXISTS {}'.format(cls.database)
+            text('DROP DATABASE IF EXISTS {}'.format(cls.database))
         )
         system_native_session.execute(
-            'CREATE DATABASE {}'.format(cls.database)
+            text('CREATE DATABASE {}'.format(cls.database))
         )
 
-        version = system_native_session.execute('SELECT version()').fetchall()
+        version = system_native_session.execute(
+            text('SELECT version()')
+        ).fetchall()
         cls.server_version = tuple(int(x) for x in version[0][0].split('.'))
 
-        super(BaseTestCase, cls).setUpClass()
+        super().setUpClass()
 
     def setUp(self):
         super(BaseTestCase, self).setUp()
@@ -101,14 +101,14 @@ class BaseAsynchTestCase(BaseTestCase):
     async def setUpClass(cls):
         # System database is always present.
         await system_asynch_session.execute(
-            'DROP DATABASE IF EXISTS {}'.format(cls.database)
+            text('DROP DATABASE IF EXISTS {}'.format(cls.database))
         )
         await system_asynch_session.execute(
-            'CREATE DATABASE {}'.format(cls.database)
+            text('CREATE DATABASE {}'.format(cls.database))
         )
 
         version = (
-            await system_asynch_session.execute('SELECT version()')
+            await system_asynch_session.execute(text('SELECT version()'))
         ).fetchall()
         cls.server_version = tuple(int(x) for x in version[0][0].split('.'))
 
@@ -116,13 +116,14 @@ class BaseAsynchTestCase(BaseTestCase):
 
     @asynccontextmanager
     async def create_table(self, table):
-        await self.run_sync(table.metadata.drop_all)
-        await self.run_sync(table.metadata.create_all)
+        metadata = self.metadata()
+        await self.run_sync(metadata.drop_all)
+        await self.run_sync(metadata.create_all)
 
         try:
             yield
         finally:
-            await self.run_sync(table.metadata.drop_all)
+            await self.run_sync(metadata.drop_all)
 
     async def get_connection(self):
         return await self.session.connection()

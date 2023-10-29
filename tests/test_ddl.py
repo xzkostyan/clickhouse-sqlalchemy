@@ -319,13 +319,13 @@ class DDLTestCase(BaseTestCase):
 
         with mocked_engine() as engine:
             table = Table(
-                't1', self.metadata(session=engine.session),
+                't1', self.metadata(),
                 Column('x', types.Int32, primary_key=True),
                 engines.Memory(),
                 clickhouse_cluster='test_cluster'
             )
 
-            table.create()
+            table.create(bind=engine.session.bind)
             self.assertEqual(engine.history, [create_sql])
 
         self.assertEqual(
@@ -351,10 +351,10 @@ class DDLTestCase(BaseTestCase):
     def test_table_drop(self):
         with mocked_engine() as engine:
             table = Table(
-                't1', self.metadata(session=engine.session),
+                't1', self.metadata(),
                 Column('x', types.Int32, primary_key=True)
             )
-            table.drop(if_exists=True)
+            table.drop(bind=engine.session.bind, if_exists=True)
             self.assertEqual(engine.history, ['DROP TABLE IF EXISTS t1'])
 
     def test_drop_table_event(self):
@@ -370,10 +370,10 @@ class DDLTestCase(BaseTestCase):
 
         with mocked_engine() as engine:
             table = Table(
-                't1', self.metadata(session=engine.session),
+                't1', self.metadata(),
                 Column('x', types.Int32, primary_key=True)
             )
-            table.drop(if_exists=True)
+            table.drop(bind=engine.session.bind, if_exists=True)
 
         assert events_triggered == [
             ("before_drop", "t1"),
@@ -385,11 +385,11 @@ class DDLTestCase(BaseTestCase):
 
         with mocked_engine() as engine:
             table = Table(
-                't1', self.metadata(session=engine.session),
+                't1', self.metadata(),
                 Column('x', types.Int32, primary_key=True),
                 clickhouse_cluster='test_cluster'
             )
-            table.drop(if_exists=True)
+            table.drop(bind=engine.session.bind, if_exists=True)
             self.assertEqual(engine.history, [drop_sql])
 
         self.assertEqual(
@@ -398,7 +398,7 @@ class DDLTestCase(BaseTestCase):
         )
 
     def test_create_all_drop_all(self):
-        metadata = self.metadata(session=self.session)
+        metadata = self.metadata()
 
         Table(
             't1', metadata,
@@ -406,8 +406,8 @@ class DDLTestCase(BaseTestCase):
             engines.Memory(),
         )
 
-        metadata.create_all()
-        metadata.drop_all()
+        metadata.create_all(bind=self.session.bind)
+        metadata.drop_all(bind=self.session.bind)
 
     def test_create_drop_mat_view(self):
         Base = get_declarative_base(self.metadata())
@@ -439,27 +439,27 @@ class DDLTestCase(BaseTestCase):
             )
 
         # Define SELECT for Materialized View
-        MatView = MaterializedView(GroupedStatistics, select([
+        MatView = MaterializedView(GroupedStatistics, select(
             Statistics.date.label('date'),
-            func.sum(Statistics.metric1 * Statistics.sign).label('metric1')
-        ]).where(
+            func.sum(Statistics.metric1 * Statistics.sign).label('metric1'),
+        ).where(
             Statistics.grouping > 42
         ).group_by(
             Statistics.date
         ))
 
-        Statistics.__table__.create()
-        MatView.create()
+        Statistics.__table__.create(bind=self.session.bind)
+        MatView.create(bind=self.session.bind)
 
         inspector = inspect(self.session.connection())
 
         self.assertTrue(inspector.has_table(MatView.name))
-        MatView.drop()
+        MatView.drop(bind=self.session.bind)
         self.assertFalse(inspector.has_table(MatView.name))
 
     def test_create_table_with_comment(self):
         table = Table(
-            't1', self.metadata(session=self.session),
+            't1', self.metadata(),
             Column('x', types.Int32, primary_key=True),
             engines.Memory(),
             comment='table_comment'
@@ -472,7 +472,7 @@ class DDLTestCase(BaseTestCase):
 
     def test_create_table_with_column_comment(self):
         table = Table(
-            't1', self.metadata(session=self.session),
+            't1', self.metadata(),
             Column('x', types.Int32, primary_key=True, comment='col_comment'),
             engines.Memory()
         )
@@ -484,7 +484,7 @@ class DDLTestCase(BaseTestCase):
 
     def test_do_not_render_fk(self):
         table = Table(
-            't1', self.metadata(session=self.session),
+            't1', self.metadata(),
             Column('x', types.Int32, ForeignKey('t2.x'), primary_key=True),
             engines.Memory()
         )

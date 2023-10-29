@@ -9,9 +9,9 @@ class SanityTestCase(NativeSessionTestCase):
     def test_sanity(self):
         with mocked_engine(self.session) as engine:
             table = Table(
-                't1', self.metadata(session=engine.session),
+                't1', self.metadata(),
                 Column('x', types.Int32, primary_key=True),
                 engines.Memory()
             )
-            table.drop(if_exists=True)
+            table.drop(bind=engine.session.bind, if_exists=True)
             self.assertEqual(engine.history, ['DROP TABLE IF EXISTS t1'])

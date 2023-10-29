@@ -46,8 +46,8 @@ class UpdateTestCase(NativeSessionTestCase):
             Column('x', types.Int32, primary_key=True),
             engines.MergeTree(order_by=(func.tuple(), ))
         )
-        t1.drop(if_exists=True)
-        t1.create()
+        t1.drop(bind=self.session.bind, if_exists=True)
+        t1.create(bind=self.session.bind)
 
         with self.assertRaises(exc.CompileError) as ex:
             dialect = self.session.bind.dialect

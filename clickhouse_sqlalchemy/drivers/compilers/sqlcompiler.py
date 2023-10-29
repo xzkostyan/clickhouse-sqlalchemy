@@ -432,13 +432,14 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             update_stmt, update_stmt.table, render_extra_froms, **kw
         )
         crud_params = crud._get_crud_params(
-            self, update_stmt, compile_state, **kw
+            self, update_stmt, compile_state, True, **kw
         )
 
         text += table_text
         text += " UPDATE "
-
-        text += ", ".join(expr + "=" + value for c, expr, value in crud_params)
+        text += ", ".join(
+            expr + "=" + value for c,
+            expr, value, _ in crud_params.single_params)
 
         if update_stmt._where_criteria:
             t = self._generate_delimited_and_list(

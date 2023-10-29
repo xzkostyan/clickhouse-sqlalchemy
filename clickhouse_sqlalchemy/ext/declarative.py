@@ -1,7 +1,8 @@
 import re
 
 from sqlalchemy import Column
-from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
+from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy.orm import declarative_base
 
 from ..sql.schema import Table
 

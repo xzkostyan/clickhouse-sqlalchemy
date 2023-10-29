@@ -21,7 +21,7 @@ class ClickHouseDialect_http(ClickHouseDialect):
     supports_statement_cache = True
 
     @classmethod
-    def dbapi(cls):
+    def import_dbapi(cls):
         return connector
 
     def create_connect_args(self, url):
@@ -49,7 +49,7 @@ class ClickHouseDialect_http(ClickHouseDialect):
             # `ClickHouseExecutionContext` logic.
             sql = sa.sql.elements.TextClause(sql)
         f = connection.scalar if scalar else connection.execute
-        return f(sql, **kwargs)
+        return f(sql, kwargs)
 
 
 dialect = ClickHouseDialect_http

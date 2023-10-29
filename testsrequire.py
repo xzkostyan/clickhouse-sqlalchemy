@@ -1,7 +1,7 @@
 
 tests_require = [
     'pytest',
-    'sqlalchemy>=1.4.24,<1.5',
+    'sqlalchemy>=2.0.0,<2.1.0',
     'greenlet>=2.0.1',
     'alembic',
     'requests',

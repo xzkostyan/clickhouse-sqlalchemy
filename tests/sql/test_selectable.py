@@ -23,38 +23,38 @@ class SelectTestCase(BaseTestCase):
     def test_group_by_with_modifiers(self):
         table = self._make_table()
 
-        query = select([table.c.x]).group_by(table.c.x)
+        query = select(table.c.x).group_by(table.c.x)
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x FROM t1 GROUP BY t1.x'
         )
 
-        query = select([table.c.x]).group_by(table.c.x).with_cube()
+        query = select(table.c.x).group_by(table.c.x).with_cube()
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x FROM t1 GROUP BY t1.x WITH CUBE'
         )
 
-        query = select([table.c.x]).group_by(table.c.x).with_rollup()
+        query = select(table.c.x).group_by(table.c.x).with_rollup()
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x FROM t1 GROUP BY t1.x WITH ROLLUP'
         )
 
-        query = select([table.c.x]).group_by(table.c.x).with_totals()
+        query = select(table.c.x).group_by(table.c.x).with_totals()
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x FROM t1 GROUP BY t1.x WITH TOTALS'
         )
 
-        query = select([table.c.x]).group_by(table.c.x).with_cube()\
+        query = select(table.c.x).group_by(table.c.x).with_cube()\
             .with_totals()
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x FROM t1 GROUP BY t1.x WITH CUBE WITH TOTALS'
         )
 
-        query = select([table.c.x]).group_by(table.c.x).with_rollup()\
+        query = select(table.c.x).group_by(table.c.x).with_rollup()\
             .with_totals()
         self.assertEqual(
             self.compile(query),
@@ -64,7 +64,7 @@ class SelectTestCase(BaseTestCase):
     def test_sample(self):
         table = self._make_table()
 
-        query = select([table.c.x]).sample(0.1).group_by(table.c.x)
+        query = select(table.c.x).sample(0.1).group_by(table.c.x)
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x FROM t1 SAMPLE %(param_1)s GROUP BY t1.x'
@@ -78,7 +78,7 @@ class SelectTestCase(BaseTestCase):
     def test_final(self):
         table = self._make_table()
 
-        query = select([table.c.x]).final().group_by(table.c.x)
+        query = select(table.c.x).final().group_by(table.c.x)
         self.assertEqual(
             self.compile(query),
             'SELECT t1.x FROM t1 FINAL GROUP BY t1.x'
@@ -87,7 +87,7 @@ class SelectTestCase(BaseTestCase):
     def test_limit_by(self):
         table = self._make_table()
 
-        query = select([table.c.x]).order_by(table.c.x)\
+        query = select(table.c.x).order_by(table.c.x)\
             .limit_by([table.c.x], limit=1)
         self.assertEqual(
             self.compile(query),
@@ -101,7 +101,7 @@ class SelectTestCase(BaseTestCase):
     def test_limit_by_with_offset(self):
         table = self._make_table()
 
-        query = select([table.c.x]).order_by(table.c.x)\
+        query = select(table.c.x).order_by(table.c.x)\
             .limit_by([table.c.x], offset=1, limit=2)
         self.assertEqual(
             self.compile(query),
@@ -124,7 +124,7 @@ class SelectTestCase(BaseTestCase):
         )
 
         query = select(
-            [table.c.parent.child1]
+            table.c.parent.child1
         ).where(
             and_(
                 table.c.parent.child1 == [1, 2],
@@ -148,10 +148,8 @@ class SelectTestCase(BaseTestCase):
             ))
         )
         query = select(
-            [
-                table.c.parent.child1,
-                table.c.parent.child2,
-            ]
+            table.c.parent.child1,
+            table.c.parent.child2,
         ).array_join(
             table.c.parent
         )
@@ -163,10 +161,8 @@ class SelectTestCase(BaseTestCase):
         )
 
         query = select(
-            [
-                table.c.parent.child1,
-                table.c.parent.child2,
-            ]
+            table.c.parent.child1,
+            table.c.parent.child2,
         ).array_join(
             table.c.parent.child1,
         )
@@ -178,10 +174,8 @@ class SelectTestCase(BaseTestCase):
         )
 
         query = select(
-            [
-                table.c.parent.child1,
-                table.c.parent.child2,
-            ]
+            table.c.parent.child1,
+            table.c.parent.child2,
         ).array_join(
             table.c.parent.child1,
             table.c.parent.child2,
@@ -196,10 +190,8 @@ class SelectTestCase(BaseTestCase):
         parent_labeled = table.c.parent.label('p')
 
         query = select(
-            [
-                table.c.parent.child1,
-                table.c.parent.child2,
-            ]
+            table.c.parent.child1,
+            table.c.parent.child2,
         ).array_join(
             parent_labeled
         )
@@ -211,11 +203,9 @@ class SelectTestCase(BaseTestCase):
         )
 
         query = select(
-            [
-                parent_labeled.child1,
-                parent_labeled.child2,
-                table.c.parent.child1,
-            ]
+            parent_labeled.child1,
+            parent_labeled.child2,
+            table.c.parent.child1,
         ).array_join(
             parent_labeled
         )
@@ -236,10 +226,8 @@ class SelectTestCase(BaseTestCase):
             ))
         )
         query = select(
-            [
-                table.c.parent.child1,
-                table.c.parent.child2,
-            ]
+            table.c.parent.child1,
+            table.c.parent.child2,
         ).array_join(
             table.c.parent, left=True
         )
@@ -260,10 +248,8 @@ class SelectTestCase(BaseTestCase):
             ))
         )
         query = select(
-            [
-                table.c.parent.child1,
-                table.c.parent.child2,
-            ]
+            table.c.parent.child1,
+            table.c.parent.child2,
         ).left_array_join(
             table.c.parent
         )
@@ -275,10 +261,8 @@ class SelectTestCase(BaseTestCase):
         )
 
         query = select(
-            [
-                table.c.parent.child1,
-                table.c.parent.child2,
-            ]
+            table.c.parent.child1,
+            table.c.parent.child2,
         ).left_array_join(
             table.c.parent.child1,
         )
@@ -290,10 +274,8 @@ class SelectTestCase(BaseTestCase):
         )
 
         query = select(
-            [
-                table.c.parent.child1,
-                table.c.parent.child2,
-            ]
+            table.c.parent.child1,
+            table.c.parent.child2,
         ).left_array_join(
             table.c.parent.child1,
             table.c.parent.child2,
@@ -308,10 +290,8 @@ class SelectTestCase(BaseTestCase):
         parent_labeled = table.c.parent.label('p')
 
         query = select(
-            [
-                table.c.parent.child1,
-                table.c.parent.child2,
-            ]
+            table.c.parent.child1,
+            table.c.parent.child2,
         ).left_array_join(
             parent_labeled
         )
@@ -323,11 +303,9 @@ class SelectTestCase(BaseTestCase):
         )
 
         query = select(
-            [
-                parent_labeled.child1,
-                parent_labeled.child2,
-                table.c.parent.child1,
-            ]
+            parent_labeled.child1,
+            parent_labeled.child2,
+            table.c.parent.child1,
         ).left_array_join(
             parent_labeled
         )
@@ -360,7 +338,7 @@ class SelectTestCase(BaseTestCase):
                 strictness=strictness,
                 distribution=distribution
             )
-            return select([table_1.c.x]).select_from(join)
+            return select(table_1.c.x).select_from(join)
 
         self.assertEqual(
             self.compile(make_statement(
@@ -559,7 +537,7 @@ class SelectTestCase(BaseTestCase):
         join = table_1.join(table_2, table_1.c.x == table_2.c.x, type='INNER')
 
         self.assertEqual(
-            self.compile(select([table_1.c.x]).select_from(join)),
+            self.compile(select(table_1.c.x).select_from(join)),
             'SELECT table_1.x FROM table_1 '
             'INNER JOIN table_2 ON table_1.x = table_2.x'
         )

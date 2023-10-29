@@ -8,7 +8,7 @@ from tests.testcase import BaseTestCase
 
 class IsDistinctFromTestCase(BaseTestCase):
     def _select_bool(self, expr):
-        query = select([expr])
+        query = select(expr)
         (result,), = self.session.execute(query).fetchall()
         return bool(result)
 

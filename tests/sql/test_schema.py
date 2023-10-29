@@ -36,7 +36,7 @@ class SchemaTestCase(BaseTestCase):
         # Sub-test: ensure the `metadata.reflect` makes a CHTable
         metadata.clear()  # reflect from clean state
         self.assertFalse(metadata.tables)
-        metadata.reflect(only=[table.name])
+        metadata.reflect(bind=session.bind, only=[table.name])
         table2 = metadata.tables.get(table.name)
         self.assertIsNotNone(table2)
         self.assertListEqual([c.name for c in table2.columns], ['x'])
@@ -44,7 +44,7 @@ class SchemaTestCase(BaseTestCase):
 
         # Sub-test: ensure `CHTable(..., autoload=True)` works too
         metadata.clear()
-        table3 = CHTable('test_reflect', metadata, autoload=True)
+        table3 = CHTable('test_reflect', metadata, autoload_with=session.bind)
         self.assertListEqual([c.name for c in table3.columns], ['x'])
 
         # Sub-test: check that they all reflected the same.
@@ -75,14 +75,18 @@ class SchemaTestCase(BaseTestCase):
             engines.Log()
         )
 
-        self.session.execute('DROP TABLE IF EXISTS test_reflect')
+        self.session.execute(text('DROP TABLE IF EXISTS test_reflect'))
         table.create(self.session.bind)
 
         # Sub-test: ensure the `metadata.reflect` makes a CHTable
         metadata.clear()  # reflect from clean state
         self.assertFalse(metadata.tables)
 
-        table = Table('test_reflect', metadata, autoload=True)
+        table = Table(
+            'test_reflect',
+            metadata,
+            autoload_with=self.session.bind
+        )
         self.assertListEqual([c.name for c in table.columns], ['x'])
 
     def test_reflect_subquery(self):
@@ -90,9 +94,8 @@ class SchemaTestCase(BaseTestCase):
             '(select arrayJoin([1, 2]) as a, arrayJoin([3, 4]) as b)')
         table_node = TextClause(table_node_sql)
 
-        metadata = self.metadata()
         # Cannot use `Table` as it only works with a simple string.
-        columns = inspect(metadata.bind).get_columns(table_node)
+        columns = inspect(self.session.bind).get_columns(table_node)
         self.assertListEqual(
             sorted([col['name'] for col in columns]),
             ['a', 'b'])
@@ -110,7 +113,7 @@ class SchemaTestCase(BaseTestCase):
             engines.Log()
         )
 
-        self.session.execute('DROP TABLE IF EXISTS test_reflect')
+        self.session.execute(text('DROP TABLE IF EXISTS test_reflect'))
         table.create(self.session.bind)
 
         insp = inspect(self.session.bind)

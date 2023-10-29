@@ -17,7 +17,7 @@ class ClickHouseDialect_asynch(ClickHouseDialect_native):
     supports_statement_cache = True
 
     @classmethod
-    def dbapi(cls):
+    def import_dbapi(cls):
         return AsyncAdapt_asynch_dbapi(asynch)
 
     @classmethod
@@ -30,7 +30,7 @@ class ClickHouseDialect_asynch(ClickHouseDialect_native):
             # `ClickHouseExecutionContext` logic.
             sql = TextClause(sql)
         f = connection.scalar if scalar else connection.execute
-        return f(sql, parameters=kwargs)
+        return f(sql, kwargs)
 
     def do_execute(self, cursor, statement, parameters, context=None):
         cursor.execute(statement, parameters, context)

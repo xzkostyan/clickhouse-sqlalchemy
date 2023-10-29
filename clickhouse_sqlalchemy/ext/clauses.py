@@ -1,4 +1,4 @@
-from sqlalchemy import util, exc
+from sqlalchemy import exc
 from sqlalchemy.sql import type_api, roles
 from sqlalchemy.sql.elements import (
     BindParameter,
@@ -34,7 +34,7 @@ class LimitByClause:
 
     def __init__(self, by_clauses, limit, offset):
         self.by_clauses = ClauseList(
-            *by_clauses, _literal_as_text=roles.ByOfRole
+            *by_clauses, _literal_as_text_role=roles.ByOfRole
         )
         self.offset = _offset_or_limit_clause(offset)
         self.limit = _offset_or_limit_clause(limit)
@@ -49,7 +49,7 @@ class Lambda(ColumnElement):
     __visit_name__ = 'lambda'
 
     def __init__(self, func):
-        if not util.callable(func):
+        if not callable(func):
             raise exc.ArgumentError('func must be callable')
 
         self.type = type_api.NULLTYPE

@@ -21,7 +21,11 @@ class EngineReflectionTestCase(BaseTestCase):
         with self.create_table(table):
             metadata.clear()  # reflect from clean state
             self.assertFalse(metadata.tables)
-            table = Table('test_reflect', metadata, autoload=True)
+            table = Table(
+                'test_reflect',
+                metadata,
+                autoload_with=self.session.bind
+            )
             yield table, table.engine
 
     def assertColumns(self, first, second, msg=None):
@@ -188,34 +192,42 @@ class EngineReflectionTestCase(BaseTestCase):
         with self.create_table(table):
             metadata.clear()  # reflect from clean state
             self.assertFalse(metadata.tables)
-            table = Table('test_reflect', metadata, autoload=True)
+            table = Table(
+                'test_reflect',
+                metadata,
+                autoload_with=self.session.connection()
+            )
 
-            exists_query = 'EXISTS TABLE test_reflect'
-            table.drop()
+            exists_query = text('EXISTS TABLE test_reflect')
+            table.drop(bind=self.session.bind)
             exists = self.session.execute(exists_query).fetchall()
             self.assertEqual(exists, [(0, )])
 
-            table.create()
+            table.create(bind=self.session.bind)
             exists = self.session.execute(exists_query).fetchall()
             self.assertEqual(exists, [(1, )])
 
     def test_disable_engine_reflection(self):
         engine = self.session.connection().engine
-        url = str(engine.url)
+        url = engine.url.render_as_string(hide_password=False)
         prefix = 'clickhouse+{}://'.format(engine.driver)
         if not url.startswith(prefix):
             url = prefix + url.split('://')[1]
 
         session = make_session(create_engine(url + '?engine_reflection=no'))
 
-        metadata = self.metadata(session=session)
+        metadata = self.metadata()
         columns = [Column('x', types.Int32)] + [engines.Log()]
         table = Table('test_reflect', metadata, *columns)
 
         with self.create_table(table):
             metadata.clear()  # reflect from clean state
             self.assertFalse(metadata.tables)
-            table = Table('test_reflect', metadata, autoload=True)
+            table = Table(
+                'test_reflect',
+                metadata,
+                autoload_with=session.connection()
+            )
             self.assertIsNone(getattr(table, 'engine', None))
 
     def test_exists_describe_escaping(self):
@@ -227,7 +239,7 @@ class EngineReflectionTestCase(BaseTestCase):
         with self.create_table(table):
             metadata.clear()  # reflect from clean state
             self.assertFalse(metadata.tables)
-            Table('.test', metadata, autoload=True)
+            Table('.test', metadata, autoload_with=self.session.connection())
 
 
 class EngineClassReflectionTestCase(BaseTestCase):

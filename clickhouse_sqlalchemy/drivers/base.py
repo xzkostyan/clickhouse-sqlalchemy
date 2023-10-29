@@ -156,13 +156,13 @@ class ClickHouseDialect(default.DefaultDialect):
         rows = self._execute(connection, query, database=database)
         return [row.name for row in rows]
 
-    def has_table(self, connection, table_name, schema=None):
+    def has_table(self, connection, table_name, schema=None, **kw):
         quote = self._quote_table_name
         if schema:
             qualified_name = quote(schema) + '.' + quote(table_name)
         else:
             qualified_name = quote(table_name)
-        query = 'EXISTS TABLE {}'.format(qualified_name)
+        query = text('EXISTS TABLE {}'.format(qualified_name))
         for r in self._execute(connection, query):
             if r.result == 1:
                 return True
