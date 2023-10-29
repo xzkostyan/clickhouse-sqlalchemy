@@ -6,10 +6,10 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.8"
+          - "3.12"
         clickhouse-version:
-          - 19.16.2.2
-        sa-version: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]
+          - 23.8.4
+        sa-version: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
 
     name: ${{ matrix.python-version }} SA=1.4.${{ matrix.sa-version }}
     steps:
