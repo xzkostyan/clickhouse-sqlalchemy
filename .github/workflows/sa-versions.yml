@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.11"
+          - "3.12"
         clickhouse-version:
           - 23.8.4.69
         sa-version: [18, 19, 20, 21, 22]
