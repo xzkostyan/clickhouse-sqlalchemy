@@ -25,7 +25,7 @@ class ClickHouseDialectTestCase(BaseTestCase):
         return self.session.connection()
 
     def setUp(self):
-        super(ClickHouseDialectTestCase, self).setUp()
+        super().setUp()
         self.table = Table(
             'test_exists_table',
             self.metadata(),
@@ -44,7 +44,7 @@ class ClickHouseDialectTestCase(BaseTestCase):
 
     def tearDown(self):
         self.table.drop(self.session.bind, if_exists=True)
-        super(ClickHouseDialectTestCase, self).tearDown()
+        super().tearDown()
 
     def test_has_table(self):
         self.assertFalse(

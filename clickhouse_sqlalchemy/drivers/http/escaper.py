@@ -3,7 +3,7 @@ from decimal import Decimal
 import enum
 
 
-class Escaper(object):
+class Escaper:
 
     number_types = (int, float, )
 
@@ -29,7 +29,7 @@ class Escaper(object):
             return "[" + ",".join(
                 [str(self.escape_item(x)) for x in parameters]) + "]"
         else:
-            raise Exception("Unsupported param format: {}".format(parameters))
+            raise Exception(f"Unsupported param format: {parameters}")
 
     def escape_number(self, item):
         return item
@@ -76,4 +76,4 @@ class Escaper(object):
         elif isinstance(item, enum.Enum):
             return self.escape_string(item.name)
         else:
-            raise Exception("Unsupported object {}".format(item))
+            raise Exception(f"Unsupported object {item}")

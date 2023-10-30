@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from parameterized import parameterized
 from sqlalchemy import select, literal
 
@@ -16,7 +14,7 @@ class IsDistinctFromTestCase(BaseTestCase):
         (1, 2),
         (1, None),
         (None, "NULL"),
-        (None, u"ᴺᵁᴸᴸ"),
+        (None, "ᴺᵁᴸᴸ"),
         ((1, None), (2, None)),
         ((1, (1, None)), (1, (2, None)))
     ])

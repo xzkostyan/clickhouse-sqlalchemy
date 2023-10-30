@@ -59,9 +59,9 @@ ischema_names = {
 
 class ClickHouseIdentifierPreparer(compiler.IdentifierPreparer):
 
-    reserved_words = compiler.IdentifierPreparer.reserved_words | set((
+    reserved_words = compiler.IdentifierPreparer.reserved_words | {
         'index',  # reserved in the 'create table' syntax, at least.
-    ))
+    }
     # Alternatively, use `_requires_quotes = lambda self, value: True`
 
     def _escape_identifier(self, value):
@@ -133,7 +133,7 @@ class ClickHouseDialect(default.DefaultDialect):
     inspector = ClickHouseInspector
 
     def initialize(self, connection):
-        super(ClickHouseDialect, self).initialize(connection)
+        super().initialize(connection)
 
         version = self.server_version_info
 
@@ -162,7 +162,7 @@ class ClickHouseDialect(default.DefaultDialect):
             qualified_name = quote(schema) + '.' + quote(table_name)
         else:
             qualified_name = quote(table_name)
-        query = text('EXISTS TABLE {}'.format(qualified_name))
+        query = text(f'EXISTS TABLE {qualified_name}')
         for r in self._execute(connection, query):
             if r.result == 1:
                 return True
@@ -181,7 +181,7 @@ class ClickHouseDialect(default.DefaultDialect):
             qualified_name = quote(schema) + '.' + quote(table_name)
         else:
             qualified_name = quote(table_name)
-        query = 'DESCRIBE TABLE {}'.format(qualified_name)
+        query = f'DESCRIBE TABLE {qualified_name}'
         rows = self._execute(connection, query)
 
         return [
@@ -483,7 +483,7 @@ class ClickHouseDialect(default.DefaultDialect):
     def connect(self, *cargs, **cparams):
         self.forced_server_version_string = cparams.pop(
             'server_version', self.forced_server_version_string)
-        return super(ClickHouseDialect, self).connect(*cargs, **cparams)
+        return super().connect(*cargs, **cparams)
 
 
 clickhouse_dialect = ClickHouseDialect()

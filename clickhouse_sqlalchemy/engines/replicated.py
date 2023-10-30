@@ -5,15 +5,15 @@ from .mergetree import (
 from .util import parse_columns
 
 
-class ReplicatedEngineMixin(object):
+class ReplicatedEngineMixin:
     def __init__(self, table_path, replica_name):
         self.table_path = table_path
         self.replica_name = replica_name
 
     def get_parameters(self):
         return [
-            "'{}'".format(self.table_path),
-            "'{}'".format(self.replica_name)
+            f"'{self.table_path}'",
+            f"'{self.replica_name}'"
         ]
 
     @classmethod

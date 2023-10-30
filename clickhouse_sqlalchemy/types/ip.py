@@ -31,7 +31,7 @@ class BaseIPComparator(UserDefinedType.Comparator):
     def in_(self, other):
         if isinstance(other, (list, tuple)):
             addresses, networks = self._split_other(other)
-            addresses_clause = super(BaseIPComparator, self).in_(
+            addresses_clause = super().in_(
                 self._wrap_to_ip(x) for x in addresses
             ) if addresses else None
             networks_clause = or_(*[
@@ -49,7 +49,7 @@ class BaseIPComparator(UserDefinedType.Comparator):
                 return networks_clause
             else:
                 # other is an empty array
-                return super(BaseIPComparator, self).in_(other)
+                return super().in_(other)
 
         if not isinstance(other, self.network_class):
             other = self.network_class(other)
@@ -62,7 +62,7 @@ class BaseIPComparator(UserDefinedType.Comparator):
     def not_in(self, other):
         if isinstance(other, (list, tuple)):
             addresses, networks = self._split_other(other)
-            addresses_clause = super(BaseIPComparator, self).notin_(
+            addresses_clause = super().notin_(
                 self._wrap_to_ip(x) for x in addresses
             ) if addresses else None
             networks_clause = and_(*[
@@ -80,7 +80,7 @@ class BaseIPComparator(UserDefinedType.Comparator):
                 return networks_clause
             else:
                 # other is an empty array
-                return super(BaseIPComparator, self).notin_(other)
+                return super().notin_(other)
 
         if not isinstance(other, self.network_class):
             other = self.network_class(other)

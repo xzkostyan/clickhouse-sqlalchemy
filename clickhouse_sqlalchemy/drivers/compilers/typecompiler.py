@@ -68,7 +68,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_datetime64(self, type_, **kw):
         if type_.timezone:
-            return "DateTime64(%s, '%s')" % (type_.precision, type_.timezone)
+            return f"DateTime64({type_.precision}, '{type_.timezone}')"
         else:
             return 'DateTime64(%s)' % type_.precision
 
@@ -79,7 +79,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         return 'Float64'
 
     def visit_numeric(self, type_, **kw):
-        return 'Decimal(%s, %s)' % (type_.precision, type_.scale)
+        return f'Decimal({type_.precision}, {type_.scale})'
 
     def visit_boolean(self, type_, **kw):
         return 'Bool'
@@ -97,7 +97,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
             "'%s' = %d" %
             (x.name.replace("'", r"\'"), x.value) for x in type_.enum_class
         )
-        return '%s(%s)' % (db_type, ', '.join(choices))
+        return '{}({})'.format(db_type, ', '.join(choices))
 
     def visit_enum(self, type_, **kw):
         return self._render_enum('Enum', type_, **kw)
@@ -127,7 +127,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_map(self, type_, **kw):
         key_type = type_api.to_instance(type_.key_type)
         value_type = type_api.to_instance(type_.value_type)
-        return 'Map(%s, %s)' % (
+        return 'Map({}, {})'.format(
             self.process(key_type, **kw),
             self.process(value_type, **kw)
         )

@@ -21,7 +21,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         ClickHouse does not, so we rely on the `hasAny` array function here.
         """
 
-        return "hasAny([%s], [%s])" % (
+        return "hasAny([{}], [{}])".format(
             self.process(binary.left, **kw),
             self.process(binary.right, **kw),
         )
@@ -32,7 +32,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         )
 
     def visit_empty_set_expr(self, element_types):
-        return "SELECT %s WHERE 1!=1" % (
+        return "SELECT {} WHERE 1!=1".format(
             ", ".join(
                 "CAST(NULL AS %s)"
                 % self.dialect.type_compiler.process(
@@ -68,7 +68,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         return text
 
     def visit_if__func(self, func, **kw):
-        return "(%s) ? (%s) : (%s)" % (
+        return "({}) ? ({}) : ({})".format(
             self.process(func.clauses.clauses[0], **kw),
             self.process(func.clauses.clauses[1], **kw),
             self.process(func.clauses.clauses[2], **kw)
@@ -223,12 +223,12 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
                     from_labeled_label=False,
                     **kw):
         if from_labeled_label:
-            return super(ClickHouseSQLCompiler, self).visit_label(
+            return super().visit_label(
                 label,
                 render_label_as_label=label
             )
         else:
-            return super(ClickHouseSQLCompiler, self).visit_label(
+            return super().visit_label(
                 label,
                 **kw
             )
@@ -464,7 +464,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
                 ']'
             )
         else:
-            return super(ClickHouseSQLCompiler, self).render_literal_value(
+            return super().render_literal_value(
                 value, type_
             )
 
@@ -475,7 +475,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
 
     def visit_regexp_match_op_binary(self, binary, operator, **kw):
         string, pattern = self._get_regexp_args(binary, kw)
-        return "MATCH(%s, %s)" % (string, pattern)
+        return f"MATCH({string}, {pattern})"
 
     def visit_not_regexp_match_op_binary(self, binary, operator, **kw):
         return "NOT %s" % self.visit_regexp_match_op_binary(
@@ -488,13 +488,13 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         return element.element._compiler_dispatch(self, **kw)
 
     def visit_ilike_op_binary(self, binary, operator, **kw):
-        return "%s ILIKE %s" % (
+        return "{} ILIKE {}".format(
             self.process(binary.left, **kw),
             self.process(binary.right, **kw)
         )
 
     def visit_not_ilike_op_binary(self, binary, operator, **kw):
-        return "%s NOT ILIKE %s" % (
+        return "{} NOT ILIKE {}".format(
             self.process(binary.left, **kw),
             self.process(binary.right, **kw)
         )

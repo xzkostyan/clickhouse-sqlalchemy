@@ -52,7 +52,7 @@ class TestConnectArgs(BaseTestCase):
     def test_quoting(self):
         user = quote('us#er')
         password = quote(' pass#word')
-        part = '{}:{}@host/database'.format(user, password)
+        part = f'{user}:{password}@host/database'
         url = make_url('clickhouse+native://' + part)
         connect_args = self.dialect.create_connect_args(url)
         self.assertEqual(
