@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+## [0.3.0] - 2023-11-06
+### Changed
+- Supported SQLAlchemy version is 2.0. Pull request [#256](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/256) by [PedroAquilino](https://github.com/PedroAquilino) and [#268](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/268) by [Net-Mist](https://github.com/Net-Mist). Solves issue [#259](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/259).
+
 ## [0.2.5] - 2023-10-29
 ### Added
 - Table primary key reflection. Pull request [#265](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/265) by [akurdyukov](https://github.com/akurdyukov). Solves issue [#264](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/264).
@@ -325,7 +329,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.5...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.5...0.3.0
 [0.2.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.4...0.2.5
 [0.2.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.3...0.2.4
 [0.2.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.2...0.2.3
