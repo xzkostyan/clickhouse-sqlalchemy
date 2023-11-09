@@ -30,7 +30,7 @@ def _reflect_table(inspector, table):
     if alembic_version >= (1, 11, 0):
         return _alembic_reflect_table(inspector, table)
     else:
-        return _alembic_reflect_table(inspector, table)
+        return _alembic_reflect_table(inspector, table, None)
 
 
 @comparators.dispatch_for('schema')
