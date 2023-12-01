@@ -48,6 +48,7 @@ class Table(TableBase):
         if _extend_on is None:
             ch_table._columns = std_table._columns
             ch_table.columns = std_table.columns
+            ch_table.c = std_table.c
 
         return ch_table
 
