@@ -43,7 +43,7 @@ def patch_alembic_version(context, **kwargs):
     dt = Column('dt', types.DateTime, server_default=func.now())
     version_num = Column('version_num', types.String, primary_key=True)
     version.append_column(dt)
-    version.append_column(version_num)
+    version.append_column(version_num, replace_existing=True)
 
     if 'cluster' in kwargs:
         cluster = kwargs['cluster']
