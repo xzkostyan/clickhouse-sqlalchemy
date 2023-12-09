@@ -57,7 +57,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         if codec is not None:
             if isinstance(codec, (list, tuple)):
                 codec = ', '.join(codec)
-            colspec += " CODEC({0})".format(codec)
+            colspec += f" CODEC({codec})"
 
         if opts['after'] is not None:
             colspec += " AFTER " + self._get_default_string(
@@ -73,7 +73,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         # All columns including synthetic PKs must be 'nullable'
         column.nullable = True
 
-        rv = super(ClickHouseDDLCompiler, self).visit_create_column(
+        rv = super().visit_create_column(
             create, **kw
         )
         column.nullable = nullable
@@ -116,16 +116,16 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         else:
             param = self._compile_param(to_list(param))
 
-        text = '{0}{1}\n'.format(engine.name, param)
+        text = f'{engine.name}{param}\n'
         if engine.partition_by:
-            text += ' PARTITION BY {0}\n'.format(
+            text += ' PARTITION BY {}\n'.format(
                 self._compile_param(
                     engine.partition_by.get_expressions_or_columns(),
                     opt_list=True
                 )
             )
         if engine.order_by:
-            text += ' ORDER BY {0}\n'.format(
+            text += ' ORDER BY {}\n'.format(
                 self._compile_param(
                     engine.order_by.get_expressions_or_columns(),
                     opt_list=True
@@ -133,28 +133,28 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             )
         if engine.primary_key:
             if not engine.order_by:
-                text += ' ORDER BY {0}\n'.format(
+                text += ' ORDER BY {}\n'.format(
                     self._compile_param(
                         engine.primary_key.get_expressions_or_columns(),
                         opt_list=True
                     )
                 )
 
-            text += ' PRIMARY KEY {0}\n'.format(
+            text += ' PRIMARY KEY {}\n'.format(
                 self._compile_param(
                     engine.primary_key.get_expressions_or_columns(),
                     opt_list=True
                 )
             )
         if engine.sample_by:
-            text += ' SAMPLE BY {0}\n'.format(
+            text += ' SAMPLE BY {}\n'.format(
                 self._compile_param(
                     engine.sample_by.get_expressions_or_columns()[0]
                 )
             )
         if engine.ttl:
             compile = self.sql_compiler.process
-            text += ' TTL {0}\n'.format(
+            text += ' TTL {}\n'.format(
                 ',\n     '.join(
                     compile(i, include_table=False, literal_binds=True)
                     for i in engine.ttl.get_expressions_or_columns()
@@ -292,7 +292,7 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
         return rv
 
     def visit_set_table_comment(self, create, **kw):
-        return "ALTER TABLE %s MODIFY COMMENT %s" % (
+        return "ALTER TABLE {} MODIFY COMMENT {}".format(
             self.preparer.format_table(create.element),
             self.sql_compiler.render_literal_value(
                 create.element.comment, sqltypes.String()

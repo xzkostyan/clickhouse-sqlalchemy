@@ -26,7 +26,7 @@ def read_version():
 
 
 dialects = [
-    'clickhouse{}=clickhouse_sqlalchemy.drivers.{}'.format(driver, d_path)
+    f'clickhouse{driver}=clickhouse_sqlalchemy.drivers.{d_path}'
 
     for driver, d_path in [
         ('', 'http.base:ClickHouseDialect_http'),

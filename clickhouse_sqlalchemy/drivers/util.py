@@ -1,4 +1,3 @@
-
 def get_inner_spec(spec):
     brackets = 0
     offset = spec.find('(')

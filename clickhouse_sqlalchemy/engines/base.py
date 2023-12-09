@@ -35,7 +35,7 @@ class Engine(Constraint):
 
 class TableCol(ColumnCollectionMixin, SchemaItem):
     def __init__(self, column, **kwargs):
-        super(TableCol, self).__init__(*[column], **kwargs)
+        super().__init__(*[column], **kwargs)
 
     def get_column(self):
         return list(self.columns)[0]
@@ -45,7 +45,7 @@ class KeysExpressionOrColumn(ColumnCollectionMixin, SchemaItem):
     def __init__(self, *expressions, **kwargs):
         self.expressions = []
 
-        super(KeysExpressionOrColumn, self).__init__(
+        super().__init__(
             *expressions, _gather_expressions=self.expressions, **kwargs
         )
 

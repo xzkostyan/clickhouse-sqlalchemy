@@ -210,7 +210,7 @@ class EngineReflectionTestCase(BaseTestCase):
     def test_disable_engine_reflection(self):
         engine = self.session.connection().engine
         url = engine.url.render_as_string(hide_password=False)
-        prefix = 'clickhouse+{}://'.format(engine.driver)
+        prefix = f'clickhouse+{engine.driver}://'
         if not url.startswith(prefix):
             url = prefix + url.split('://')[1]
 

@@ -20,7 +20,7 @@ class Query(BaseQuery):
     _array_join = None
 
     def _compile_context(self, *args, **kwargs):
-        context = super(Query, self)._compile_context(*args, **kwargs)
+        context = super()._compile_context(*args, **kwargs)
         query = context.query
 
         query._with_cube = self._with_cube

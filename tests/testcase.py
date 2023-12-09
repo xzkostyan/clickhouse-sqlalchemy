@@ -11,7 +11,7 @@ from tests.session import http_session, native_session, \
 from tests.util import skip_by_server_version, run_async
 
 
-class BaseAbstractTestCase(object):
+class BaseAbstractTestCase:
     """ Supporting code for tests """
     required_server_version = None
     server_version = None
@@ -71,10 +71,10 @@ class BaseTestCase(BaseAbstractTestCase, TestCase):
     def setUpClass(cls):
         # System database is always present.
         system_native_session.execute(
-            text('DROP DATABASE IF EXISTS {}'.format(cls.database))
+            text(f'DROP DATABASE IF EXISTS {cls.database}')
         )
         system_native_session.execute(
-            text('CREATE DATABASE {}'.format(cls.database))
+            text(f'CREATE DATABASE {cls.database}')
         )
 
         version = system_native_session.execute(
@@ -85,7 +85,7 @@ class BaseTestCase(BaseAbstractTestCase, TestCase):
         super().setUpClass()
 
     def setUp(self):
-        super(BaseTestCase, self).setUp()
+        super().setUp()
 
         required = self.required_server_version
 
@@ -101,10 +101,10 @@ class BaseAsynchTestCase(BaseTestCase):
     async def setUpClass(cls):
         # System database is always present.
         await system_asynch_session.execute(
-            text('DROP DATABASE IF EXISTS {}'.format(cls.database))
+            text(f'DROP DATABASE IF EXISTS {cls.database}')
         )
         await system_asynch_session.execute(
-            text('CREATE DATABASE {}'.format(cls.database))
+            text(f'CREATE DATABASE {cls.database}')
         )
 
         version = (
@@ -174,7 +174,7 @@ class CompilationTestCase(BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(CompilationTestCase, cls).setUpClass()
+        super().setUpClass()
 
         cls._session_connection = cls.session.connection
         cls._session_execute = cls.session.execute
@@ -187,4 +187,4 @@ class CompilationTestCase(BaseTestCase):
         cls.session.execute = cls._session_execute
         cls.session.connection = cls._session_connection
 
-        super(CompilationTestCase, cls).tearDownClass()
+        super().tearDownClass()
