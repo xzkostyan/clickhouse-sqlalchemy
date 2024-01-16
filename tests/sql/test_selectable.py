@@ -340,191 +340,208 @@ class SelectTestCase(BaseTestCase):
             )
             return select(table_1.c.x).select_from(join)
 
-        self.assertEqual(
-            self.compile(make_statement(
-                type='INNER'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'INNER JOIN table_2 ON table_2.y = table_1.x'
-        )
+        def make_statement_select_join(type=None,
+                                       strictness=None,
+                                       distribution=None,
+                                       full=False,
+                                       isouter=False):
+            join = select(table_1).join(
+                table_2,
+                table_2.c.y == table_1.c.x,
+                isouter=isouter,
+                full=full,
+                type=type,
+                strictness=strictness,
+                distribution=distribution
+            )
+            return join
 
-        self.assertEqual(
-            self.compile(make_statement(
-                type='INNER',
-                strictness='all'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'ALL INNER JOIN table_2 ON table_2.y = table_1.x'
-        )
+        for make_statement in (make_statement, make_statement_select_join):
+            self.assertEqual(
+                self.compile(make_statement(
+                    type='INNER'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'INNER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                type='INNER',
-                strictness='any'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'ANY INNER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    type='INNER',
+                    strictness='all'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'ALL INNER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                type='INNER',
-                distribution='global'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'GLOBAL INNER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    type='INNER',
+                    strictness='any'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'ANY INNER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                type='INNER',
-                distribution='global',
-                strictness='any'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'GLOBAL ANY INNER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    type='INNER',
+                    distribution='global'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'GLOBAL INNER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                type='INNER',
-                distribution='global',
-                strictness='all'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'GLOBAL ALL INNER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    type='INNER',
+                    distribution='global',
+                    strictness='any'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'GLOBAL ANY INNER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                type='LEFT OUTER',
-                distribution='global',
-                strictness='all')),
-            'SELECT table_1.x FROM table_1 '
-            'GLOBAL ALL LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    type='INNER',
+                    distribution='global',
+                    strictness='all'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'GLOBAL ALL INNER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                type='RIGHT OUTER',
-                distribution='global',
-                strictness='all')),
-            'SELECT table_1.x FROM table_1 '
-            'GLOBAL ALL RIGHT OUTER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    type='LEFT OUTER',
+                    distribution='global',
+                    strictness='all')),
+                'SELECT table_1.x FROM table_1 '
+                'GLOBAL ALL LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                type='CROSS',
-                distribution='global',
-                strictness='all')),
-            'SELECT table_1.x FROM table_1 '
-            'GLOBAL ALL CROSS JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    type='RIGHT OUTER',
+                    distribution='global',
+                    strictness='all')),
+                'SELECT table_1.x FROM table_1 '
+                'GLOBAL ALL RIGHT OUTER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(type='FULL OUTER')),
-            'SELECT table_1.x FROM table_1 '
-            'FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    type='CROSS',
+                    distribution='global',
+                    strictness='all')),
+                'SELECT table_1.x FROM table_1 '
+                'GLOBAL ALL CROSS JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(isouter=False,
-                                        full=False)),
-            'SELECT table_1.x FROM table_1 '
-            'INNER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(type='FULL OUTER')),
+                'SELECT table_1.x FROM table_1 '
+                'FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(isouter=True,
-                                        full=False)),
-            'SELECT table_1.x FROM table_1 '
-            'LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(isouter=False,
+                                            full=False)),
+                'SELECT table_1.x FROM table_1 '
+                'INNER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(isouter=True,
-                                        full=True)),
-            'SELECT table_1.x FROM table_1 '
-            'FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(isouter=True,
+                                            full=False)),
+                'SELECT table_1.x FROM table_1 '
+                'LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(isouter=False,
-                                        full=True)),
-            'SELECT table_1.x FROM table_1 '
-            'FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(isouter=True,
+                                            full=True)),
+                'SELECT table_1.x FROM table_1 '
+                'FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                isouter=False, full=False,
-                type='INNER'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'INNER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(isouter=False,
+                                            full=True)),
+                'SELECT table_1.x FROM table_1 '
+                'FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                isouter=False, full=False,
-                type='LEFT OUTER'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    isouter=False, full=False,
+                    type='INNER'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'INNER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                isouter=False, full=False,
-                type='LEFT', strictness='ALL'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'ALL LEFT JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    isouter=False, full=False,
+                    type='LEFT OUTER'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'LEFT OUTER JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                isouter=False, full=False,
-                type='LEFT', strictness='ANY'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'ANY LEFT JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    isouter=False, full=False,
+                    type='LEFT', strictness='ALL'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'ALL LEFT JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                isouter=False, full=False,
-                type='LEFT', strictness='ANY', distribution='GLOBAL'
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'GLOBAL ANY LEFT JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    isouter=False, full=False,
+                    type='LEFT', strictness='ANY'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'ANY LEFT JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertRaises(
-            CompileError,
-            lambda: self.compile(make_statement(
-                isouter=True, full=False,
-                type='INNER', strictness='ANY', distribution='GLOBAL'
-            )),
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    isouter=False, full=False,
+                    type='LEFT', strictness='ANY', distribution='GLOBAL'
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'GLOBAL ANY LEFT JOIN table_2 ON table_2.y = table_1.x'
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                type='FULL OUTER', strictness='ANY', distribution='GLOBAL'
-            )),
-            'SELECT table_1.x FROM table_1 GLOBAL '
-            'ANY FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertRaises(
+                CompileError,
+                lambda: self.compile(make_statement(
+                    isouter=True, full=False,
+                    type='INNER', strictness='ANY', distribution='GLOBAL'
+                )),
+            )
 
-        self.assertEqual(
-            self.compile(make_statement(
-                isouter=True, full=False,
-                type='CROSS',
-            )),
-            'SELECT table_1.x FROM table_1 '
-            'CROSS JOIN table_2 ON table_2.y = table_1.x'
-        )
+            self.assertEqual(
+                self.compile(make_statement(
+                    type='FULL OUTER', strictness='ANY', distribution='GLOBAL'
+                )),
+                'SELECT table_1.x FROM table_1 GLOBAL '
+                'ANY FULL OUTER JOIN table_2 ON table_2.y = table_1.x'
+            )
+
+            self.assertEqual(
+                self.compile(make_statement(
+                    isouter=True, full=False,
+                    type='CROSS',
+                )),
+                'SELECT table_1.x FROM table_1 '
+                'CROSS JOIN table_2 ON table_2.y = table_1.x'
+            )
 
     def test_join_same_column_name(self):
         table_1 = self._make_table(
