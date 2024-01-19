@@ -50,11 +50,23 @@ class TestConnectArgs(BaseTestCase):
         )
 
     def test_quoting(self):
-        user = quote('us#er')
-        password = quote(' pass#word')
+        user = "us#er"
+        password = 'pass#word'
         part = '{}:{}@host/database'.format(user, password)
+        quote_user = quote(user)
+        quote_password = quote(password)
+        quote_part = '{}:{}@host/database'.format(quote_user, quote_password)
+
+        # test with unquote user and password
         url = make_url('clickhouse+native://' + part)
         connect_args = self.dialect.create_connect_args(url)
         self.assertEqual(
-            str(connect_args[0][0]), 'clickhouse://' + part
+            str(connect_args[0][0]), 'clickhouse://' + quote_part
+        )
+
+        # test with quote user and password
+        url = make_url('clickhouse+native://' + quote_part)
+        connect_args = self.dialect.create_connect_args(url)
+        self.assertEqual(
+            str(connect_args[0][0]), 'clickhouse://' + quote_part
         )
