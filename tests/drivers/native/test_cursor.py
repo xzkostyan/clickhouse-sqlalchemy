@@ -24,7 +24,9 @@ class CursorTestCase(NativeSessionTestCase):
         self.assertListEqual(list(rv), [(x,) for x in range(5)])
 
     def test_execute_with_stream(self):
-        rv = self.session.execute(text("SELECT * FROM system.numbers LIMIT 1")).yield_per(10)
+        rv = self.session.execute(
+            text("SELECT * FROM system.numbers LIMIT 1")
+        ).yield_per(10)
 
         self.assertEqual(len(rv.fetchall()), 1)
 
