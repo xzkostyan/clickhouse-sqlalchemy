@@ -132,7 +132,8 @@ class Cursor(object):
         if self._stream_results and execute_iter:
             execute = execute_iter
             settings = settings or {}
-            settings['max_block_size'] = execution_options['max_row_buffer']
+            settings['max_block_size'] = (
+                execution_options.get('max_row_buffer', 1000))
 
         execute_kwargs = {
             'settings': settings,
