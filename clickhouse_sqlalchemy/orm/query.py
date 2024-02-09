@@ -15,6 +15,7 @@ class Query(BaseQuery):
     _with_rollup = False
     _with_totals = False
     _final = None
+    _settings_final = None
     _sample = None
     _limit_by = None
     _array_join = None
@@ -27,6 +28,7 @@ class Query(BaseQuery):
         query._with_rollup = self._with_rollup
         query._with_totals = self._with_totals
         query._final_clause = self._final
+        query._settings_final_clause = self._settings_final
         query._sample_clause = sample_clause(self._sample)
         query._limit_by_clause = self._limit_by
         query._array_join = self._array_join
@@ -94,6 +96,11 @@ class Query(BaseQuery):
     @_generative
     def final(self):
         self._final = True
+        return self
+
+    @_generative
+    def settings_final(self):
+        self._settings_final = True
         return self
 
     @_generative

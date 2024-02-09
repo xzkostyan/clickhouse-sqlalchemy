@@ -20,6 +20,7 @@ class Select(StandardSelect):
     _with_rollup = False
     _with_totals = False
     _final_clause = None
+    _settings_final_clause = None
     _sample_clause = None
     _limit_by_clause = None
     _array_join = None
@@ -42,6 +43,11 @@ class Select(StandardSelect):
     @_generative
     def final(self):
         self._final_clause = True
+        return self
+
+    @_generative
+    def settings_final(self):
+        self._settings_final_clause = True
         return self
 
     @_generative
