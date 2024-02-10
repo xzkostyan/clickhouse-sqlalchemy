@@ -906,7 +906,7 @@ becomes (respectively)
 FINAL
 +++++
 
-.. note:: Currently ``FINAL`` clause is supported only for table specified in ``FROM`` clause.
+.. note:: Currently ``FINAL`` clause is supported only for table specified in ``FROM`` clause. To apply ``FINAL`` modifier to all tables in a query, ``SETTINGS final = 1`` can be used.
 
     .. code-block:: python
 
@@ -923,6 +923,30 @@ becomes
     .. code-block:: sql
 
         SELECT ... FROM ... FINAL GROUP BY ...
+
+To apply final to all tables in the query
+
+.. code-block:: python
+
+        session.query(t1.c.x, t2.c.x).join(
+            t2,
+            t1.c.x == t2.c.y,
+        ).settings_final()
+
+or
+
+    .. code-block:: python
+
+        select([t1.c.x, t2.c.x]).join(
+            t2,
+            t1.c.x == t2.c.y,
+        ).settings_final()
+
+becomes
+
+    .. code-block:: sql
+
+        SELECT ... FROM ... JOIN ... SETTINGS final = 1
 
 Miscellaneous
 -------------
