@@ -13,6 +13,10 @@ from sqlalchemy import __version__ as sqlalchemy_version
 # Export connector version
 VERSION = (0, 0, 2, None)
 
+sqlalchemy_version = tuple(
+    (int(x) if x.isdigit() else x) for x in sqlalchemy_version.split('.')
+)
+
 
 class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
     def pre_exec(self):
@@ -53,7 +57,7 @@ class ClickHouseDialect_native(ClickHouseDialect):
         return connector
 
     def create_connect_args(self, url):
-        use_quote = sqlalchemy_version < '2.0.24'
+        use_quote = sqlalchemy_version < (2, 0, 24)
 
         url = url.set(drivername='clickhouse')
         if url.username:
