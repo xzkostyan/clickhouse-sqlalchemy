@@ -1,5 +1,5 @@
 on: [push, pull_request]
-name: "SQLAlchemy >=2.0.25 versions"
+name: "SQLAlchemy >=2.0.18 versions"
 jobs:
   tests:
     runs-on: ubuntu-20.04
@@ -9,7 +9,7 @@ jobs:
           - "3.12"
         clickhouse-version:
           - 23.8.4.69
-        sa-version: [25]
+        sa-version: [18, 19, 20, 21, 22, 23, 24, 25, 26, 27]
 
     name: ${{ matrix.python-version }} SA=2.0.${{ matrix.sa-version }}
     steps:
