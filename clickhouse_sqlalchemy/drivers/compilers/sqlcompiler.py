@@ -498,3 +498,23 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             self.process(binary.left, **kw),
             self.process(binary.right, **kw)
         )
+
+    def get_select_precolumns(self, select, **kw):
+        # Do not call super().get_select_precolumns because
+        # it will warn/raise when distinct on is present
+        if select._distinct or select._distinct_on:
+            if select._distinct_on:
+                return (
+                    "DISTINCT ON ("
+                    + ", ".join(
+                        [
+                            self.process(col, **kw)
+                            for col in select._distinct_on
+                        ]
+                    )
+                    + ") "
+                )
+            else:
+                return "DISTINCT "
+        else:
+            return ""
