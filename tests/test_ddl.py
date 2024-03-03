@@ -311,6 +311,39 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    def test_create_aggregate_function(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('total', types.AggregateFunction(func.sum(), types.UInt32)),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'total AggregateFunction(sum(), UInt32)) '
+            'ENGINE = Memory'
+        )
+
+    @require_server_version(22, 8, 21)
+    def test_create_simple_aggregate_function(self):
+        table = Table(
+            't1', self.metadata(),
+            Column(
+                'total', types.SimpleAggregateFunction(
+                    func.sum(), types.UInt32
+                )
+            ),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'total SimpleAggregateFunction(sum(), UInt32)) '
+            'ENGINE = Memory'
+        )
+
     def test_table_create_on_cluster(self):
         create_sql = (
             'CREATE TABLE t1 ON CLUSTER test_cluster '

@@ -131,3 +131,29 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
             self.process(key_type, **kw),
             self.process(value_type, **kw)
         )
+
+    def visit_aggregatefunction(self, type_, **kw):
+        types = [type_api.to_instance(val) for val in type_.nested_types]
+        type_strings = [self.process(val, **kw) for val in types]
+
+        if isinstance(type_.agg_func, str):
+            agg_str = type_.agg_func
+        else:
+            agg_str = str(type_.agg_func.compile(dialect=self.dialect))
+
+        return "AggregateFunction(%s, %s)" % (
+            agg_str, ", ".join(type_strings)
+        )
+
+    def visit_simpleaggregatefunction(self, type_, **kw):
+        types = [type_api.to_instance(val) for val in type_.nested_types]
+        type_strings = [self.process(val, **kw) for val in types]
+
+        if isinstance(type_.agg_func, str):
+            agg_str = type_.agg_func
+        else:
+            agg_str = str(type_.agg_func.compile(dialect=self.dialect))
+
+        return "SimpleAggregateFunction(%s, %s)" % (
+            agg_str, ", ".join(type_strings)
+        )

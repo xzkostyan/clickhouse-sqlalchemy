@@ -13,7 +13,7 @@ from .compilers.ddlcompiler import ClickHouseDDLCompiler
 from .compilers.sqlcompiler import ClickHouseSQLCompiler
 from .compilers.typecompiler import ClickHouseTypeCompiler
 from .reflection import ClickHouseInspector
-from .util import get_inner_spec
+from .util import get_inner_spec, parse_arguments
 from .. import types
 
 # Column specifications
@@ -54,6 +54,8 @@ ischema_names = {
     '_lowcardinality': types.LowCardinality,
     '_tuple': types.Tuple,
     '_map': types.Map,
+    '_aggregatefunction': types.AggregateFunction,
+    '_simpleaggregatefunction': types.SimpleAggregateFunction,
 }
 
 
@@ -229,6 +231,32 @@ class ClickHouseDialect(default.DefaultDialect):
             inner = spec[15:-1]
             coltype = self.ischema_names['_lowcardinality']
             return coltype(self._get_column_type(name, inner))
+
+        elif spec.startswith('AggregateFunction'):
+            params = spec[18:-1]
+
+            arguments = parse_arguments(params)
+            agg_func, inner = arguments[0], arguments[1:]
+
+            inner_types = [
+                self._get_column_type(name, param)
+                for param in inner
+            ]
+            coltype = self.ischema_names['_aggregatefunction']
+            return coltype(agg_func, *inner_types)
+
+        elif spec.startswith('SimpleAggregateFunction'):
+            params = spec[24:-1]
+
+            arguments = parse_arguments(params)
+            agg_func, inner = arguments[0], arguments[1:]
+
+            inner_types = [
+                self._get_column_type(name, param)
+                for param in inner
+            ]
+            coltype = self.ischema_names['_simpleaggregatefunction']
+            return coltype(agg_func, *inner_types)
 
         elif spec.startswith('Tuple'):
             inner = spec[6:-1]
