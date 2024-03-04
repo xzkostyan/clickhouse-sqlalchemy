@@ -559,3 +559,12 @@ class SelectTestCase(BaseTestCase):
             self.compile(join),
             'table_1 INNER JOIN table_2 ON table_1.x = table_2.x'
         )
+
+    def test_distinct_on(self):
+        table = self._make_table()
+
+        query = select(table.c.x).distinct(table.c.x)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT DISTINCT ON (t1.x) t1.x FROM t1'
+        )
