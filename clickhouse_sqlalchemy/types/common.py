@@ -37,6 +37,11 @@ class Array(ClickHouseTypeEngine):
         self.item_type_impl = to_instance(item_type)
         super(Array, self).__init__()
 
+    def __repr__(self):
+        nested_type_str = \
+            f'{self.item_type_impl.__module__}.{self.item_type_impl!r}'
+        return f'Array({nested_type_str})'
+
     @property
     def python_type(self):
         return list
@@ -72,6 +77,10 @@ class LowCardinality(ClickHouseTypeEngine):
     def __init__(self, nested_type):
         self.nested_type = to_instance(nested_type)
         super(LowCardinality, self).__init__()
+
+    def __repr__(self):
+        nested_type_str = f'{self.nested_type.__module__}.{self.nested_type!r}'
+        return f'LowCardinality({nested_type_str})'
 
 
 class Int8(Int):
