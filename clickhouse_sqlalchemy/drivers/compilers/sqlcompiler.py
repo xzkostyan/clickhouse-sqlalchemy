@@ -333,11 +333,6 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         if select._for_update_arg is not None:
             text += self.for_update_clause(select, **kwargs)
 
-        settings_final_clause = getattr(select, '_settings_final_clause', None)
-
-        if settings_final_clause is not None:
-            text += self.settings_final_clause()
-
         return text
 
     def sample_clause(self, select, **kw):
@@ -345,9 +340,6 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
 
     def final_clause(self):
         return " \nFINAL"
-
-    def settings_final_clause(self):
-        return " \nSETTINGS final = 1"
 
     def group_by_clause(self, select, **kw):
         text = ""

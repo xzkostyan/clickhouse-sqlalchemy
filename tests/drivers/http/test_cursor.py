@@ -16,3 +16,11 @@ class CursorTestCase(HttpSessionTestCase, HttpEngineTestCase):
                 text('SELECT number FROM system.numbers LIMIT 5')
             )
             self.assertListEqual(list(rv), [(x,) for x in range(5)])
+
+    def test_with_settings_in_execution_options(self):
+        rv = self.session.execute(
+            text("SELECT number FROM system.numbers LIMIT 5"),
+            execution_options={"settings": {"final": 1}}
+        )
+        self.assertEqual(dict(rv.context.execution_options), {"settings": {"final": 1}})
+        self.assertListEqual(list(rv), [(x,) for x in range(5)])

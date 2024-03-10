@@ -84,15 +84,6 @@ class SelectTestCase(BaseTestCase):
             'SELECT t1.x FROM t1 FINAL GROUP BY t1.x'
         )
 
-    def test_settings_final(self):
-        table = self._make_table()
-
-        query = select(table.c.x).settings_final().group_by(table.c.x)
-        self.assertEqual(
-            self.compile(query),
-            'SELECT t1.x FROM t1 GROUP BY t1.x SETTINGS final = 1'
-        )
-
     def test_limit_by(self):
         table = self._make_table()
 
