@@ -1,6 +1,21 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.3.1] - 2023-11-06
+### Added
+- ``SETTINGS`` clause. Pull request [#292](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/292) by [limonyellow](https://github.com/limonyellow).
+- ``DISTINCT ON`` clause. Pull request [#293](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/293) by [aronbierbaum](https://github.com/aronbierbaum). Solves issue [#234](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/234).
+
+### Fixed
+- ``select(...).join(...)`` query generation. Pull request [#284](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/284) by [Net-Mist](https://github.com/Net-Mist). 
+- [Native] Streaming results without explicitly setting `max_row_buffer`. Pull request [#287](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/287) by [akurdyukov](https://github.com/akurdyukov). Solves issue [#286](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/286).
+- Username and password quoting for SQLAlchemy>=2.0.25. Pull request [#285](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/285) by [Net-Mist](https://github.com/Net-Mist). 
+- ``match`` function case. Pull request [#283](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/283) by [bader-tayeb](https://github.com/bader-tayeb). 
+- [alembic] Missing column on reflection. Pull request [#277](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/277) by [littlebtc](https://github.com/littlebtc). Solves issue [#280](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/280). 
+- [alembic] Use `replace_existing=True` for alembic_version.version_num column. Pull request [#275](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/275) by [leemurus](https://github.com/leemurus). Solves issue [#288](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/288).
+- [alembic] Table reflection for alembic version < 1.11. Solves issue [#274](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/274).
+
 ## [0.3.0] - 2023-11-06
 ### Changed
 - Supported SQLAlchemy version is 2.0. Pull request [#256](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/256) by [PedroAquilino](https://github.com/PedroAquilino) and [#268](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/268) by [Net-Mist](https://github.com/Net-Mist). Solves issue [#259](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/259).
@@ -329,7 +344,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.1...HEAD
+[0.3.1]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.5...0.3.0
 [0.2.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.4...0.2.5
 [0.2.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.3...0.2.4
