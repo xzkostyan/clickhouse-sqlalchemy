@@ -1,6 +1,7 @@
 from sqlalchemy import text
 
 from tests.testcase import NativeSessionTestCase
+from tests.util import require_server_version
 
 
 class CursorTestCase(NativeSessionTestCase):
@@ -36,6 +37,7 @@ class CursorTestCase(NativeSessionTestCase):
 
         self.assertEqual(len(rv.fetchall()), 1)
 
+    @require_server_version(23, 2, 1)
     def test_with_settings_in_execution_options(self):
         rv = self.session.execute(
             text("SELECT * FROM system.numbers LIMIT 1"),
