@@ -906,7 +906,7 @@ becomes (respectively)
 FINAL
 +++++
 
-.. note:: Currently ``FINAL`` clause is supported only for table specified in ``FROM`` clause.
+.. note:: Currently ``FINAL`` clause is supported only for table specified in ``FROM`` clause. To apply ``FINAL`` modifier to all tables in a query, settings with "final=1" can be passed using execution options.
 
     .. code-block:: python
 

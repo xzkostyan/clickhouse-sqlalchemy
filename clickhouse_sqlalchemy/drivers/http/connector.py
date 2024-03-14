@@ -101,6 +101,21 @@ class Cursor(object):
     def close(self):
         pass
 
+    def _prepare(self, raw_sql, context=None):
+        if context:
+            execution_options = context.execution_options
+        else:
+            execution_options = {}
+
+        settings = execution_options.get('settings')
+        if settings:
+            raw_settings = ", ".join(
+                f"{key}={value}" for key, value in settings.items()
+            )
+            raw_sql = raw_sql + " SETTINGS " + raw_settings
+
+        return raw_sql
+
     def execute(self, operation, parameters=None, context=None):
         raw_sql = operation
 
@@ -112,6 +127,7 @@ class Cursor(object):
 
         transport = self._connection.transport
         params = {'query_id': self._query_id}
+        raw_sql = self._prepare(raw_sql, context)
         response_gen = transport.execute(raw_sql, params=params)
 
         self._process_response(response_gen)
