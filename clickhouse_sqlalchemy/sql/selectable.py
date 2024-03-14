@@ -1,7 +1,6 @@
 from sqlalchemy.sql.base import _generative
 from sqlalchemy.sql.selectable import (
     Select as StandardSelect,
-    Join
 )
 
 from ..ext.clauses import (
@@ -77,8 +76,8 @@ class Select(StandardSelect):
             'strictness': strictness,
             'distribution': distribution
         }
-        return Join(self, right, onclause=onclause, isouter=isouter,
-                    full=flags)
+        return super().join(right, onclause=onclause, isouter=isouter,
+                            full=flags)
 
 
 select = Select
