@@ -41,5 +41,7 @@ class CursorTestCase(NativeSessionTestCase):
             text("SELECT * FROM system.numbers LIMIT 1"),
             execution_options={"settings": {"final": 1}}
         )
-        self.assertEqual(dict(rv.context.execution_options), {"settings": {"final": 1}})
+        self.assertEqual(
+            dict(rv.context.execution_options), {"settings": {"final": 1}}
+        )
         self.assertEqual(len(rv.fetchall()), 1)
