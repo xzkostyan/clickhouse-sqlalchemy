@@ -109,7 +109,9 @@ class Cursor(object):
 
         settings = execution_options.get('settings')
         if settings:
-            raw_settings = ", ".join([f"{key}={value}" for key, value in settings.items()])
+            raw_settings = ", ".join(
+                f"{key}={value}" for key, value in settings.items()
+            )
             raw_sql = raw_sql + " SETTINGS " + raw_settings
 
         return raw_sql
