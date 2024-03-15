@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [0.3.1] - 2023-11-06
+## [0.3.1] - 2024-03-14
 ### Added
 - ``SETTINGS`` clause. Pull request [#292](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/292) by [limonyellow](https://github.com/limonyellow).
 - ``DISTINCT ON`` clause. Pull request [#293](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/293) by [aronbierbaum](https://github.com/aronbierbaum). Solves issue [#234](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/234).
