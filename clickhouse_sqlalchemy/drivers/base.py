@@ -7,7 +7,6 @@ from sqlalchemy.sql import (
 )
 from sqlalchemy.sql.ddl import CreateColumn
 from sqlalchemy.sql.elements import TextClause
-from sqlalchemy.types import DATE, DATETIME, FLOAT
 from sqlalchemy.util.compat import inspect_getfullargspec
 from sqlalchemy.util import (
     warn,
@@ -34,11 +33,11 @@ ischema_names = {
     'UInt32': types.UInt32,
     'UInt16': types.UInt16,
     'UInt8': types.UInt8,
-    'Date': DATE,
-    'DateTime': DATETIME,
-    'DateTime64': DATETIME,
-    'Float64': FLOAT,
-    'Float32': FLOAT,
+    'Date': types.Date,
+    'DateTime': types.DateTime,
+    'DateTime64': types.DateTime64,
+    'Float64': types.Float64,
+    'Float32': types.Float32,
     'Decimal': types.Decimal,
     'String': types.String,
     'UUID': types.UUID,
