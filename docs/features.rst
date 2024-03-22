@@ -46,7 +46,17 @@ Tables created in declarative way have lowercase with words separated by
 underscores naming convention. But you can easy set you own via SQLAlchemy
 ``__tablename__`` attribute.
 
-SQLAlchemy ``func`` proxy for real ClickHouse functions can be also used.
+
+Functions
++++++++++
+
+Many of the ClickHouse functions can be called using the SQLAlchemy ``func``
+proxy. A few of aggregate functions require special handling though. There
+following functions are supported:
+
+* ``func.quantile(0.5, column1)`` becomes ``quantile(0.5)(column1)``
+* ``func.quantileIf(0.5, column1, column2 > 10)`` becomes ``quantileIf(0.5)(column1, column2 > 10)``
+
 
 Dialect-specific options
 ++++++++++++++++++++++++
