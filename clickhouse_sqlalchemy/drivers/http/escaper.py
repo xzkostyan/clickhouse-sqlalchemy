@@ -25,7 +25,10 @@ class Escaper(object):
     def escape(self, parameters):
         if isinstance(parameters, dict):
             return {k: self.escape_item(v) for k, v in parameters.items()}
-        elif isinstance(parameters, (list, tuple)):
+        elif isinstance(parameters, tuple):
+            return "(" + ",".join(
+                [str(self.escape_item(x)) for x in parameters]) + ")"
+        elif isinstance(parameters, list):
             return "[" + ",".join(
                 [str(self.escape_item(x)) for x in parameters]) + "]"
         else:
@@ -62,7 +65,11 @@ class Escaper(object):
             return self.escape_decimal(item)
         elif isinstance(item, str):
             return self.escape_string(item)
-        elif isinstance(item, (list, tuple)):
+        elif isinstance(item, tuple):
+            return "(" + ", ".join(
+                [str(self.escape_item(x)) for x in item]
+            ) + ")"
+        elif isinstance(item, list):
             return "[" + ", ".join(
                 [str(self.escape_item(x)) for x in item]
             ) + "]"
