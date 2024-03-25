@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.1.11] - 2024-03-25
+### Fixed (backported from 0.2.x and 0.3.x )
+- [alembic] Table reflection for alembic version < 1.11. Solves issue [#274](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/274).
+- Guess number of `_reflect_table` alembic argsPull request [#249](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/249) by [9bany](https://github.com/9bany). Solves issue [#250](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/250).
+- Inconsistency in `ischema_names` type converters. Pull request [#216](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/216) by [AntonFriberg](https://github.com/AntonFriberg). Solves issue [#215](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/215).
+
 ## [0.1.10] - 2022-06-06
 ### Added
 - Documentation on Read the Docs: https://clickhouse-sqlalchemy.readthedocs.io
@@ -256,7 +262,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.10...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.11...HEAD
+[0.1.11]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.10...0.1.11
 [0.1.10]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.9...0.1.10
 [0.1.9]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.8...0.1.9
 [0.1.8]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.7...0.1.8
