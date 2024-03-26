@@ -1,7 +1,8 @@
 import enum
-from sqlalchemy import Column, inspect, types as sa_types
+from sqlalchemy import Column, func, inspect, types as sa_types
 
 from clickhouse_sqlalchemy import types, engines, Table
+
 from tests.testcase import BaseTestCase
 from tests.util import require_server_version, with_native_and_http_sessions
 
@@ -166,3 +167,65 @@ class ReflectionTestCase(BaseTestCase):
 
         self.assertIsInstance(coltype, types.DateTime)
         self.assertIsNone(coltype.timezone)
+
+    def test_aggregate_function(self):
+        coltype = self._type_round_trip(
+            types.AggregateFunction(func.sum(), types.UInt16)
+        )[0]['type']
+
+        self.assertIsInstance(coltype, types.AggregateFunction)
+        self.assertEqual(coltype.agg_func, 'sum')
+        self.assertEqual(len(coltype.nested_types), 1)
+        self.assertIsInstance(coltype.nested_types[0], types.UInt16)
+
+        coltype = self._type_round_trip(
+            types.AggregateFunction('quantiles(0.5, 0.9)', types.UInt32)
+        )[0]['type']
+        self.assertIsInstance(coltype, types.AggregateFunction)
+        self.assertEqual(coltype.agg_func, 'quantiles(0.5, 0.9)')
+        self.assertEqual(len(coltype.nested_types), 1)
+        self.assertIsInstance(coltype.nested_types[0], types.UInt32)
+
+        coltype = self._type_round_trip(
+            types.AggregateFunction(
+                func.argMin(), types.Float32, types.Float32
+            )
+        )[0]['type']
+        self.assertIsInstance(coltype, types.AggregateFunction)
+        self.assertEqual(coltype.agg_func, 'argMin')
+        self.assertEqual(len(coltype.nested_types), 2)
+        self.assertIsInstance(coltype.nested_types[0], types.Float32)
+        self.assertIsInstance(coltype.nested_types[1], types.Float32)
+
+        coltype = self._type_round_trip(
+            types.AggregateFunction(
+                'sum', types.Decimal(18, 2)
+            )
+        )[0]['type']
+        self.assertIsInstance(coltype, types.AggregateFunction)
+        self.assertEqual(coltype.agg_func, 'sum')
+        self.assertEqual(len(coltype.nested_types), 1)
+        self.assertIsInstance(coltype.nested_types[0], types.Decimal)
+        self.assertEqual(coltype.nested_types[0].precision, 18)
+        self.assertEqual(coltype.nested_types[0].scale, 2)
+
+    @require_server_version(22, 8, 21)
+    def test_simple_aggregate_function(self):
+        coltype = self._type_round_trip(
+            types.SimpleAggregateFunction(func.sum(), types.UInt64)
+        )[0]['type']
+
+        self.assertIsInstance(coltype, types.SimpleAggregateFunction)
+        self.assertEqual(coltype.agg_func, 'sum')
+        self.assertEqual(len(coltype.nested_types), 1)
+        self.assertIsInstance(coltype.nested_types[0], types.UInt64)
+
+        coltype = self._type_round_trip(
+            types.SimpleAggregateFunction(
+                'sum', types.Float64
+            )
+        )[0]['type']
+        self.assertIsInstance(coltype, types.SimpleAggregateFunction)
+        self.assertEqual(coltype.agg_func, 'sum')
+        self.assertEqual(len(coltype.nested_types), 1)
+        self.assertIsInstance(coltype.nested_types[0], types.Float64)

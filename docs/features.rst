@@ -599,6 +599,26 @@ You can specify cluster for materialized view in inner table definition.
                 {'clickhouse_cluster': 'my_cluster'}
             )
 
+Materialized views can also store the aggregated data in a table using the
+``AggregatingMergeTree`` engine. The aggregate columns are defined using
+``AggregateFunction`` or ``SimpleAggregateFunction``.
+
+    .. code-block:: python
+
+
+        # Define storage for Materialized View
+        class GroupedStatistics(Base):
+            date = Column(types.Date, primary_key=True)
+            metric1 = Column(SimpleAggregateFunction(sa.func.sum(), types.Int32), nullable=False)
+
+            __table_args__ = (
+                engines.AggregatingMergeTree(
+                    partition_by=func.toYYYYMM(date),
+                    order_by=(date, )
+                ),
+            )
+
+
 Basic DDL support
 -----------------
 

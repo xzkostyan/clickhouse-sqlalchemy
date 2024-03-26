@@ -1,5 +1,8 @@
-from sqlalchemy.sql.type_api import to_instance
+from typing import Type, Union
+
 from sqlalchemy import types
+from sqlalchemy.sql.functions import Function
+from sqlalchemy.sql.type_api import to_instance
 
 
 class ClickHouseTypeEngine(types.TypeEngine):
@@ -37,6 +40,11 @@ class Array(ClickHouseTypeEngine):
         self.item_type_impl = to_instance(item_type)
         super(Array, self).__init__()
 
+    def __repr__(self):
+        nested_type_str = \
+            f'{self.item_type_impl.__module__}.{self.item_type_impl!r}'
+        return f'Array({nested_type_str})'
+
     @property
     def python_type(self):
         return list
@@ -72,6 +80,10 @@ class LowCardinality(ClickHouseTypeEngine):
     def __init__(self, nested_type):
         self.nested_type = to_instance(nested_type)
         super(LowCardinality, self).__init__()
+
+    def __repr__(self):
+        nested_type_str = f'{self.nested_type.__module__}.{self.nested_type!r}'
+        return f'LowCardinality({nested_type_str})'
 
 
 class Int8(Int):
@@ -188,3 +200,49 @@ class Map(ClickHouseTypeEngine):
         self.key_type = key_type
         self.value_type = value_type
         super(Map, self).__init__()
+
+
+class AggregateFunction(ClickHouseTypeEngine):
+    __visit_name__ = 'aggregatefunction'
+
+    def __init__(
+        self,
+        agg_func: Union[Function, str],
+        *nested_types: Union[Type[ClickHouseTypeEngine], ClickHouseTypeEngine],
+    ):
+        self.agg_func = agg_func
+        self.nested_types = [to_instance(val) for val in nested_types]
+        super(AggregateFunction, self).__init__()
+
+    def __repr__(self) -> str:
+        type_strs = [f'{val.__module__}.{val!r}' for val in self.nested_types]
+
+        if isinstance(self.agg_func, str):
+            agg_str = self.agg_func
+        else:
+            agg_str = f'sa.func.{self.agg_func}'
+
+        return f"AggregateFunction({agg_str}, {', '.join(type_strs)})"
+
+
+class SimpleAggregateFunction(ClickHouseTypeEngine):
+    __visit_name__ = 'simpleaggregatefunction'
+
+    def __init__(
+        self,
+        agg_func: Union[Function, str],
+        *nested_types: Union[Type[ClickHouseTypeEngine], ClickHouseTypeEngine],
+    ):
+        self.agg_func = agg_func
+        self.nested_types = [to_instance(val) for val in nested_types]
+        super(SimpleAggregateFunction, self).__init__()
+
+    def __repr__(self) -> str:
+        type_strs = [f'{val.__module__}.{val!r}' for val in self.nested_types]
+
+        if isinstance(self.agg_func, str):
+            agg_str = self.agg_func
+        else:
+            agg_str = f'sa.func.{self.agg_func}'
+
+        return f"SimpleAggregateFunction({agg_str}, {', '.join(type_strs)})"
