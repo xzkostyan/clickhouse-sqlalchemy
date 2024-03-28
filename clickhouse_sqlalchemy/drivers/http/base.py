@@ -40,7 +40,8 @@ class ClickHouseDialect_http(ClickHouseDialect):
             kwargs['verify'] = False
 
         db_url = '%s://%s:%d/%s' % (protocol, url.host, port, endpoint)
-
+        if 'session_id' in kwargs.keys():
+            db_url += f"?session_id={kwargs['session_id']}"
         return (db_url, db_name, url.username, url.password), kwargs
 
     def _execute(self, connection, sql, scalar=False, **kwargs):
