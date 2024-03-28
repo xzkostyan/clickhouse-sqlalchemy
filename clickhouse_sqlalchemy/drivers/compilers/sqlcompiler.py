@@ -10,6 +10,31 @@ from ... import types
 
 
 class ClickHouseSQLCompiler(compiler.SQLCompiler):
+    def visit_select(
+        self,
+        select_stmt,
+        **kwargs,
+    ):
+        orig_compile_state_factory = select_stmt._compile_state_factory
+
+        def f(self, *args, **kwargs):
+            tmp = orig_compile_state_factory(self, *args, **kwargs)
+
+            if hasattr(tmp, 'select_statement'):
+                # Fix missed attributes
+                for attr in ["_with_cube", "_with_rollup", "_with_totals", "_final_clause", "_sample_clause", "_limit_by_clause", "_array_join"]:
+                    val = getattr(tmp.select_statement, attr, None)
+
+                    if val:
+                        setattr(tmp.statement, attr, val)
+
+            return tmp
+
+        select_stmt._compile_state_factory = f
+        tmp_select = super().visit_select(select_stmt=select_stmt, **kwargs)
+
+        return tmp_select
+
     def visit_mod_binary(self, binary, operator, **kw):
         return self.process(binary.left, **kw) + ' %% ' + \
             self.process(binary.right, **kw)
