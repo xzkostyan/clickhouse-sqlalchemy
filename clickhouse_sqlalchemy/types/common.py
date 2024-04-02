@@ -145,6 +145,8 @@ class Float64(Float):
 class Date(types.Date, ClickHouseTypeEngine):
     __visit_name__ = 'date'
 
+class Date32(Date):
+    __visit_name__ = 'date32'
 
 class DateTime(types.DateTime, ClickHouseTypeEngine):
     __visit_name__ = 'datetime'
