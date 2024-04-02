@@ -8,7 +8,7 @@ from tests.testcase import BaseTestCase, CompilationTestCase
 from tests.util import with_native_and_http_sessions
 
 
-class DateTimeCompilationTestCase(CompilationTestCase):
+class Date32CompilationTestCase(CompilationTestCase):
     def test_create_table(self):
         table = Table(
             'test', CompilationTestCase.metadata(),
@@ -22,7 +22,7 @@ class DateTimeCompilationTestCase(CompilationTestCase):
         )
 
 @with_native_and_http_sessions
-class DateTimeTestCase(BaseTestCase):
+class Date32TestCase(BaseTestCase):
     table = Table(
         'test', BaseTestCase.metadata(),
         Column('x', types.Date32, primary_key=True),
