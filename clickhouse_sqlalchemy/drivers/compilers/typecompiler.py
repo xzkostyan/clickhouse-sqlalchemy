@@ -59,7 +59,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_date(self, type_, **kw):
         return 'Date'
-    
+
     def visit_date32(self, type_, **kw):
         return 'Date32'
 

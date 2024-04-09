@@ -21,6 +21,7 @@ class Date32CompilationTestCase(CompilationTestCase):
             'CREATE TABLE test (x Date32) ENGINE = Memory'
         )
 
+
 @with_native_and_http_sessions
 class Date32TestCase(BaseTestCase):
     table = Table(
