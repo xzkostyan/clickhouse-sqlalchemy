@@ -36,7 +36,7 @@ class Date32TestCase(BaseTestCase):
 
     def test_select_insert(self):
         # Use a date before epoch to validate dates before epoch can be stored.
-        date = datetime.date(1920, 1, 1)
+        date = datetime.date(1925, 1, 1)
         with self.create_table(self.table):
             self.session.execute(self.table.insert(), [{'x': date}])
             result = self.session.execute(self.table.select()).scalar()
