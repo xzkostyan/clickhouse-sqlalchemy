@@ -10,7 +10,7 @@ from tests.util import with_native_and_http_sessions
 
 class Date32CompilationTestCase(CompilationTestCase):
     required_server_version = (21, 9, 0)
-    
+
     def test_create_table(self):
         table = Table(
             'test', CompilationTestCase.metadata(),
