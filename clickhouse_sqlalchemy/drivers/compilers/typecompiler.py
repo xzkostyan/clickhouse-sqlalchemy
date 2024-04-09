@@ -59,6 +59,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_date(self, type_, **kw):
         return 'Date'
+    
+    def visit_date32(self, type_, **kw):
+        return 'Date32'
 
     def visit_datetime(self, type_, **kw):
         if type_.timezone:

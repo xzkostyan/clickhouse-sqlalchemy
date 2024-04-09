@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from sqlalchemy import Column
 from sqlalchemy.sql.ddl import CreateTable
@@ -30,8 +30,12 @@ class Date32TestCase(BaseTestCase):
     )
 
     def test_select_insert(self):
-        dt = datetime(2018, 1, 1, 0, 0)
-
+        # Use a date before epoch to validate dates before epoch can be stored.
+        date = datetime.date(1920, 1, 1)
         with self.create_table(self.table):
-            self.session.execute(self.table.insert(), [{'x': dt}])
-            self.assertEqual(self.session.query(self.table.c.x).scalar(), dt)
+            self.session.execute(self.table.insert(), [{'x': date}])
+            result = self.session.execute(self.table.select()).scalar()
+            if isinstance(result, datetime.date):
+                self.assertEqual(result, date)
+            else:
+                self.assertEqual(result, date.isoformat())
