@@ -35,6 +35,7 @@ ischema_names = {
     'UInt16': types.UInt16,
     'UInt8': types.UInt8,
     'Date': types.Date,
+    'Date32': types.Date32,
     'DateTime': types.DateTime,
     'DateTime64': types.DateTime64,
     'Float64': types.Float64,
