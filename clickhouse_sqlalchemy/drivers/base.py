@@ -273,7 +273,7 @@ class ClickHouseDialect(default.DefaultDialect):
             coltype = self.ischema_names['_map']
             inner_types = [
                 self._get_column_type(name, t.strip())
-                for t in inner.split(',')
+                for t in inner.split(',', 1)
             ]
             return coltype(*inner_types)
 
