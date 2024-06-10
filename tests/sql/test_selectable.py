@@ -600,7 +600,9 @@ class SelectTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.compile(query, literal_binds=True),
-            'SELECT mapKeys(t1.y) AS "mapKeys_1", mapValues(t1.y) AS "mapValues_1" FROM t1 '
+            'SELECT mapKeys(t1.y) AS "mapKeys_1", '
+            'mapValues(t1.y) AS "mapValues_1" '
+            'FROM t1 '
             'WHERE has(t1.y, \'foo\')'
         )
 
@@ -608,7 +610,13 @@ class SelectTestCase(BaseTestCase):
         table = self._make_table(
             't1',
             Column('x', types.Int32, primary_key=True),
-            Column('y', types.Map(types.String, types.Map(types.String, types.String)))
+            Column(
+                'y',
+                types.Map(
+                    types.String,
+                    types.Map(types.String, types.String)
+                )
+            )
         )
 
         query = select(
@@ -618,6 +626,8 @@ class SelectTestCase(BaseTestCase):
         )
         self.assertEqual(
             self.compile(query, literal_binds=True),
-            'SELECT mapKeys(t1.y) AS "mapKeys_1", mapValues(t1.y) AS "mapValues_1" FROM t1 '
+            'SELECT mapKeys(t1.y) AS "mapKeys_1", '
+            'mapValues(t1.y) AS "mapValues_1" '
+            'FROM t1 '
             'WHERE has(t1.y, \'foo\')'
         )
