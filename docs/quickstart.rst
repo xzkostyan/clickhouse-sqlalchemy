@@ -18,27 +18,27 @@ Let's define some table, insert data into it and query inserted data.
     .. code-block:: python
 
         from sqlalchemy import create_engine, Column, MetaData
-
+        
         from clickhouse_sqlalchemy import (
             Table, make_session, get_declarative_base, types, engines
         )
-
+        
         uri = 'clickhouse+native://localhost/default'
-
+        
         engine = create_engine(uri)
         session = make_session(engine)
         metadata = MetaData(bind=engine)
-
+        
         Base = get_declarative_base(metadata=metadata)
-
+        
         class Rate(Base):
             day = Column(types.Date, primary_key=True)
             value = Column(types.Int32)
-
+        
             __table_args__ = (
                 engines.Memory(),
             )
-
+        
         # Emits CREATE TABLE statement
         Rate.__table__.create()
 
