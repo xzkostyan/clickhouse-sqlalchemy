@@ -279,7 +279,23 @@ class DDLTestCase(BaseTestCase):
 
         self.assertEqual(
             self.compile(CreateColumn(col)),
-            'x2 Int8 AFTER x1'
+            'x2 Int8'
+        )
+
+    def test_create_table_after(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('c1', types.Int8),
+            Column('c2', types.Boolean, clickhouse_after=text('c1')),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'c1 Int8, '
+            'c2 Bool) '
+            'ENGINE = Memory'
         )
 
     def test_create_table_tuple(self):
