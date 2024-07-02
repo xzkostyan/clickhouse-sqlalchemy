@@ -30,7 +30,7 @@ class Boolean(types.Boolean, ClickHouseTypeEngine):
     pass
 
 
-class JSON(types.JOSN, ClickHouseTypeEngine):
+class JSON(types.JSON, ClickHouseTypeEngine):
     __visit_name__ = 'json'
 
 
