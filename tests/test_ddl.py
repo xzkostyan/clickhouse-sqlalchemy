@@ -296,6 +296,20 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    def test_create_table_named_tuple(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('x', types.Tuple(('name', types.String), ('value', types.Float32))),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'x Tuple(name String, value Float32)) '
+            'ENGINE = Memory'
+        )
+
     @require_server_version(21, 1, 3)
     def test_create_table_map(self):
         table = Table(
