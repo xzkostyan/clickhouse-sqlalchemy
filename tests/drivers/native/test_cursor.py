@@ -58,6 +58,8 @@ class CursorTestCase(NativeSessionTestCase):
         ).first()
         self.session.execute(text("SYSTEM FLUSH LOGS"))
         rv = self.session.execute(
-            text(f"SELECT COUNT(*) FROM system.query_log WHERE query_id = '{query_id}'")
+            text(f"SELECT COUNT(*) "
+                 f"FROM system.query_log "
+                 f"WHERE query_id = '{query_id}'")
         ).first()
         self.assertEqual(rv[0], 2)
