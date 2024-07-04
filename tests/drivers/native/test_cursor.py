@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy import text
 
 from tests.testcase import NativeSessionTestCase
@@ -49,7 +51,6 @@ class CursorTestCase(NativeSessionTestCase):
         self.assertEqual(len(rv.fetchall()), 1)
 
     def test_set_query_id(self):
-        import uuid
         query_id = str(uuid.uuid4())
         self.session.execute(
             text("SELECT 1"),
