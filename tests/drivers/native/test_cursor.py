@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy import text
 
 from tests.testcase import NativeSessionTestCase
@@ -47,3 +49,17 @@ class CursorTestCase(NativeSessionTestCase):
             dict(rv.context.execution_options), {"settings": {"final": 1}}
         )
         self.assertEqual(len(rv.fetchall()), 1)
+
+    def test_set_query_id(self):
+        query_id = str(uuid.uuid4())
+        self.session.execute(
+            text("SELECT 1"),
+            execution_options={'query_id': query_id}
+        ).first()
+        self.session.execute(text("SYSTEM FLUSH LOGS"))
+        rv = self.session.execute(
+            text(f"SELECT COUNT(*) "
+                 f"FROM system.query_log "
+                 f"WHERE query_id = '{query_id}'")
+        ).first()
+        self.assertEqual(rv[0], 2)
