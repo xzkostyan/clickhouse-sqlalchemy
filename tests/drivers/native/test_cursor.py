@@ -52,14 +52,11 @@ class CursorTestCase(NativeSessionTestCase):
 
     def test_set_query_id(self):
         query_id = str(uuid.uuid4())
-        self.session.execute(
-            text("SELECT 1"),
-            execution_options={'query_id': query_id}
-        ).first()
-        self.session.execute(text("SYSTEM FLUSH LOGS"))
         rv = self.session.execute(
-            text(f"SELECT COUNT(*) "
-                 f"FROM system.query_log "
-                 f"WHERE query_id = '{query_id}'")
-        ).first()
-        self.assertEqual(rv[0], 2)
+            text(
+                f"SELECT query_id "
+                f"FROM system.processes "
+                f"WHERE query_id = '{query_id}'"
+            ), execution_options={'query_id': query_id}
+        )
+        self.assertEqual(rv.fetchall()[0][0], query_id)
