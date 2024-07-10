@@ -135,7 +135,7 @@ class ClickHouseDialect(default.DefaultDialect):
     ]
 
     inspector = ClickHouseInspector
-    
+
     def __init__(
         self,
         json_serializer=None,

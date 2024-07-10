@@ -86,7 +86,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_boolean(self, type_, **kw):
         return 'Bool'
-    
+
     def visit_json(self, type_, **kw):
         return 'JSON'
 

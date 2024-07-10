@@ -23,7 +23,10 @@ class JSONCompilationTestCase(CompilationTestCase):
         )
 
 
-@parameterized_class([{'session': native_session}], class_name_func=class_name_func)
+@parameterized_class(
+    [{'session': native_session}],
+    class_name_func=class_name_func
+)
 class JSONTestCase(BaseTestCase):
     table = Table(
         'test', BaseTestCase.metadata(),
@@ -37,15 +40,20 @@ class JSONTestCase(BaseTestCase):
         self.table.drop(bind=self.session.bind, if_exists=True)
         try:
             # http session is unsupport
-            self.session.execute(text('SET allow_experimental_object_type = 1;'))
+            self.session.execute(
+                text('SET allow_experimental_object_type = 1;')
+            )
             self.session.execute(text(self.compile(CreateTable(self.table))))
             self.session.execute(self.table.insert(), [{'x': data}])
             coltype = inspect(self.session.bind).get_columns('test')[0]['type']
             self.assertIsInstance(coltype, types.JSON)
             # https://clickhouse.com/docs/en/sql-reference/functions/json-functions#tojsonstring
-            # The json type returns a tuple of values by default, 
-            # which needs to be converted to json using the toJSONString function.
-            res = self.session.query(func.toJSONString(self.table.c.x)).scalar()
+            # The json type returns a tuple of values by default,
+            # which needs to be converted to json using the
+            # toJSONString function.
+            res = self.session.query(
+                func.toJSONString(self.table.c.x)
+            ).scalar()
             self.assertEqual(json.loads(res), data)
         finally:
             self.table.drop(bind=self.session.bind, if_exists=True)
