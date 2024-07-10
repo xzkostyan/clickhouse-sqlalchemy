@@ -299,7 +299,13 @@ class DDLTestCase(BaseTestCase):
     def test_create_table_named_tuple(self):
         table = Table(
             't1', self.metadata(),
-            Column('x', types.Tuple(('name', types.String), ('value', types.Float32))),
+            Column(
+                'x',
+                types.Tuple(
+                    ('name', types.String),
+                    ('value', types.Float32)
+                )
+            ),
             engines.Memory()
         )
 
