@@ -28,6 +28,8 @@ class JSONCompilationTestCase(CompilationTestCase):
     class_name_func=class_name_func
 )
 class JSONTestCase(BaseTestCase):
+    required_server_version = (22, 3, 2)
+
     table = Table(
         'test', BaseTestCase.metadata(),
         Column('x', types.JSON),
