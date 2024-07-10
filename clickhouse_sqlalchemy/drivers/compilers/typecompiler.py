@@ -121,10 +121,26 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         return 'IPv6'
 
     def visit_tuple(self, type_, **kw):
-        cols = (
-            self.process(type_api.to_instance(nested_type), **kw)
+        cols = []
+        is_named_type = all([
+            isinstance(nested_type, tuple) and len(nested_type) == 2
             for nested_type in type_.nested_types
-        )
+        ])
+        if is_named_type:
+            for nested_type in type_.nested_types:
+                name = nested_type[0]
+                name_type = nested_type[1]
+                inner_type = self.process(
+                    type_api.to_instance(name_type),
+                    **kw
+                )
+                cols.append(
+                    f'{name} {inner_type}')
+        else:
+            cols = (
+                self.process(type_api.to_instance(nested_type), **kw)
+                for nested_type in type_.nested_types
+            )
         return 'Tuple(%s)' % ', '.join(cols)
 
     def visit_map(self, type_, **kw):
