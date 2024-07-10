@@ -50,6 +50,7 @@ ischema_names = {
     'FixedString': types.String,
     'Enum8': types.Enum8,
     'Enum16': types.Enum16,
+    'Object(\'json\')': types.JSON,
     '_array': types.Array,
     '_nullable': types.Nullable,
     '_lowcardinality': types.LowCardinality,
@@ -134,6 +135,16 @@ class ClickHouseDialect(default.DefaultDialect):
     ]
 
     inspector = ClickHouseInspector
+
+    def __init__(
+        self,
+        json_serializer=None,
+        json_deserializer=None,
+        **kwargs,
+    ):
+        default.DefaultDialect.__init__(self, **kwargs)
+        self._json_deserializer = json_deserializer
+        self._json_serializer = json_serializer
 
     def initialize(self, connection):
         super(ClickHouseDialect, self).initialize(connection)
