@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from sqlalchemy import Column, Numeric
+from sqlalchemy import Column, Numeric, select, cast, column
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
@@ -34,6 +34,30 @@ class NumericCompilationTestCase(CompilationTestCase):
         self.assertEqual(
             self.compile(CreateTable(table)),
             'CREATE TABLE test (x Decimal(10, 2)) ENGINE = Memory'
+        )
+
+    def test_scale_and_precision(self):
+        self.assertEqual(
+            self.compile(cast(10, Numeric(10, 2))),
+            "CAST(%(param_1)s AS Decimal(10, 2))"
+        )
+
+    def test_no_scale(self):
+        self.assertEqual(
+            self.compile(cast(10, Numeric(10))),
+            "CAST(%(param_1)s AS Decimal(10))"
+        )
+
+    def test_no_precision(self):
+        self.assertEqual(
+            self.compile(cast(10, Numeric())),
+            "CAST(%(param_1)s AS Decimal)"
+        )
+
+    def test_division_works(self):
+        self.assertEqual(
+            self.compile(select(column('x') / column('y'))),
+            "SELECT x / CAST(y AS Decimal) AS anon_1"
         )
 
 

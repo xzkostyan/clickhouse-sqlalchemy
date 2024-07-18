@@ -82,7 +82,13 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         return 'Float64'
 
     def visit_numeric(self, type_, **kw):
-        return 'Decimal(%s, %s)' % (type_.precision, type_.scale)
+        if type_.precision is None:
+            return "Decimal"
+        elif type_.scale is None:
+            return "Decimal(%(precision)s)" % {"precision": type_.precision}
+        else:
+            return ("Decimal(%(precision)s, %(scale)s)" %
+                    {"precision": type_.precision, "scale": type_.scale})
 
     def visit_boolean(self, type_, **kw):
         return 'Bool'
