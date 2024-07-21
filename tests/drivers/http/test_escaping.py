@@ -1,5 +1,6 @@
 from decimal import Decimal
 from datetime import date
+import uuid
 
 from sqlalchemy import Column, literal
 
@@ -29,6 +30,10 @@ class EscapingTestCase(HttpSessionTestCase):
         self.assertEqual(e.escape([10.0]), '[10.0]')
         self.assertEqual(e.escape([date(2017, 1, 2)]), "['2017-01-02']")
         self.assertEqual(e.escape(dict(x=10, y=20)), {'x': 10, 'y': 20})
+        self.assertEqual(
+            e.escape(uuid.UUID("ef3e3d4b-c782-4993-83fc-894ff0aba8ff")),
+            "ef3e3d4b-c782-4993-83fc-894ff0aba8ff"
+        )
         with self.assertRaises(Exception) as ex:
             e.escape([object()])
 
