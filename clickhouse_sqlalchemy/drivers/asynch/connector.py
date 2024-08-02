@@ -114,10 +114,8 @@ class AsyncAdapt_asynch_dbapi:
         self.paramstyle = 'pyformat'
         self._init_dbapi_attributes()
 
-    class Error(Exception):
-        pass
-
     def _init_dbapi_attributes(self):
+        self.Error = self.asynch.errors.ClickHouseException
         for name in (
                 'ServerException',
                 'UnexpectedPacketFromServerError',
