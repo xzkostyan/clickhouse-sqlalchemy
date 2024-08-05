@@ -35,3 +35,16 @@ class CursorTestCase(AsynchSessionTestCase):
         )
 
         self.assertListEqual(list(rv), [(x,) for x in range(5)])
+
+    @run_async
+    async def test_execute_with_stream(self):
+        conn = await self.get_connection()
+        async with conn.stream(
+            text("SELECT * FROM system.numbers LIMIT 10")
+        ) as result:
+            idx = 0
+            async for r in result:
+                self.assertEqual(r[0], idx)
+                idx += 1
+
+        self.assertEqual(idx, 10)
