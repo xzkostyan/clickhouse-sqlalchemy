@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy import text
 
 from tests.testcase import NativeSessionTestCase
@@ -47,3 +49,14 @@ class CursorTestCase(NativeSessionTestCase):
             dict(rv.context.execution_options), {"settings": {"final": 1}}
         )
         self.assertEqual(len(rv.fetchall()), 1)
+
+    def test_set_query_id(self):
+        query_id = str(uuid.uuid4())
+        rv = self.session.execute(
+            text(
+                f"SELECT query_id "
+                f"FROM system.processes "
+                f"WHERE query_id = '{query_id}'"
+            ), execution_options={'query_id': query_id}
+        )
+        self.assertEqual(rv.fetchall()[0][0], query_id)

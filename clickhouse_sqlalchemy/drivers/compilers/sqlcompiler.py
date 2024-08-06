@@ -4,6 +4,8 @@ from sqlalchemy.sql import compiler, elements, COLLECT_CARTESIAN_PRODUCTS, \
 from sqlalchemy.sql import type_api
 from sqlalchemy.util import inspect_getfullargspec
 
+import clickhouse_sqlalchemy.sql.functions  # noqa:F401
+
 from ... import types
 
 

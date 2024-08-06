@@ -13,7 +13,7 @@ from .compilers.ddlcompiler import ClickHouseDDLCompiler
 from .compilers.sqlcompiler import ClickHouseSQLCompiler
 from .compilers.typecompiler import ClickHouseTypeCompiler
 from .reflection import ClickHouseInspector
-from .util import get_inner_spec
+from .util import get_inner_spec, parse_arguments
 from .. import types
 
 # Column specifications
@@ -35,6 +35,7 @@ ischema_names = {
     'UInt16': types.UInt16,
     'UInt8': types.UInt8,
     'Date': types.Date,
+    'Date32': types.Date32,
     'DateTime': types.DateTime,
     'DateTime64': types.DateTime64,
     'Float64': types.Float64,
@@ -49,11 +50,14 @@ ischema_names = {
     'FixedString': types.String,
     'Enum8': types.Enum8,
     'Enum16': types.Enum16,
+    'Object(\'json\')': types.JSON,
     '_array': types.Array,
     '_nullable': types.Nullable,
     '_lowcardinality': types.LowCardinality,
     '_tuple': types.Tuple,
     '_map': types.Map,
+    '_aggregatefunction': types.AggregateFunction,
+    '_simpleaggregatefunction': types.SimpleAggregateFunction,
 }
 
 
@@ -131,6 +135,16 @@ class ClickHouseDialect(default.DefaultDialect):
     ]
 
     inspector = ClickHouseInspector
+
+    def __init__(
+        self,
+        json_serializer=None,
+        json_deserializer=None,
+        **kwargs,
+    ):
+        default.DefaultDialect.__init__(self, **kwargs)
+        self._json_deserializer = json_deserializer
+        self._json_serializer = json_serializer
 
     def initialize(self, connection):
         super(ClickHouseDialect, self).initialize(connection)
@@ -230,6 +244,32 @@ class ClickHouseDialect(default.DefaultDialect):
             coltype = self.ischema_names['_lowcardinality']
             return coltype(self._get_column_type(name, inner))
 
+        elif spec.startswith('AggregateFunction'):
+            params = spec[18:-1]
+
+            arguments = parse_arguments(params)
+            agg_func, inner = arguments[0], arguments[1:]
+
+            inner_types = [
+                self._get_column_type(name, param)
+                for param in inner
+            ]
+            coltype = self.ischema_names['_aggregatefunction']
+            return coltype(agg_func, *inner_types)
+
+        elif spec.startswith('SimpleAggregateFunction'):
+            params = spec[24:-1]
+
+            arguments = parse_arguments(params)
+            agg_func, inner = arguments[0], arguments[1:]
+
+            inner_types = [
+                self._get_column_type(name, param)
+                for param in inner
+            ]
+            coltype = self.ischema_names['_simpleaggregatefunction']
+            return coltype(agg_func, *inner_types)
+
         elif spec.startswith('Tuple'):
             inner = spec[6:-1]
             coltype = self.ischema_names['_tuple']
@@ -244,7 +284,7 @@ class ClickHouseDialect(default.DefaultDialect):
             coltype = self.ischema_names['_map']
             inner_types = [
                 self._get_column_type(name, t.strip())
-                for t in inner.split(',')
+                for t in inner.split(',', 1)
             ]
             return coltype(*inner_types)
 

@@ -13,6 +13,7 @@ jobs:
           - "3.11"
           - "3.12"
         clickhouse-version:
+          - 24.1.8.22
           - 23.8.4.69
           - 22.5.1.2079
           - 19.3.5
@@ -77,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Finished
-        uses: coverallsapp/github-action@v2.2.3
+        uses: coverallsapp/github-action@v2.3.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true

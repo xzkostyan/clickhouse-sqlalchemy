@@ -22,6 +22,7 @@ __all__ = [
     'Float32',
     'Float64',
     'Date',
+    'Date32',
     'DateTime',
     'DateTime64',
     'Enum',
@@ -30,9 +31,12 @@ __all__ = [
     'Decimal',
     'IPv4',
     'IPv6',
+    'JSON',
     'Nested',
     'Tuple',
     'Map',
+    'AggregateFunction',
+    'SimpleAggregateFunction',
 ]
 
 from .common import String
@@ -58,14 +62,18 @@ from .common import UInt256
 from .common import Float32
 from .common import Float64
 from .common import Date
+from .common import Date32
 from .common import DateTime
 from .common import DateTime64
 from .common import Enum
 from .common import Enum8
 from .common import Enum16
 from .common import Decimal
+from .common import JSON
 from .common import Tuple
 from .common import Map
+from .common import AggregateFunction
+from .common import SimpleAggregateFunction
 from .ip import IPv4
 from .ip import IPv6
 from .nested import Nested

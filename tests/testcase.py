@@ -1,5 +1,5 @@
 import re
-from contextlib import contextmanager, asynccontextmanager
+from contextlib import contextmanager
 from unittest import TestCase
 
 from sqlalchemy import MetaData, text
@@ -97,46 +97,29 @@ class BaseAsynchTestCase(BaseTestCase):
     session = asynch_session
 
     @classmethod
-    @run_async
-    async def setUpClass(cls):
+    def setUpClass(cls):
         # System database is always present.
-        await system_asynch_session.execute(
+        run_async(system_asynch_session.execute)(
             text('DROP DATABASE IF EXISTS {}'.format(cls.database))
         )
-        await system_asynch_session.execute(
+        run_async(system_asynch_session.execute)(
             text('CREATE DATABASE {}'.format(cls.database))
         )
 
         version = (
-            await system_asynch_session.execute(text('SELECT version()'))
+            run_async(system_asynch_session.execute)(text('SELECT version()'))
         ).fetchall()
         cls.server_version = tuple(int(x) for x in version[0][0].split('.'))
 
-        super(BaseTestCase, cls).setUpClass()
+    def setUp(self):
+        self.connection = run_async(self.session.connection)()
+        super(BaseAsynchTestCase, self).setUp()
 
-    @asynccontextmanager
-    async def create_table(self, table):
-        metadata = self.metadata()
-        await self.run_sync(metadata.drop_all)
-        await self.run_sync(metadata.create_all)
-
-        try:
-            yield
-        finally:
-            await self.run_sync(metadata.drop_all)
-
-    async def get_connection(self):
-        return await self.session.connection()
+    def _callTestMethod(self, method):
+        return run_async(method)()
 
     async def run_sync(self, f):
-        conn = await self.get_connection()
-        return await conn.run_sync(f)
-
-    async def session_scalar(self, statement):
-        def wrapper(session):
-            return session.query(statement).scalar()
-
-        return await self.session.run_sync(wrapper)
+        return await self.connection.run_sync(f)
 
 
 class HttpSessionTestCase(BaseTestCase):

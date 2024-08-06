@@ -86,7 +86,7 @@ class ClickHouseDialectTestCase(BaseTestCase):
         db_views = self.dialect.get_view_names(self.connection, test_database)
         self.assertNotIn(self.table.name, db_views)
 
-    def test_reflecttable(self):
+    def test_reflect_table(self):
         self.table.create(self.session.bind)
         meta = self.metadata()
         insp = inspect(self.session.bind)
@@ -95,7 +95,7 @@ class ClickHouseDialectTestCase(BaseTestCase):
 
         self.assertEqual(self.table.name, reflected_table.name)
 
-    def test_reflecttable_with_schema(self):
+    def test_reflect_table_with_schema(self):
         # Imitates calling sequence for clients like Superset that look
         # across schemas.
         meta = self.metadata()
@@ -146,9 +146,8 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
     session = asynch_session
 
-    @run_async
-    async def setUp(self):
-        super().setUp()
+    def setUp(self):
+        super(ClickHouseAsynchDialectTestCase, self).setUp()
         self.test_metadata = self.metadata()
         self.table = Table(
             'test_exists_table',
@@ -156,12 +155,11 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
             Column('x', types.Int32, primary_key=True),
             engines.Memory()
         )
-        await self.run_sync(self.test_metadata.drop_all)
+        run_async(self.connection.run_sync)(self.test_metadata.drop_all)
 
-    @run_async
-    async def tearDown(self):
-        await self.run_sync(self.test_metadata.drop_all)
-        super().tearDown()
+    def tearDown(self):
+        run_async(self.connection.run_sync)(self.test_metadata.drop_all)
+        super(ClickHouseAsynchDialectTestCase, self).tearDown()
 
     async def run_inspector_method(self, method, *args, **kwargs):
         def _run(conn):
@@ -170,7 +168,6 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
         return await self.run_sync(_run)
 
-    @run_async
     async def test_has_table(self):
         self.assertFalse(
             await self.run_inspector_method('has_table', self.table.name)
@@ -182,7 +179,6 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
             await self.run_inspector_method('has_table', self.table.name)
         )
 
-    @run_async
     async def test_has_table_with_schema(self):
         self.assertFalse(
             await self.run_inspector_method(
@@ -199,7 +195,6 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
             )
         )
 
-    @run_async
     async def test_get_table_names(self):
         await self.run_sync(self.test_metadata.create_all)
 
@@ -207,7 +202,6 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
         self.assertIn(self.table.name, db_tables)
 
-    @run_async
     async def test_get_table_names_with_schema(self):
         await self.run_sync(self.test_metadata.create_all)
 
@@ -218,7 +212,6 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
         self.assertIn('columns', db_tables)
 
-    @run_async
     async def test_get_view_names(self):
         await self.run_sync(self.test_metadata.create_all)
 
@@ -226,7 +219,6 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
         self.assertNotIn(self.table.name, db_views)
 
-    @run_async
     async def test_get_view_names_with_schema(self):
         await self.run_sync(self.test_metadata.create_all)
 
@@ -237,8 +229,7 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
         self.assertNotIn(self.table.name, db_views)
 
-    @run_async
-    async def test_reflecttable(self):
+    async def test_reflect_table(self):
         await self.run_sync(self.test_metadata.create_all)
         meta = self.metadata()
 
@@ -247,8 +238,7 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
         self.assertEqual(self.table.name, reflected_table.name)
 
-    @run_async
-    async def test_reflecttable_with_schema(self):
+    async def test_reflect_table_with_schema(self):
         # Imitates calling sequence for clients like Superset that look
         # across schemas.
         meta = self.metadata()
@@ -260,17 +250,15 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
         if self.server_version >= (18, 16, 0):
             self.assertIsNone(reflected_table.engine)
 
-    @run_async
     async def test_get_schema_names(self):
         schemas = await self.run_inspector_method('get_schema_names')
         self.assertIn(test_database, schemas)
 
-    def test_columns_compilation(self):
+    async def test_columns_compilation(self):
         # should not raise UnsupportedCompilationError
         col = Column('x', types.Nullable(types.Int32))
         self.assertEqual(str(col.type), 'Nullable(Int32)')
 
-    @run_async
     @require_server_version(19, 16, 2, is_async=True)
     async def test_empty_set_expr(self):
         numbers = Table(
@@ -310,7 +298,8 @@ class CachedServerVersionTestCase(BaseTestCase):
     def test_server_version_native(self):
         return self._test_server_version_any(system_native_uri)
 
-    @run_async
+
+class CachedServerVersionAsyncTestCase(BaseAsynchTestCase):
     async def test_server_version_asynch(self):
         engine_session = make_session(create_async_engine(
             system_asynch_uri,

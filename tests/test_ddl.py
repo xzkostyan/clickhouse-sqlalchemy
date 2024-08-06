@@ -296,6 +296,26 @@ class DDLTestCase(BaseTestCase):
             'ENGINE = Memory'
         )
 
+    def test_create_table_named_tuple(self):
+        table = Table(
+            't1', self.metadata(),
+            Column(
+                'x',
+                types.Tuple(
+                    ('name', types.String),
+                    ('value', types.Float32)
+                )
+            ),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'x Tuple(name String, value Float32)) '
+            'ENGINE = Memory'
+        )
+
     @require_server_version(21, 1, 3)
     def test_create_table_map(self):
         table = Table(
@@ -308,6 +328,39 @@ class DDLTestCase(BaseTestCase):
             self.compile(CreateTable(table)),
             'CREATE TABLE t1 ('
             'x Map(String, String)) '
+            'ENGINE = Memory'
+        )
+
+    def test_create_aggregate_function(self):
+        table = Table(
+            't1', self.metadata(),
+            Column('total', types.AggregateFunction(func.sum(), types.UInt32)),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'total AggregateFunction(sum(), UInt32)) '
+            'ENGINE = Memory'
+        )
+
+    @require_server_version(22, 8, 21)
+    def test_create_simple_aggregate_function(self):
+        table = Table(
+            't1', self.metadata(),
+            Column(
+                'total', types.SimpleAggregateFunction(
+                    func.sum(), types.UInt32
+                )
+            ),
+            engines.Memory()
+        )
+
+        self.assertEqual(
+            self.compile(CreateTable(table)),
+            'CREATE TABLE t1 ('
+            'total SimpleAggregateFunction(sum(), UInt32)) '
             'ENGINE = Memory'
         )
 

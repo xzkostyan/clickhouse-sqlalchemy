@@ -4,11 +4,9 @@ from clickhouse_sqlalchemy import engines, types, Table
 from asynch.errors import TypeMismatchError
 
 from tests.testcase import AsynchSessionTestCase
-from tests.util import run_async
 
 
 class NativeInsertTestCase(AsynchSessionTestCase):
-    @run_async
     async def test_rowcount_return1(self):
         metadata = self.metadata()
         table = Table(
@@ -37,7 +35,6 @@ class NativeInsertTestCase(AsynchSessionTestCase):
         )
         self.assertEqual(rv.rowcount, -1)
 
-    @run_async
     async def test_types_check(self):
         metadata = self.metadata()
         table = Table(

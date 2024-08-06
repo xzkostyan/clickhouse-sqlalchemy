@@ -60,6 +60,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_date(self, type_, **kw):
         return 'Date'
 
+    def visit_date32(self, type_, **kw):
+        return 'Date32'
+
     def visit_datetime(self, type_, **kw):
         if type_.timezone:
             return "DateTime('%s')" % type_.timezone
@@ -83,6 +86,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_boolean(self, type_, **kw):
         return 'Bool'
+
+    def visit_json(self, type_, **kw):
+        return 'JSON'
 
     def visit_nested(self, nested, **kwargs):
         ddl_compiler = self.dialect.ddl_compiler(self.dialect, None)
@@ -118,10 +124,26 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         return 'IPv6'
 
     def visit_tuple(self, type_, **kw):
-        cols = (
-            self.process(type_api.to_instance(nested_type), **kw)
+        cols = []
+        is_named_type = all([
+            isinstance(nested_type, tuple) and len(nested_type) == 2
             for nested_type in type_.nested_types
-        )
+        ])
+        if is_named_type:
+            for nested_type in type_.nested_types:
+                name = nested_type[0]
+                name_type = nested_type[1]
+                inner_type = self.process(
+                    type_api.to_instance(name_type),
+                    **kw
+                )
+                cols.append(
+                    f'{name} {inner_type}')
+        else:
+            cols = (
+                self.process(type_api.to_instance(nested_type), **kw)
+                for nested_type in type_.nested_types
+            )
         return 'Tuple(%s)' % ', '.join(cols)
 
     def visit_map(self, type_, **kw):
@@ -130,4 +152,30 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         return 'Map(%s, %s)' % (
             self.process(key_type, **kw),
             self.process(value_type, **kw)
+        )
+
+    def visit_aggregatefunction(self, type_, **kw):
+        types = [type_api.to_instance(val) for val in type_.nested_types]
+        type_strings = [self.process(val, **kw) for val in types]
+
+        if isinstance(type_.agg_func, str):
+            agg_str = type_.agg_func
+        else:
+            agg_str = str(type_.agg_func.compile(dialect=self.dialect))
+
+        return "AggregateFunction(%s, %s)" % (
+            agg_str, ", ".join(type_strings)
+        )
+
+    def visit_simpleaggregatefunction(self, type_, **kw):
+        types = [type_api.to_instance(val) for val in type_.nested_types]
+        type_strings = [self.process(val, **kw) for val in types]
+
+        if isinstance(type_.agg_func, str):
+            agg_str = type_.agg_func
+        else:
+            agg_str = str(type_.agg_func.compile(dialect=self.dialect))
+
+        return "SimpleAggregateFunction(%s, %s)" % (
+            agg_str, ", ".join(type_strings)
         )

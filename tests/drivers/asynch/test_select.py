@@ -3,12 +3,9 @@ from sqlalchemy import Column
 from clickhouse_sqlalchemy import engines, types, Table
 from tests.session import mocked_engine
 from tests.testcase import AsynchSessionTestCase
-from tests.util import run_async
 
 
 class SanityTestCase(AsynchSessionTestCase):
-
-    @run_async
     async def test_sanity(self):
         with mocked_engine(self.session) as engine:
             metadata = self.metadata()

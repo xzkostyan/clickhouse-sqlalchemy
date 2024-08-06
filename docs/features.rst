@@ -46,7 +46,17 @@ Tables created in declarative way have lowercase with words separated by
 underscores naming convention. But you can easy set you own via SQLAlchemy
 ``__tablename__`` attribute.
 
-SQLAlchemy ``func`` proxy for real ClickHouse functions can be also used.
+
+Functions
++++++++++
+
+Many of the ClickHouse functions can be called using the SQLAlchemy ``func``
+proxy. A few of aggregate functions require special handling though. There
+following functions are supported:
+
+* ``func.quantile(0.5, column1)`` becomes ``quantile(0.5)(column1)``
+* ``func.quantileIf(0.5, column1, column2 > 10)`` becomes ``quantileIf(0.5)(column1, column2 > 10)``
+
 
 Dialect-specific options
 ++++++++++++++++++++++++
@@ -588,6 +598,26 @@ You can specify cluster for materialized view in inner table definition.
                 engines.ReplicatedSummingMergeTree(...),
                 {'clickhouse_cluster': 'my_cluster'}
             )
+
+Materialized views can also store the aggregated data in a table using the
+``AggregatingMergeTree`` engine. The aggregate columns are defined using
+``AggregateFunction`` or ``SimpleAggregateFunction``.
+
+    .. code-block:: python
+
+
+        # Define storage for Materialized View
+        class GroupedStatistics(Base):
+            date = Column(types.Date, primary_key=True)
+            metric1 = Column(SimpleAggregateFunction(sa.func.sum(), types.Int32), nullable=False)
+
+            __table_args__ = (
+                engines.AggregatingMergeTree(
+                    partition_by=func.toYYYYMM(date),
+                    order_by=(date, )
+                ),
+            )
+
 
 Basic DDL support
 -----------------

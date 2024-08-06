@@ -138,7 +138,8 @@ class Cursor(object):
         execute_kwargs = {
             'settings': settings,
             'external_tables': external_tables,
-            'types_check': execution_options.get('types_check', False)
+            'types_check': execution_options.get('types_check', False),
+            'query_id': execution_options.get('query_id', None)
         }
 
         return execute, execute_kwargs

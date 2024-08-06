@@ -1,4 +1,4 @@
-from sqlalchemy import Column, and_
+from sqlalchemy import Column, and_, func
 from sqlalchemy.exc import CompileError
 from sqlalchemy.sql import expression
 
@@ -584,4 +584,50 @@ class SelectTestCase(BaseTestCase):
         self.assertEqual(
             self.compile(query),
             'SELECT DISTINCT ON (t1.x) t1.x FROM t1'
+        )
+
+    def test_map_type(self):
+        table = self._make_table(
+            't1',
+            Column('x', types.Int32, primary_key=True),
+            Column('y', types.Map(types.String, types.String))
+        )
+
+        query = select(
+            func.mapKeys(table.c.y), func.mapValues(table.c.y)
+        ).where(
+            func.has(table.c.y, 'foo')
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT mapKeys(t1.y) AS "mapKeys_1", '
+            'mapValues(t1.y) AS "mapValues_1" '
+            'FROM t1 '
+            'WHERE has(t1.y, \'foo\')'
+        )
+
+    def test_nested_map_type(self):
+        table = self._make_table(
+            't1',
+            Column('x', types.Int32, primary_key=True),
+            Column(
+                'y',
+                types.Map(
+                    types.String,
+                    types.Map(types.String, types.String)
+                )
+            )
+        )
+
+        query = select(
+            func.mapKeys(table.c.y), func.mapValues(table.c.y)
+        ).where(
+            func.has(table.c.y, 'foo')
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT mapKeys(t1.y) AS "mapKeys_1", '
+            'mapValues(t1.y) AS "mapValues_1" '
+            'FROM t1 '
+            'WHERE has(t1.y, \'foo\')'
         )

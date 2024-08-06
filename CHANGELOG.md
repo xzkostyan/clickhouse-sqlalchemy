@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [0.3.2] - 2024-06-12
+### Added
+- ``quantile`` and ``quantileIf`` functions. Pull request [#303](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/303) by [aronbierbaum](https://github.com/aronbierbaum).
+- ``AggregateFunction`` and ``SimpleAggregateFunction`` aggregate types. Pull request [#297](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/297) by [aronbierbaum](https://github.com/aronbierbaum).
+- Date32 type. Pull request [#307](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/307) by [BTheunissen](https://github.com/BTheunissen). Solves issue [#302](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/302).
+
+### Fixed
+- Broken nested Map types. Pull request [#315](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/315) by [aksenof](https://github.com/aksenof). Solves issue [#314](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/314).
+
 ## [0.3.1] - 2024-03-14
 ### Added
 - ``SETTINGS`` clause. Pull request [#292](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/292) by [limonyellow](https://github.com/limonyellow).
@@ -344,7 +353,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.1...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.2...HEAD
+[0.3.2]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.1...0.3.2
 [0.3.1]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.0...0.3.1
 [0.3.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.5...0.3.0
 [0.2.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.4...0.2.5

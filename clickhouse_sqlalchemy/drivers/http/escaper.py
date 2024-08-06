@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 import enum
+import uuid
 
 
 class Escaper(object):
@@ -49,6 +50,9 @@ class Escaper(object):
     def escape_decimal(self, item):
         return float(item)
 
+    def escape_uuid(self, item):
+        return str(item)
+
     def escape_item(self, item):
         if item is None:
             return 'NULL'
@@ -75,5 +79,7 @@ class Escaper(object):
             ) + "}"
         elif isinstance(item, enum.Enum):
             return self.escape_string(item.name)
+        elif isinstance(item, uuid.UUID):
+            return self.escape_uuid(item)
         else:
             raise Exception("Unsupported object {}".format(item))

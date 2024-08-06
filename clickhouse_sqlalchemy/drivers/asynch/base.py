@@ -4,17 +4,24 @@ from sqlalchemy.sql.elements import TextClause
 from sqlalchemy.pool import AsyncAdaptedQueuePool
 
 from .connector import AsyncAdapt_asynch_dbapi
-from ..native.base import ClickHouseDialect_native
+from ..native.base import ClickHouseDialect_native, ClickHouseExecutionContext
 
 # Export connector version
 VERSION = (0, 0, 1, None)
 
 
+class ClickHouseAsynchExecutionContext(ClickHouseExecutionContext):
+    def create_server_side_cursor(self):
+        return self.create_default_cursor()
+
+
 class ClickHouseDialect_asynch(ClickHouseDialect_native):
     driver = 'asynch'
+    execution_ctx_cls = ClickHouseAsynchExecutionContext
 
     is_async = True
     supports_statement_cache = True
+    supports_server_side_cursors = True
 
     @classmethod
     def import_dbapi(cls):
