@@ -33,6 +33,9 @@ class Boolean(types.Boolean, ClickHouseTypeEngine):
 class JSON(types.JSON, ClickHouseTypeEngine):
     __visit_name__ = 'json'
 
+class Dynamic(types.Dynamic, ClickHouseTypeEngine):
+    pass
+
 
 class Array(ClickHouseTypeEngine):
     __visit_name__ = 'array'
