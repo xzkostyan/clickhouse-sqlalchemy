@@ -1,7 +1,10 @@
+import asynch.errors
+import sqlalchemy
+import sqlalchemy.event
 from sqlalchemy.engine.url import URL
 
 from clickhouse_sqlalchemy.drivers.asynch.base import ClickHouseDialect_asynch
-from tests.testcase import BaseTestCase
+from tests.testcase import AsynchSessionTestCase, BaseTestCase
 
 
 class TestConnectArgs(BaseTestCase):
@@ -46,3 +49,22 @@ class TestConnectArgs(BaseTestCase):
         self.assertEqual(
             str(connect_args[0][0]), 'clickhouse://localhost:9001/default'
         )
+
+
+class DBApiTestCase(AsynchSessionTestCase):
+    async def test_error_handler(self):
+        class MockedException(Exception):
+            pass
+
+        def handle_error(e: sqlalchemy.engine.ExceptionContext):
+            if isinstance(
+                e.original_exception,
+                asynch.errors.ServerException,
+            ):
+                raise MockedException()
+
+        engine = self.session.get_bind()
+        sqlalchemy.event.listen(engine, 'handle_error', handle_error)
+
+        with self.assertRaises(MockedException):
+            await self.session.execute(sqlalchemy.text('SELECT'))
