@@ -349,7 +349,7 @@ class ClickHouseDialect(default.DefaultDialect):
     def _parse_options(option_string):
         def _fix_invalid_enum_member_name(member_name):
             # Python Enum does not support blank string ("")
-            # or "mro" as option name
+            # or "mro" as member name
             if member_name == '':
                 member_name = '_'
             elif member_name == 'mro':
