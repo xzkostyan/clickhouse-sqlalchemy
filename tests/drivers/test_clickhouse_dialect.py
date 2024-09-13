@@ -141,6 +141,15 @@ class ClickHouseDialectTestCase(BaseTestCase):
 
         self.assertEqual(len(rv), 0)
 
+    def test_enum_type_with_illegal_characters(self):
+        empty_string = ''
+        mro = 'mro'
+        try:
+            self.dialect._get_column_type('col_name', f"Enum8('unknown' = -1, '{empty_string}' = 0, 'known' = 1, '{mro}' = 2)")
+            self.dialect._get_column_type('col_name', f"Enum8('unknown' = -1, '{mro}' = 0, 'known' = 1, '{empty_string}' = 2)")
+        except ValueError as e:
+            self.fail(f"Enum options parsing failed: {e}")
+
 
 class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
