@@ -145,8 +145,14 @@ class ClickHouseDialectTestCase(BaseTestCase):
         empty_string = ''
         mro = 'mro'
         try:
-            self.dialect._get_column_type('col_name', f"Enum8('unknown' = -1, '{empty_string}' = 0, 'known' = 1, '{mro}' = 2)")
-            self.dialect._get_column_type('col_name', f"Enum8('unknown' = -1, '{mro}' = 0, 'known' = 1, '{empty_string}' = 2)")
+            self.dialect._get_column_type(
+                'col_name',
+                f"Enum8('f' = -1, '{empty_string}' = 0, 'ok' = 1, '{mro}' = 2)"
+            )
+            self.dialect._get_column_type(
+                'col_name',
+                f"Enum8('f' = -1, '{mro}' = 0, 'ok' = 1, '{empty_string}' = 2)"
+            )
         except ValueError as e:
             self.fail(f"Enum options parsing failed: {e}")
 
