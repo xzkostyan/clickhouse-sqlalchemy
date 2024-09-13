@@ -363,6 +363,11 @@ class ClickHouseDialect(default.DefaultDialect):
                 if ch in (' ', '='):
                     pass
                 elif ch == ',':
+                    # Python Enum does not support empty ("") string or "mro" as name
+                    if name == '':
+                        name = '_'
+                    elif name == 'mro':
+                        name = '__'
                     options[name] = int(value)
                     after_name = False
                     name = ''
