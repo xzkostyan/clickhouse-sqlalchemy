@@ -57,7 +57,6 @@ class InsertTestCase(NativeSessionTestCase):
             self.session.execute(query)
 
             result = list(self.session.execute(select(table.c.x)))
-            print(result)
             self.assertListEqual(result, [('foo',), ('bar',)])
 
     @require_server_version(19, 3, 3)
@@ -76,5 +75,4 @@ class InsertTestCase(NativeSessionTestCase):
             self.session.execute(query)
 
             result = list(self.session.execute(select(table.c.x)))
-            print(result)
             self.assertListEqual(result, [('foo',), ('bar',)])
