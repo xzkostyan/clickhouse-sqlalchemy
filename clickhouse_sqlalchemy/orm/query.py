@@ -117,7 +117,7 @@ class Query(BaseQuery):
         x_spec = dict(spec)
         # use 'full' key to pass extra flags
         x_spec['full'] = x[-1]['full']
-        x[-1]['full'] = x_spec
+        x[-1]['full'] = tuple(x_spec.items())
 
         return rv
 
