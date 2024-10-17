@@ -99,7 +99,7 @@ setup(
         'sqlalchemy>=1.4.24,<1.5',
         'requests',
         'clickhouse-driver>=0.1.2',
-        'asynch>=0.2.2',
+        'asynch>=0.2.2,<=0.2.4',
     ],
     # Registering `clickhouse` as dialect.
     entry_points={

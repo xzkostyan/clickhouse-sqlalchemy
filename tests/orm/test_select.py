@@ -394,6 +394,26 @@ class JoinTestCase(CompilationTestCase):
         )
 
 
+class JoinExecuteTestCase(NativeSessionTestCase):
+    def test_execute_full_join(self):
+        t1 = Table(
+            't1', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            engines.Memory()
+        )
+        t1.create()
+        t2 = Table(
+            't2', self.metadata(),
+            Column('x', types.Int32, primary_key=True),
+            engines.Memory()
+        )
+        t2.create()
+
+        self.session.query(t1.c.x, t2.c.x) \
+            .outerjoin(t2, t1.c.x == t2.c.x, strictness='any') \
+            .all()
+
+
 class YieldTest(NativeSessionTestCase):
     def test_yield_per_and_execution_options(self):
         numbers = Table(

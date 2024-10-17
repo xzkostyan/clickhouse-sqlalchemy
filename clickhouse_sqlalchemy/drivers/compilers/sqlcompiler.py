@@ -146,7 +146,10 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
 
         flags = join.full
         if not isinstance(flags, dict):
-            flags = {'full': flags}
+            if isinstance(flags, tuple):
+                flags = dict(flags)
+            else:
+                flags = {'full': flags}
         # need to make a variable to prevent leaks in some debuggers
         join_type = flags.get('type')
         if join_type is None:
