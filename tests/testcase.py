@@ -36,8 +36,7 @@ class BaseAbstractTestCase(object):
         if bind is None:
             bind = self.session.bind
         if isinstance(clause, Query):
-            context = clause._compile_context()
-            clause = context.query
+            clause = clause._statement_20()
 
         kw = {}
         compile_kwargs = {}
