@@ -1,5 +1,7 @@
 import asyncio
 
+import asynch
+import asynch.errors
 from sqlalchemy.engine.interfaces import AdaptedConnection
 from sqlalchemy.util.concurrency import await_only
 
@@ -109,15 +111,12 @@ class AsyncAdapt_asynch_cursor:
 
 
 class AsyncAdapt_asynch_dbapi:
-    def __init__(self, asynch):
-        self.asynch = asynch
+    def __init__(self):
         self.paramstyle = 'pyformat'
         self._init_dbapi_attributes()
 
-    class Error(Exception):
-        pass
-
     def _init_dbapi_attributes(self):
+        self.Error = asynch.errors.ClickHouseException
         for name in (
                 'ServerException',
                 'UnexpectedPacketFromServerError',
@@ -141,12 +140,12 @@ class AsyncAdapt_asynch_dbapi:
                 'ProgrammingError',
                 'NotSupportedError',
         ):
-            setattr(self, name, getattr(self.asynch.errors, name))
+            setattr(self, name, getattr(asynch.errors, name))
 
     def connect(self, *args, **kwargs) -> 'AsyncAdapt_asynch_connection':
         return AsyncAdapt_asynch_connection(
             self,
-            await_only(self.asynch.connect(*args, **kwargs))
+            await_only(asynch.connect(*args, **kwargs))
         )
 
 
