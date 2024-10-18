@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+## [0.2.7] - 2024-10-18
+### Fixed
+- ClickHouse dialect extensions (FINAL, SAMPLE, LIMIT BY etc.) rendering in SQLAlchemy version 1.4.
+- Unhashable type dict caused by full join. Solves issue [#276](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/276).
+
 ## [0.2.6] - 2024-03-25
 ### Fixed (backported from 00.3.x)
 - [alembic] Table reflection for alembic version < 1.11. Solves issue [#274](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/274).
@@ -329,7 +334,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.6...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.7...HEAD
+[0.2.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.6...0.2.7
 [0.2.6]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.5...0.2.6
 [0.2.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.4...0.2.5
 [0.2.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.3...0.2.4
