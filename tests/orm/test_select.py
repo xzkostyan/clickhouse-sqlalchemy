@@ -401,13 +401,13 @@ class JoinExecuteTestCase(NativeSessionTestCase):
             Column('x', types.Int32, primary_key=True),
             engines.Memory()
         )
-        t1.create()
+        t1.create(self.session.bind)
         t2 = Table(
             't2', self.metadata(),
             Column('x', types.Int32, primary_key=True),
             engines.Memory()
         )
-        t2.create()
+        t2.create(self.session.bind)
 
         self.session.query(t1.c.x, t2.c.x) \
             .outerjoin(t2, t1.c.x == t2.c.x, strictness='any') \
