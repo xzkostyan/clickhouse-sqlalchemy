@@ -282,10 +282,29 @@ class ClickHouseDialect(default.DefaultDialect):
         elif spec.startswith('Map'):
             inner = spec[4:-1]
             coltype = self.ischema_names['_map']
-            inner_types = [
-                self._get_column_type(name, t.strip())
-                for t in inner.split(',', 1)
-            ]
+
+            inner_types = []
+            bracket_level = 0
+            current_type = ''
+
+            for char in inner:
+                if char == ',' and bracket_level == 0:
+                    inner_types.append(
+                        self._get_column_type(name, current_type.strip())
+                    )
+                    current_type = ''
+                else:
+                    if char == '(':
+                        bracket_level += 1
+                    elif char == ')':
+                        bracket_level -= 1
+                    current_type += char
+
+            if current_type:
+                inner_types.append(
+                    self._get_column_type(name, current_type.strip())
+                )
+
             return coltype(*inner_types)
 
         elif spec.startswith('Enum'):
