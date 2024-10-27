@@ -347,7 +347,16 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @staticmethod
     def _parse_options(option_string):
-        options = dict()
+        def _fix_invalid_enum_option_name(option_name):
+            # Python Enum does not support blank string ("")
+            # or "mro" as option name
+            if option_name == '':
+                option_name = '_'
+            elif option_name == 'mro':
+                option_name = '__'
+            return option_name
+
+        options = {}
         after_name = False
         escaped = False
         quote_character = None
@@ -363,6 +372,7 @@ class ClickHouseDialect(default.DefaultDialect):
                 if ch in (' ', '='):
                     pass
                 elif ch == ',':
+                    name = _fix_invalid_enum_option_name(name)
                     options[name] = int(value)
                     after_name = False
                     name = ''
@@ -384,6 +394,7 @@ class ClickHouseDialect(default.DefaultDialect):
                     quote_character = ch
 
         if after_name:
+            name = _fix_invalid_enum_option_name(name)
             options.setdefault(name, int(value))  # Word after last comma
 
         return options
