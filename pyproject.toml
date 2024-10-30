@@ -1,0 +1,52 @@
+[tool.poetry]
+name = "clickhouse-sqlalchemy"
+version = "0.3.2"
+description = "SQLAlchemy dialect for ClickHouse"
+authors = ["Konstantin Lebedev <kostyan.lebedev@gmail.com>"]
+license = "MIT"
+readme = "README.rst"
+include = ["CHANGELOG.md"]
+exclude = ["tests"]
+repository = "https://github.com/xzkostyan/clickhouse-sqlalchemy"
+documentation = "https://clickhouse-sqlalchemy.readthedocs.io/en/latest/"
+keywords = ["clickhouse", "sqlalchemy"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Information Technology',
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: SQL",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+[tool.project.urls]
+"PyPI" = "https://pypi.org/project/clickhouse-sqlalchemy/"
+
+[project.entry-points."poetry.plugin"]
+"clickhouse.asynch" = "clickhouse_sqlalchemy.drivers.asynch.base:ClickHouseDialect_asynch"
+"clickhouse.http" = "clickhouse_sqlalchemy.drivers.http.base:ClickHouseDialect_http"
+"clickhouse.native" = "clickhouse_sqlalchemy.drivers.native.base:ClickHouseDialect_native"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+asynch = "0.2.4"
+clickhouse-driver = ">=0.1.2"
+requests = "^2.32.3"
+sqlalchemy = "^2.0.36"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
