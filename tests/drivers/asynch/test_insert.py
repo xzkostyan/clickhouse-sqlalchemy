@@ -1,8 +1,8 @@
+import sqlalchemy.exc
+from asynch.errors import TypeMismatchError
 from sqlalchemy import Column, func, text
 
-from clickhouse_sqlalchemy import engines, types, Table
-from asynch.errors import TypeMismatchError
-
+from clickhouse_sqlalchemy import Table, engines, types
 from tests.testcase import AsynchSessionTestCase
 
 
@@ -45,16 +45,18 @@ class NativeInsertTestCase(AsynchSessionTestCase):
         await self.run_sync(metadata.drop_all)
         await self.run_sync(metadata.create_all)
 
-        with self.assertRaises(TypeMismatchError) as ex:
+        with self.assertRaises(sqlalchemy.exc.DBAPIError) as ex:
             await self.session.execute(
                 table.insert(),
                 [{'x': -1}],
                 execution_options=dict(types_check=True),
             )
+        self.assertTrue(isinstance(ex.exception.orig, TypeMismatchError))
         self.assertIn('-1 for column "x"', str(ex.exception))
 
-        with self.assertRaises(TypeMismatchError) as ex:
+        with self.assertRaises(sqlalchemy.exc.DBAPIError) as ex:
             await self.session.execute(table.insert(), {'x': -1})
+        self.assertTrue(isinstance(ex.exception.orig, TypeMismatchError))
         self.assertIn(
             'Repeat query with types_check=True for detailed info',
             str(ex.exception)
