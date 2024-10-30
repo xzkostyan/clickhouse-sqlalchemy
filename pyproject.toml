@@ -41,7 +41,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
-asynch = "0.2.4"
+asynch = "0.2.3"
 clickhouse-driver = ">=0.1.2"
 requests = "^2.32.3"
 sqlalchemy = "^2.0.36"

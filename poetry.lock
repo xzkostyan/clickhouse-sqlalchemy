@@ -2,13 +2,13 @@
 
 [[package]]
 name = "asynch"
-version = "0.2.4"
+version = "0.2.3"
 description = "A asyncio driver for ClickHouse with native tcp protocol"
 optional = false
-python-versions = "<4.0,>=3.7"
+python-versions = ">=3.7,<4.0"
 files = [
-    {file = "asynch-0.2.4-py3-none-any.whl", hash = "sha256:7286a88da4060ecd23a3b4caff6c25e9e6f26561c1b3d61853f2d6d88d57c33d"},
-    {file = "asynch-0.2.4.tar.gz", hash = "sha256:15ef9517bb093dfd5a0f1f31cc31e0da84543eead0269345052922cf399d280e"},
+    {file = "asynch-0.2.3-py3-none-any.whl", hash = "sha256:c7869e60059fb92885d75e168c8bad2e1dfa8f20bd3ae8358191759b84236604"},
+    {file = "asynch-0.2.3.tar.gz", hash = "sha256:c8cdd88663f46cff8d3c7e1b7d8806a50fd2c385ed43f41ea5a0078ef46329e3"},
 ]
 
 [package.dependencies]
@@ -775,4 +775,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "a9176e44241e9cdd1795a87d15fc67b89a7cceef17981aa0d8603f2579a888e8"
+content-hash = "3db38f58cd0441ea01563d2569e8f27bcd7193b3d6ef1b4605dc62517cf906c5"
