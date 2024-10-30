@@ -1,6 +1,3 @@
 
-from .schema import Table, MaterializedView
-from .selectable import Select, select
-
-
-__all__ = ('Table', 'MaterializedView', 'Select', 'select')
+from clickhouse_sqlalchemy.sql.schema import Table, MaterializedView  # noqa: F401
+from clickhouse_sqlalchemy.sql.selectable import Select, select  # noqa: F401

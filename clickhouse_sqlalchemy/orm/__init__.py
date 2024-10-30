@@ -1,5 +1,2 @@
 
-from .session import make_session
-
-
-__all__ = ('make_session', )
+from clickhouse_sqlalchemy.orm.session import make_session  # noqa: F401

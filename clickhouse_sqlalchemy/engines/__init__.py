@@ -1,40 +1,14 @@
 
-from .mergetree import (
+from clickhouse_sqlalchemy.engines.mergetree import (  # noqa: F401
     MergeTree, AggregatingMergeTree, GraphiteMergeTree, CollapsingMergeTree,
     VersionedCollapsingMergeTree, ReplacingMergeTree, SummingMergeTree
 )
-from .misc import (
+from clickhouse_sqlalchemy.engines.misc import (  # noqa: F401
     Distributed, View, MaterializedView,
     Buffer, TinyLog, Log, Memory, Null, File
 )
-from .replicated import (
+from clickhouse_sqlalchemy.engines.replicated import (  # noqa: F401
     ReplicatedMergeTree, ReplicatedAggregatingMergeTree,
     ReplicatedCollapsingMergeTree, ReplicatedVersionedCollapsingMergeTree,
     ReplicatedReplacingMergeTree, ReplicatedSummingMergeTree
-)
-
-
-__all__ = (
-    MergeTree,
-    AggregatingMergeTree,
-    GraphiteMergeTree,
-    CollapsingMergeTree,
-    VersionedCollapsingMergeTree,
-    SummingMergeTree,
-    ReplacingMergeTree,
-    Distributed,
-    ReplicatedMergeTree,
-    ReplicatedAggregatingMergeTree,
-    ReplicatedCollapsingMergeTree,
-    ReplicatedVersionedCollapsingMergeTree,
-    ReplicatedReplacingMergeTree,
-    ReplicatedSummingMergeTree,
-    View,
-    MaterializedView,
-    Buffer,
-    TinyLog,
-    Log,
-    Memory,
-    Null,
-    File
 )
