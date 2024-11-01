@@ -43,6 +43,10 @@ clickhouse-driver = ">=0.1.2"
 requests = "^2.32.3"
 sqlalchemy = "^2.0.36"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.4"
+tomli = "^2.0.2"
+
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4"
 pytest-asyncio = "^0.23.0"
@@ -51,6 +55,7 @@ responses = "^0.25.3"
 
 [tool.pytest.ini_options]
 minversion = "7.4"
+testpaths = ["tests"]
 asyncio_mode = "auto"
 
 [tool.poetry.plugins."sqlalchemy.dialects"]
