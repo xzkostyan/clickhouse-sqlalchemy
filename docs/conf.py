@@ -16,7 +16,20 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-from clickhouse_sqlalchemy import __version__, VERSION
+from pathlib import Path
+from sys import version_info
+
+PY_VERSION = version_info[:3]
+if PY_VERSION >= (3, 11, 0):
+    import tomllib as tomlib
+else:
+    import tomli as tomlib
+
+PYPROJECT = Path(__file__).parent.parent / "pyproject.toml"
+with open(PYPROJECT, mode="rb") as ppt:
+    data = tomlib.load(ppt)
+    _version: str = data["tool"]["poetry"]["version"]
+    VERSION = tuple(map(int, _version.split(".")))
 
 # -- Project information -----------------------------------------------------
 
@@ -27,7 +40,7 @@ author = 'clickhouse-sqlalchemy authors'
 # The short X.Y version
 version = '.'.join(str(x) for x in VERSION[:2])
 # The full version, including alpha/beta/rc tags
-release = __version__
+release = VERSION
 
 
 # -- General configuration ---------------------------------------------------
