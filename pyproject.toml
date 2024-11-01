@@ -31,21 +31,9 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 
-[tool.poetry.group.test.dependencies]
-pytest = "^7.4"
-parameterized = "^0.9.0"
-responses = "^0.25.3"
-pytest-asyncio = "^0.23.0"
-
 [tool.project.urls]
 "PyPI" = "https://pypi.org/project/clickhouse-sqlalchemy/"
 "Changes" = "https://github.com/xzkostyan/clickhouse-sqlalchemy/blob/master/CHANGELOG.md"
-
-[tool.poetry.plugins."sqlalchemy.dialects"]
-"clickhouse" = "clickhouse_sqlalchemy.drivers.http.base:ClickHouseDialect_http"
-"clickhouse.asynch" = "clickhouse_sqlalchemy.drivers.asynch.base:ClickHouseDialect_asynch"
-"clickhouse.http" = "clickhouse_sqlalchemy.drivers.http.base:ClickHouseDialect_http"
-"clickhouse.native" = "clickhouse_sqlalchemy.drivers.native.base:ClickHouseDialect_native"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
@@ -55,10 +43,21 @@ clickhouse-driver = ">=0.1.2"
 requests = "^2.32.3"
 sqlalchemy = "^2.0.36"
 
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4"
+pytest-asyncio = "^0.23.0"
+parameterized = "^0.9.0"
+responses = "^0.25.3"
+
 [tool.pytest.ini_options]
 minversion = "7.4"
 asyncio_mode = "auto"
 
+[tool.poetry.plugins."sqlalchemy.dialects"]
+"clickhouse" = "clickhouse_sqlalchemy.drivers.http.base:ClickHouseDialect_http"
+"clickhouse.asynch" = "clickhouse_sqlalchemy.drivers.asynch.base:ClickHouseDialect_asynch"
+"clickhouse.http" = "clickhouse_sqlalchemy.drivers.http.base:ClickHouseDialect_http"
+"clickhouse.native" = "clickhouse_sqlalchemy.drivers.native.base:ClickHouseDialect_native"
 
 [build-system]
 requires = ["poetry-core"]
