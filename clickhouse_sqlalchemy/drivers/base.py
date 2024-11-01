@@ -2,19 +2,15 @@ import enum
 
 from sqlalchemy import schema, types as sqltypes, util as sa_util, text
 from sqlalchemy.engine import default, reflection
-from sqlalchemy.sql import (
-    compiler, elements
-)
-from sqlalchemy.util import (
-    warn,
-)
+from sqlalchemy.sql import compiler, elements
+from sqlalchemy.util import warn
 
-from .compilers.ddlcompiler import ClickHouseDDLCompiler
-from .compilers.sqlcompiler import ClickHouseSQLCompiler
-from .compilers.typecompiler import ClickHouseTypeCompiler
-from .reflection import ClickHouseInspector
-from .util import get_inner_spec, parse_arguments
-from .. import types
+from clickhouse_sqlalchemy.drivers.compilers.ddlcompiler import ClickHouseDDLCompiler
+from clickhouse_sqlalchemy.drivers.compilers.sqlcompiler import ClickHouseSQLCompiler
+from clickhouse_sqlalchemy.drivers.compilers.typecompiler import ClickHouseTypeCompiler
+from clickhouse_sqlalchemy.drivers.reflection import ClickHouseInspector
+from clickhouse_sqlalchemy.drivers.util import get_inner_spec, parse_arguments
+from clickhouse_sqlalchemy import types
 
 # Column specifications
 colspecs = {}
