@@ -1,15 +1,12 @@
 
-from .ext.declarative import get_declarative_base
-from .orm.session import make_session
-from .sql import Table, MaterializedView, select
-
-
-VERSION = (0, 3, 2)
-__version__ = '.'.join(str(x) for x in VERSION)
-
-
-__all__ = (
-    'get_declarative_base',
-    'make_session',
-    'Table',  'MaterializedView', 'select'
+from clickhouse_sqlalchemy.ext.declarative import (
+    get_declarative_base,
 )
+from clickhouse_sqlalchemy.orm.session import make_session
+from clickhouse_sqlalchemy.sql import (
+    Table,
+    MaterializedView,
+    select,
+)
+
+__version__ = "0.3.2"
