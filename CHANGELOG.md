@@ -2,13 +2,22 @@
 
 ## [Unreleased]
 
+## [0.3.3] - ???
+
+### Changed
+
+- introduce the `pyproject.toml` file backended with `pdm` manager. Pull request [#348](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/348) by [stankudrow](https://github.com/stankudrow). Solves issue [#345](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/345). Thanks to [DaniilAnichin](https://github.com/DaniilAnichin).
+
 ## [0.3.2] - 2024-06-12
+
 ### Added
+
 - ``quantile`` and ``quantileIf`` functions. Pull request [#303](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/303) by [aronbierbaum](https://github.com/aronbierbaum).
 - ``AggregateFunction`` and ``SimpleAggregateFunction`` aggregate types. Pull request [#297](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/297) by [aronbierbaum](https://github.com/aronbierbaum).
 - Date32 type. Pull request [#307](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/307) by [BTheunissen](https://github.com/BTheunissen). Solves issue [#302](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/302).
 
 ### Fixed
+
 - Broken nested Map types. Pull request [#315](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/315) by [aksenof](https://github.com/aksenof). Solves issue [#314](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/314).
 
 ## [0.3.1] - 2024-03-14
