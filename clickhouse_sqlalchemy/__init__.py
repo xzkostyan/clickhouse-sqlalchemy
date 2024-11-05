@@ -1,4 +1,3 @@
-
 from clickhouse_sqlalchemy.ext.declarative import (
     get_declarative_base,
 )
