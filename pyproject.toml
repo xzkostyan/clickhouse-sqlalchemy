@@ -73,9 +73,10 @@ ignore = [
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = [
+    "--maxfail=1",
   "--strict-config",
   "--strict-markers",
-  "--ignore=docs_src",
+  "--ignore=docs",
 ]
 xfail_strict = true
 testpaths = ["tests"]
