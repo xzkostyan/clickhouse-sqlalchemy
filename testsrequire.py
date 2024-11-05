@@ -1,13 +1,12 @@
-
 tests_require = [
-    'pytest',
-    'pytest-asyncio',
-    'sqlalchemy>=2.0.0,<2.1.0',
-    'greenlet>=2.0.1',
-    'alembic',
-    'requests',
-    'responses',
-    'parameterized'
+    "pytest",
+    "pytest-asyncio",
+    "sqlalchemy>=2.0.0,<2.1.0",
+    "greenlet>=2.0.1",
+    "alembic",
+    "requests",
+    "responses",
+    "parameterized",
 ]
 
 try:
@@ -15,4 +14,4 @@ try:
 except ImportError:
     from pip._internal import main as pipmain
 
-pipmain(['install'] + tests_require)
+pipmain(["install"] + tests_require)
