@@ -52,16 +52,28 @@ docs = ["sphinx>=7.4.7"]
 lint = ["mypy>=1.13.0", "ruff>=0.7.2"]
 test = ["pytest>=8.3.3", "pytest-asyncio>=0.24.0", "parameterized>=0.9.0", "responses>=0.25.3"]
 
-[tool.ruff.lint]
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "I",  # isort
-    "B",  # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = [
+    "--maxfail=1",
+    "--strict-config",
+    "--strict-markers",
+    "--ignore=docs",
 ]
+xfail_strict = true
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+extend-exclude = [
+    "assets",
+]
+line-length = 80
+respect-gitignore = true
+target-version = "py39"
+
+[tool.ruff.lint]
+extend-select = ["I", "F"]
 ignore = [
     "E501",  # line too long
     "C901",  # too complex
@@ -70,17 +82,11 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
-[tool.pytest.ini_options]
-minversion = "8.0"
-addopts = [
-    "--maxfail=1",
-  "--strict-config",
-  "--strict-markers",
-  "--ignore=docs",
-]
-xfail_strict = true
-testpaths = ["tests"]
-asyncio_mode = "auto"
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
 
 [project.entry-points."sqlalchemy.dialects"]
 "clickhouse" = "clickhouse_sqlalchemy.drivers.http.base:ClickHouseDialect_http"
