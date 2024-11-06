@@ -65,9 +65,6 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 
 [tool.ruff]
-extend-exclude = [
-    "assets",
-]
 line-length = 80
 respect-gitignore = true
 target-version = "py39"
