@@ -5,7 +5,7 @@ description = "SQLAlchemy dialect for ClickHouse"
 authors = [
     {name = "Konstantin Lebedev", email = "kostyan.lebedev@gmail.com"},
 ]
-dependencies = ["alembic>=1.14.0", "asynch>=0.2.5", "clickhouse-driver>=0.2.9", "requests>=2.32.3", "sqlalchemy>=2.0.36"]
+dependencies = ["asynch>=0.2.5", "clickhouse-driver>=0.2.9", "requests>=2.32.3", "sqlalchemy>=2.0.36"]
 requires-python = ">=3.9"
 readme = "README.rst"
 license = {text = "MIT"}
@@ -40,17 +40,17 @@ Issues = "https://github.com/fastapi/fastapi/issues"
 Changelog = "https://github.com/xzkostyan/clickhouse-sqlalchemy/blob/master/CHANGELOG.md"
 PyPI = "https://pypi.org/project/clickhouse-sqlalchemy/"
 
+[tool.pdm]
+distribution = true
+
 [tool.pdm.version]
 source = "file"
 path = "clickhouse_sqlalchemy/__init__.py"
 
-[tool.pdm]
-distribution = true
-
 [dependency-groups]
 docs = ["sphinx>=7.4.7"]
 lint = ["mypy>=1.13.0", "ruff>=0.7.2"]
-test = ["pytest>=8.3.3", "pytest-asyncio>=0.24.0", "parameterized>=0.9.0", "responses>=0.25.3"]
+test = ["pytest>=8.3.3", "pytest-asyncio>=0.24.0", "parameterized>=0.9.0", "responses>=0.25.3", "alembic>=1.14.0"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"
