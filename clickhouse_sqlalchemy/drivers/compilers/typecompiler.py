@@ -90,6 +90,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_json(self, type_, **kw):
         return 'JSON'
 
+    def visit_dynamic(self, type_, **kw):
+        return 'Dynamic'
+
     def visit_nested(self, nested, **kwargs):
         ddl_compiler = self.dialect.ddl_compiler(self.dialect, None)
         cols_create = [
