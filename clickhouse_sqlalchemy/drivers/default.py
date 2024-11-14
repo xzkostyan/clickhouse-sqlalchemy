@@ -1,26 +1,30 @@
-from . import base
+
+DefaultDialect = None
 
 try:
     from .native import base as native_driver
 
-    base.dialect = native_driver.dialect
+    DefaultDialect = native_driver.dialect
 except ImportError:
     pass
 
-if not hasattr(base, 'dialect'):
+if DefaultDialect is None:
     try:
         from .http import base as http_driver
 
-        base.dialect = http_driver.dialect
+        DefaultDialect = http_driver.dialect
     except ImportError:
         pass
 
-if not hasattr(base, 'dialect'):
+if DefaultDialect is None:
     try:
         from .asynch import base as asynch_driver
-        base.dialect = asynch_driver.dialect
+
+        DefaultDialect = asynch_driver.dialect
     except ImportError:
         pass
 
-if not hasattr(base, 'dialect'):
+if DefaultDialect is None:
     raise RuntimeError('Unable to detect default dialect. Please install one.')
+
+dialect = DefaultDialect

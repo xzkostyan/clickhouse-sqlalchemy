@@ -41,7 +41,7 @@ jobs:
           pip install --upgrade pip setuptools wheel
           pip install flake8 flake8-print coverage
           python testsrequire.py
-          python setup.py develop
+          pip install -e .[http,native,async]
           # Limit each test time execution.
           pip install pytest-timeout
       - name: Run flake8

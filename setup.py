@@ -29,7 +29,7 @@ dialects = [
     'clickhouse{}=clickhouse_sqlalchemy.drivers.{}'.format(driver, d_path)
 
     for driver, d_path in [
-        ('', 'http.base:ClickHouseDialect_http'),
+        ('', 'default:DefaultDialect'),
         ('.http', 'http.base:ClickHouseDialect_http'),
         ('.native', 'native.base:ClickHouseDialect_native'),
         ('.asynch', 'asynch.base:ClickHouseDialect_asynch'),
@@ -97,10 +97,12 @@ setup(
     python_requires='>=3.7, <4',
     install_requires=[
         'sqlalchemy>=2.0.0,<2.1.0',
-        'requests',
-        'clickhouse-driver>=0.1.2',
-        'asynch>=0.2.2,<=0.2.4',
     ],
+    extras_require={
+        'http': ['requests'],
+        'native': ['clickhouse-driver>=0.1.2'],
+        'async': ['asynch>=0.2.2,<=0.2.4']
+    },
     # Registering `clickhouse` as dialect.
     entry_points={
         'sqlalchemy.dialects': dialects
