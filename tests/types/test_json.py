@@ -45,6 +45,9 @@ class JSONTestCase(BaseTestCase):
             self.session.execute(
                 text('SET allow_experimental_object_type = 1;')
             )
+            self.session.execute(
+                text('SET allow_experimental_json_type = 1;')
+            )
             self.session.execute(text(self.compile(CreateTable(self.table))))
             self.session.execute(self.table.insert(), [{'x': data}])
             coltype = inspect(self.session.bind).get_columns('test')[0]['type']
