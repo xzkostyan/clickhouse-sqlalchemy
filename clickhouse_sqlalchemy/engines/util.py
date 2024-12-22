@@ -1,5 +1,3 @@
-
-
 def parse_columns(str_columns, delimeter=',', quote_symbol='`',
                   escape_symbol='\\'):
     if not str_columns:

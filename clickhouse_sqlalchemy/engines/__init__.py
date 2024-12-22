@@ -1,4 +1,3 @@
-
 from .mergetree import (
     MergeTree, AggregatingMergeTree, GraphiteMergeTree, CollapsingMergeTree,
     VersionedCollapsingMergeTree, ReplacingMergeTree, SummingMergeTree

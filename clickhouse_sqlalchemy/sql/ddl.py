@@ -9,20 +9,20 @@ from sqlalchemy.sql.operators import custom_op
 class DropTable(DropTableBase):
     def __init__(self, element, bind=None, if_exists=False):
         self.on_cluster = element.dialect_options['clickhouse']['cluster']
-        super(DropTable, self).__init__(element,
+        super().__init__(element,
                                         if_exists=if_exists)
 
 
 class DropView(DropTableBase):
     def __init__(self, element, bind=None, if_exists=False):
         self.on_cluster = element.cluster
-        super(DropView, self).__init__(element, if_exists=if_exists)
+        super().__init__(element, if_exists=if_exists)
 
 
 class SchemaDropper(SchemaDropperBase):
     def __init__(self, dialect, connection, if_exists=False, **kwargs):
         self.if_exists = if_exists
-        super(SchemaDropper, self).__init__(dialect, connection, **kwargs)
+        super().__init__(dialect, connection, **kwargs)
 
     def visit_table(self, table, **kwargs):
         table.dispatch.before_drop(
@@ -52,13 +52,13 @@ class CreateMaterializedView(_CreateDropBase):
 
     def __init__(self, element, if_not_exists=False):
         self.if_not_exists = if_not_exists
-        super(CreateMaterializedView, self).__init__(element)
+        super().__init__(element)
 
 
 class SchemaGenerator(SchemaGeneratorBase):
     def __init__(self, dialect, connection, if_not_exists=False, **kwargs):
         self.if_not_exists = if_not_exists
-        super(SchemaGenerator, self).__init__(dialect, connection, **kwargs)
+        super().__init__(dialect, connection, **kwargs)
 
     def visit_materialized_view(self, table, **kwargs):
         self.connection.execute(

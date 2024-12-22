@@ -1,4 +1,3 @@
-
 from .schema import Table, MaterializedView
 from .selectable import Select, select
 

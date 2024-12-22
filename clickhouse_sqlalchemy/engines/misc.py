@@ -1,4 +1,3 @@
-
 from .base import Engine
 from .util import parse_columns
 
@@ -9,7 +8,7 @@ class Distributed(Engine):
         self.default = default
         self.hits = hits
         self.sharding_key = sharding_key
-        super(Distributed, self).__init__()
+        super().__init__()
 
     def get_parameters(self):
         params = [
@@ -45,7 +44,7 @@ class Buffer(Engine):
         self.max_rows = max_rows
         self.min_bytes = min_bytes
         self.max_bytes = max_bytes
-        super(Buffer, self).__init__()
+        super().__init__()
 
     def get_parameters(self):
         return [
@@ -134,12 +133,12 @@ class File(Engine):
         fmt = self.supported_data_formats.get(data_format.lower())
         if not fmt:
             raise ValueError(
-                'Format {0} not supported for File engine'.format(
+                'Format {} not supported for File engine'.format(
                     data_format
                 )
             )
         self.data_format = fmt
-        super(File, self).__init__()
+        super().__init__()
 
     def get_parameters(self):
         return (self.data_format, )

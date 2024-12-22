@@ -28,13 +28,13 @@ def connect(*args, **kwargs):
     return Connection(*args, **kwargs)
 
 
-class Connection(object):
+class Connection:
     transport_cls = DriverClient
 
     def __init__(self, *args, **kwargs):
         url = args[0]
         self.transport = self.transport_cls.from_url(url)
-        super(Connection, self).__init__()
+        super().__init__()
 
     def close(self):
         pass
@@ -49,7 +49,7 @@ class Connection(object):
         return Cursor(self)
 
 
-class Cursor(object):
+class Cursor:
     """
     These objects represent a database cursor, which is used to manage
     the context of a fetch operation.
@@ -57,7 +57,7 @@ class Cursor(object):
     Cursors are not isolated, i.e., any changes done to the database
     by a cursor are immediately visible by other cursors or connections.
     """
-    class States(object):
+    class States:
         (
             NONE,
             RUNNING,
@@ -70,7 +70,7 @@ class Cursor(object):
         self._connection = connection
         self._reset_state()
         self._arraysize = 1
-        super(Cursor, self).__init__()
+        super().__init__()
 
     @property
     def rowcount(self):

@@ -9,7 +9,7 @@ class ClickHouseTypeEngine(types.TypeEngine):
     def compile(self, dialect=None):
         from clickhouse_sqlalchemy.drivers.base import clickhouse_dialect
 
-        return super(ClickHouseTypeEngine, self).compile(
+        return super().compile(
             dialect=clickhouse_dialect
         )
 
@@ -42,7 +42,7 @@ class Array(ClickHouseTypeEngine):
     def __init__(self, item_type):
         self.item_type = item_type
         self.item_type_impl = to_instance(item_type)
-        super(Array, self).__init__()
+        super().__init__()
 
     def __repr__(self):
         nested_type_str = \
@@ -71,7 +71,7 @@ class Nullable(ClickHouseTypeEngine):
 
     def __init__(self, nested_type):
         self.nested_type = to_instance(nested_type)
-        super(Nullable, self).__init__()
+        super().__init__()
 
 
 class UUID(String):
@@ -83,7 +83,7 @@ class LowCardinality(ClickHouseTypeEngine):
 
     def __init__(self, nested_type):
         self.nested_type = to_instance(nested_type)
-        super(LowCardinality, self).__init__()
+        super().__init__()
 
     def __repr__(self):
         nested_type_str = f'{self.nested_type.__module__}.{self.nested_type!r}'
@@ -158,7 +158,7 @@ class DateTime(types.DateTime, ClickHouseTypeEngine):
     __visit_name__ = 'datetime'
 
     def __init__(self, timezone=None):
-        super(DateTime, self).__init__()
+        super().__init__()
         self.timezone = timezone
 
 
@@ -167,7 +167,7 @@ class DateTime64(DateTime, ClickHouseTypeEngine):
 
     def __init__(self, precision=3, timezone=None):
         self.precision = precision
-        super(DateTime64, self).__init__(timezone=timezone)
+        super().__init__(timezone=timezone)
 
 
 class Enum(types.Enum, ClickHouseTypeEngine):
@@ -178,7 +178,7 @@ class Enum(types.Enum, ClickHouseTypeEngine):
         if not enums:
             enums = kw.get('_enums', ())  # passed as keyword
 
-        super(Enum, self).__init__(*enums, **kw, convert_unicode=False)
+        super().__init__(*enums, **kw, convert_unicode=False)
 
 
 class Enum8(Enum):
@@ -198,7 +198,7 @@ class Tuple(ClickHouseTypeEngine):
 
     def __init__(self, *nested_types):
         self.nested_types = nested_types
-        super(Tuple, self).__init__()
+        super().__init__()
 
 
 class Map(ClickHouseTypeEngine):
@@ -207,7 +207,7 @@ class Map(ClickHouseTypeEngine):
     def __init__(self, key_type, value_type):
         self.key_type = key_type
         self.value_type = value_type
-        super(Map, self).__init__()
+        super().__init__()
 
 
 class AggregateFunction(ClickHouseTypeEngine):
@@ -220,7 +220,7 @@ class AggregateFunction(ClickHouseTypeEngine):
     ):
         self.agg_func = agg_func
         self.nested_types = [to_instance(val) for val in nested_types]
-        super(AggregateFunction, self).__init__()
+        super().__init__()
 
     def __repr__(self) -> str:
         type_strs = [f'{val.__module__}.{val!r}' for val in self.nested_types]
@@ -243,7 +243,7 @@ class SimpleAggregateFunction(ClickHouseTypeEngine):
     ):
         self.agg_func = agg_func
         self.nested_types = [to_instance(val) for val in nested_types]
-        super(SimpleAggregateFunction, self).__init__()
+        super().__init__()
 
     def __repr__(self) -> str:
         type_strs = [f'{val.__module__}.{val!r}' for val in self.nested_types]
