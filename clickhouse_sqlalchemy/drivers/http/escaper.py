@@ -4,7 +4,7 @@ import enum
 import uuid
 
 
-class Escaper(object):
+class Escaper:
 
     number_types = (int, float, )
 
@@ -30,7 +30,7 @@ class Escaper(object):
             return "[" + ",".join(
                 [str(self.escape_item(x)) for x in parameters]) + "]"
         else:
-            raise Exception("Unsupported param format: {}".format(parameters))
+            raise Exception(f"Unsupported param format: {parameters}")
 
     def escape_number(self, item):
         return item
@@ -82,4 +82,4 @@ class Escaper(object):
         elif isinstance(item, uuid.UUID):
             return self.escape_uuid(item)
         else:
-            raise Exception("Unsupported object {}".format(item))
+            raise Exception(f"Unsupported object {item}")
