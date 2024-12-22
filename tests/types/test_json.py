@@ -64,6 +64,9 @@ class JSONTestCase(BaseTestCase):
             ).scalar()
             self.assertEqual(json.loads(res), data)
         except DatabaseException as e:
-            unittest.skipIf("Code: 50" in e.args, reason="unknown JSON type")
+            cond = "Code: 50" in str(e)
+            if not cond:
+                raise
+            unittest.skipIf(cond, reason="unknown JSON type")
         finally:
             self.table.drop(bind=self.session.bind, if_exists=True)
