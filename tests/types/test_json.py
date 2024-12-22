@@ -1,8 +1,11 @@
 import json
+import unittest
+
 from sqlalchemy import Column, text, inspect, func
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
+from clickhouse_sqlalchemy.exceptions import DatabaseException
 from tests.testcase import BaseTestCase, CompilationTestCase
 from tests.util import class_name_func
 from parameterized import parameterized_class
@@ -60,5 +63,7 @@ class JSONTestCase(BaseTestCase):
                 func.toJSONString(self.table.c.x)
             ).scalar()
             self.assertEqual(json.loads(res), data)
+        except DatabaseException as e:
+            unittest.skipIf("Code: 50" in e.args, reason="unknown JSON type")
         finally:
             self.table.drop(bind=self.session.bind, if_exists=True)
