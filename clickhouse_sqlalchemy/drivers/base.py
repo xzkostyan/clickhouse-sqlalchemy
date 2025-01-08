@@ -40,6 +40,7 @@ ischema_names = {
     'DateTime64': types.DateTime64,
     'Float64': types.Float64,
     'Float32': types.Float32,
+    'BFloat16': types.BFloat16,
     'Decimal': types.Decimal,
     'String': types.String,
     'Bool': types.Boolean,
