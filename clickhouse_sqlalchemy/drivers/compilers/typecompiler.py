@@ -78,6 +78,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
     def visit_float32(self, type_, **kw):
         return 'Float32'
 
+    def visit_bfloat32(self, type_, **kw):
+        return 'BFloat16'
+
     def visit_float64(self, type_, **kw):
         return 'Float64'
 
