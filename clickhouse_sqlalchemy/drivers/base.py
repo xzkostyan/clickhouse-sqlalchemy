@@ -360,7 +360,11 @@ class ClickHouseDialect(default.DefaultDialect):
 
     @reflection.cache
     def get_pk_constraint(self, connection, table_name, schema=None, **kw):
-        if not self.supports_engine_reflection:
+        should_reflect = (
+            self.supports_engine_reflection and
+            self.engine_reflection
+        )
+        if not should_reflect:
             return {}
 
         if schema:
