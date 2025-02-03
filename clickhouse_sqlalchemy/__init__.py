@@ -4,7 +4,7 @@ from .orm.session import make_session
 from .sql import Table, MaterializedView, select
 
 
-VERSION = (0, 2, 8)
+VERSION = (0, 2, 9)
 __version__ = '.'.join(str(x) for x in VERSION)
 
 

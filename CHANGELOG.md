@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+## [0.2.9] - 2025-02-03
+### Fixed
+- Comment reflection uses ``engine_reflection`` option. Enabled by default reflection leads to speed penalty during `system.tables` lookup.
+
 ## [0.2.8] - 2025-01-30
 ### Fixed
 - Table primary key reflection uses ``engine_reflection`` option. Enabled by default reflection leads to speed penalty during `system.tables` lookup.
@@ -338,7 +342,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.8...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.9...HEAD
+[0.2.9]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.8...0.2.9
 [0.2.8]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.7...0.2.8
 [0.2.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.6...0.2.7
 [0.2.6]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.5...0.2.6

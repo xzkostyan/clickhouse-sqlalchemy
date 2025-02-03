@@ -432,6 +432,9 @@ class ClickHouseDialect(default.DefaultDialect):
         if not self.supports_table_comment_reflection:
             raise NotImplementedError()
 
+        if not self.engine_reflection:
+            return {}
+
         database = schema if schema else connection.engine.url.database
 
         query = text(
