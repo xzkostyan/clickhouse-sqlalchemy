@@ -68,9 +68,11 @@ class ClickHouseDialect_native(ClickHouseDialect):
             password = quote(url.password) if use_quote else url.password
             url = url.set(password=password)
 
+        query = dict(url.query)
         self.engine_reflection = asbool(
-            url.query.get('engine_reflection', 'true')
+            query.pop('engine_reflection', 'true')
         )
+        url = url.set(query=query)
 
         return (url.render_as_string(hide_password=False), ), {}
 
