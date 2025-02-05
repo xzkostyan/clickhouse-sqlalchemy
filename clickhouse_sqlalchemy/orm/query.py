@@ -36,7 +36,7 @@ class Query(BaseQuery):
     _array_join = None
 
     def _statement_20(self, *args, **kwargs):
-        statement = super(Query, self)._statement_20(*args, **kwargs)
+        statement = super()._statement_20(*args, **kwargs)
         statement._compile_state_factory = partial(
             _compile_state_factory, statement._compile_state_factory, self
         )

@@ -22,7 +22,7 @@ system_asynch_session = make_session(
 )
 
 
-class MockedEngine(object):
+class MockedEngine:
 
     prev_do_execute = None
     prev_do_executemany = None

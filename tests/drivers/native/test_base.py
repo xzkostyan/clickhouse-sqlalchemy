@@ -52,10 +52,10 @@ class TestConnectArgs(BaseTestCase):
     def test_quoting(self):
         user = "us#er"
         password = 'pass#word'
-        part = '{}:{}@host/database'.format(user, password)
+        part = f'{user}:{password}@host/database'
         quote_user = quote(user)
         quote_password = quote(password)
-        quote_part = '{}:{}@host/database'.format(quote_user, quote_password)
+        quote_part = f'{quote_user}:{quote_password}@host/database'
 
         # test with unquote user and password
         url = make_url('clickhouse+native://' + part)

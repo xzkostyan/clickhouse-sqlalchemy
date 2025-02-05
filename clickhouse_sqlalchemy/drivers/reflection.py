@@ -15,7 +15,7 @@ class ClickHouseInspector(reflection.Inspector):
         else:
             ch_table = table
 
-        super(ClickHouseInspector, self).reflect_table(
+        super().reflect_table(
             ch_table, *args, **kwargs
         )
 

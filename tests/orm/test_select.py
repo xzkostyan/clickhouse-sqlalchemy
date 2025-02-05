@@ -262,12 +262,12 @@ class SelectTestCase(CompilationTestCase):
 
 class JoinTestCase(CompilationTestCase):
     def test_joins(self):
-        t1, t2 = [Table(
-            't{}'.format(i), self.metadata(),
+        t1, t2 = (Table(
+            f't{i}', self.metadata(),
             Column('x', types.Int32, primary_key=True),
             Column('y', types.Int32, primary_key=True),
             engines.Memory()
-        ) for i in range(1, 3)]
+        ) for i in range(1, 3))
 
         query = self.session.query(t1.c.x, t2.c.x) \
             .join(
@@ -364,12 +364,12 @@ class JoinTestCase(CompilationTestCase):
         )
 
     def test_multiple_joins(self):
-        t1, t2, t3 = [Table(
-            't{}'.format(i), self.metadata(),
+        t1, t2, t3 = (Table(
+            f't{i}', self.metadata(),
             Column('x', types.Int32, primary_key=True),
             Column('y', types.Int32, primary_key=True),
             engines.Memory()
-        ) for i in range(1, 4)]
+        ) for i in range(1, 4))
 
         query = self.session.query(t1.c.x, t2.c.x) \
             .join(t2, t1.c.x == t2.c.y, strictness='any') \

@@ -14,7 +14,7 @@ class Nested(types.TypeEngine):
             raise ValueError('columns must be specified for nested type')
         self.columns = columns
         self._columns_dict = {col.name: col for col in columns}
-        super(Nested, self).__init__()
+        super().__init__()
 
     class Comparator(UserDefinedType.Comparator):
         def __getattr__(self, key):
@@ -43,7 +43,7 @@ class NestedColumn(ColumnClause):
             table = self.parent.element.table
         else:
             table = self.parent.table
-        super(NestedColumn, self).__init__(
+        super().__init__(
             sub_column.name,
             sub_column.type,
             _selectable=table
@@ -55,7 +55,7 @@ def _comp(element, compiler, **kw):
     from_labeled_label = False
     if isinstance(element.parent, Label):
         from_labeled_label = True
-    return "%s.%s" % (
+    return "{}.{}".format(
         compiler.process(element.parent,
                          from_labeled_label=from_labeled_label,
                          within_label_clause=False,

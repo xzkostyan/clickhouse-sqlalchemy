@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from clickhouse_sqlalchemy.drivers.http.utils import unescape, parse_tsv
 from tests.testcase import BaseTestCase
 

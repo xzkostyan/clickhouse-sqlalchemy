@@ -25,7 +25,7 @@ class ClickHouseDialectTestCase(BaseTestCase):
         return self.session.connection()
 
     def setUp(self):
-        super(ClickHouseDialectTestCase, self).setUp()
+        super().setUp()
         self.table = Table(
             'test_exists_table',
             self.metadata(),
@@ -44,7 +44,7 @@ class ClickHouseDialectTestCase(BaseTestCase):
 
     def tearDown(self):
         self.table.drop(self.session.bind, if_exists=True)
-        super(ClickHouseDialectTestCase, self).tearDown()
+        super().tearDown()
 
     def test_has_table(self):
         self.assertFalse(
@@ -147,7 +147,7 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
     session = asynch_session
 
     def setUp(self):
-        super(ClickHouseAsynchDialectTestCase, self).setUp()
+        super().setUp()
         self.test_metadata = self.metadata()
         self.table = Table(
             'test_exists_table',
@@ -159,7 +159,7 @@ class ClickHouseAsynchDialectTestCase(BaseAsynchTestCase):
 
     def tearDown(self):
         run_async(self.connection.run_sync)(self.test_metadata.drop_all)
-        super(ClickHouseAsynchDialectTestCase, self).tearDown()
+        super().tearDown()
 
     async def run_inspector_method(self, method, *args, **kwargs):
         def _run(conn):

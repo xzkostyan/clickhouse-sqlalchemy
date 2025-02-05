@@ -1,4 +1,3 @@
-
 tests_require = [
     'pytest',
     'pytest-asyncio',

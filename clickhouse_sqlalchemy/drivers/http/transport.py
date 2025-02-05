@@ -88,7 +88,7 @@ def _get_type(type_str):
     return None
 
 
-class RequestsTransport(object):
+class RequestsTransport:
 
     def __init__(
             self,
@@ -123,7 +123,7 @@ class RequestsTransport(object):
         http = kwargs.pop('http_session', requests.Session)
         self.http = http() if callable(http) else http
 
-        super(RequestsTransport, self).__init__()
+        super().__init__()
 
     def execute(self, query, params=None):
         """
