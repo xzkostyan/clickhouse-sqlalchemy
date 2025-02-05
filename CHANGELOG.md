@@ -6,7 +6,7 @@
 
 Changed:
 
-- update ".gitignore". Pull request [#364](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/364) by @stankudrow.
+- update ".gitignore". Pull request [#364](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/364) by [stankudrow](https://github.com/stankudrow).
 
 ## [0.3.2] - 2024-06-12
 ### Added
