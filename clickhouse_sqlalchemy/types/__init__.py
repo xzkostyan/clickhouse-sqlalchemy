@@ -32,6 +32,7 @@ __all__ = [
     'IPv4',
     'IPv6',
     'JSON',
+    'Dynamic',
     'Nested',
     'Tuple',
     'Map',
@@ -70,6 +71,7 @@ from .common import Enum8
 from .common import Enum16
 from .common import Decimal
 from .common import JSON
+from .common import Dynamic
 from .common import Tuple
 from .common import Map
 from .common import AggregateFunction
