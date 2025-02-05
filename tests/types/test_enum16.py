@@ -9,6 +9,8 @@ from tests.util import with_native_and_http_sessions
 
 
 class TestEnum(enum.IntEnum):
+    __test__ = False
+
     First = 1
     Second = 2
 

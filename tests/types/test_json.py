@@ -1,8 +1,11 @@
 import json
+import unittest
+
 from sqlalchemy import Column, text, inspect, func
 from sqlalchemy.sql.ddl import CreateTable
 
 from clickhouse_sqlalchemy import types, engines, Table
+from clickhouse_sqlalchemy.exceptions import DatabaseException
 from tests.testcase import BaseTestCase, CompilationTestCase
 from tests.util import class_name_func
 from parameterized import parameterized_class
@@ -45,6 +48,9 @@ class JSONTestCase(BaseTestCase):
             self.session.execute(
                 text('SET allow_experimental_object_type = 1;')
             )
+            self.session.execute(
+                text('SET allow_experimental_json_type = 1;')
+            )
             self.session.execute(text(self.compile(CreateTable(self.table))))
             self.session.execute(self.table.insert(), [{'x': data}])
             coltype = inspect(self.session.bind).get_columns('test')[0]['type']
@@ -57,5 +63,10 @@ class JSONTestCase(BaseTestCase):
                 func.toJSONString(self.table.c.x)
             ).scalar()
             self.assertEqual(json.loads(res), data)
+        except DatabaseException as e:
+            cond = "Code: 50" in str(e)
+            if not cond:
+                raise
+            unittest.skipIf(cond, reason="unknown JSON type")
         finally:
             self.table.drop(bind=self.session.bind, if_exists=True)

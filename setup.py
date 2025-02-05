@@ -26,7 +26,7 @@ def read_version():
 
 
 dialects = [
-    'clickhouse{}=clickhouse_sqlalchemy.drivers.{}'.format(driver, d_path)
+    f'clickhouse{driver}=clickhouse_sqlalchemy.drivers.{d_path}'
 
     for driver, d_path in [
         ('', 'http.base:ClickHouseDialect_http'),
@@ -54,23 +54,13 @@ setup(
 
     classifiers=[
         'Development Status :: 4 - Beta',
-
-
         'Environment :: Console',
-
-
         'Intended Audience :: Developers',
         'Intended Audience :: Information Technology',
-
-
         'License :: OSI Approved :: MIT License',
-
-
         'Operating System :: OS Independent',
-
-
         'Programming Language :: SQL',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -78,7 +68,6 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
-
         'Topic :: Database',
         'Topic :: Software Development',
         'Topic :: Software Development :: Libraries',
