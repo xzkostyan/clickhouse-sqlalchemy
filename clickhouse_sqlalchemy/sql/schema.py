@@ -109,7 +109,7 @@ class MaterializedView(DialectKWArgs, SchemaItem, Immutable, FromClause):
             args += (
                 [repr(x) for x in self.inner_table.columns]
                 + [repr(self.inner_table.engine)]
-                + ['{}={}'.format(k, repr(getattr(self, k))) for k in ['schema']]
+                + [f'{k}={repr(getattr(self, k))}' for k in ['schema']]
             )
 
         args += ['AS ' + str(self.mv_selectable)]

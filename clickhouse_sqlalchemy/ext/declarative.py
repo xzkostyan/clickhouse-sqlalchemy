@@ -30,7 +30,7 @@ class ClickHouseDeclarativeMeta(DeclarativeMeta):
             def _join(match):
                 word = match.group()
                 if len(word) > 1:
-                    return ('_{}_{}'.format(word[:-1], word[-1])).lower()
+                    return (f'_{word[:-1]}_{word[-1]}').lower()
                 return '_' + word.lower()
             d['__tablename__'] = cls._camelcase_re.sub(_join, name).lstrip('_')
 

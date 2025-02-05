@@ -480,7 +480,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
 
     def visit_regexp_match_op_binary(self, binary, operator, **kw):
         string, pattern = self._get_regexp_args(binary, kw)
-        return "match({}, {})".format(string, pattern)
+        return f"match({string}, {pattern})"
 
     def visit_not_regexp_match_op_binary(self, binary, operator, **kw):
         return "NOT %s" % self.visit_regexp_match_op_binary(

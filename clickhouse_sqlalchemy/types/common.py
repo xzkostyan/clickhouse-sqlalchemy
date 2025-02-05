@@ -216,7 +216,7 @@ class AggregateFunction(ClickHouseTypeEngine):
     def __init__(
         self,
         agg_func: Union[Function, str],
-        *nested_types: Union[Type[ClickHouseTypeEngine], ClickHouseTypeEngine],
+        *nested_types: Union[type[ClickHouseTypeEngine], ClickHouseTypeEngine],
     ):
         self.agg_func = agg_func
         self.nested_types = [to_instance(val) for val in nested_types]
@@ -239,7 +239,7 @@ class SimpleAggregateFunction(ClickHouseTypeEngine):
     def __init__(
         self,
         agg_func: Union[Function, str],
-        *nested_types: Union[Type[ClickHouseTypeEngine], ClickHouseTypeEngine],
+        *nested_types: Union[type[ClickHouseTypeEngine], ClickHouseTypeEngine],
     ):
         self.agg_func = agg_func
         self.nested_types = [to_instance(val) for val in nested_types]

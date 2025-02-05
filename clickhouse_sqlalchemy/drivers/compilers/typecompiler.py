@@ -71,7 +71,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_datetime64(self, type_, **kw):
         if type_.timezone:
-            return "DateTime64({}, '{}')".format(type_.precision, type_.timezone)
+            return f"DateTime64({type_.precision}, '{type_.timezone}')"
         else:
             return 'DateTime64(%s)' % type_.precision
 
@@ -82,7 +82,7 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         return 'Float64'
 
     def visit_numeric(self, type_, **kw):
-        return 'Decimal({}, {})'.format(type_.precision, type_.scale)
+        return f'Decimal({type_.precision}, {type_.scale})'
 
     def visit_boolean(self, type_, **kw):
         return 'Bool'

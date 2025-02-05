@@ -13,7 +13,7 @@ from tests.testcase import HttpSessionTestCase
 class TransportCase(HttpSessionTestCase):
     @property
     def url(self):
-        return 'http://{host}:{port}'.format(host=self.host, port=self.port)
+        return f'http://{self.host}:{self.port}'
 
     @mock.activate
     def test_parse_func_count(self):
