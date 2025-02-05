@@ -6,7 +6,7 @@
 
 Changed:
 
-- the CHANGELOG.md is groomed.
+- the CHANGELOG.md is groomed. Pull request [#363](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/363) by @stankudrow.
 
 ### [0.3.2] - 2024-06-12
 
