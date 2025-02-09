@@ -47,6 +47,7 @@ class Lambda(ColumnElement):
     """Represent a lambda function, ``Lambda(lambda x: 2 * x)``."""
 
     __visit_name__ = 'lambda'
+    inherit_cache = True
 
     def __init__(self, func):
         if not callable(func):
