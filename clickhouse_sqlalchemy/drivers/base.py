@@ -95,6 +95,8 @@ class ClickHouseDialect(default.DefaultDialect):
     supports_multivalues_insert = True
     supports_statement_cache = True
 
+    div_is_floordiv = False
+
     supports_comments = True
     inline_comments = True
 
