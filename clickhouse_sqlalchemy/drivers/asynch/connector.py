@@ -144,9 +144,11 @@ class AsyncAdapt_asynch_dbapi:
             setattr(self, name, getattr(self.asynch.errors, name))
 
     def connect(self, *args, **kwargs) -> 'AsyncAdapt_asynch_connection':
+        connection = self.asynch.connection.Connection(*args, **kwargs)
+        await_only(connection.connect())
         return AsyncAdapt_asynch_connection(
             self,
-            await_only(self.asynch.connect(*args, **kwargs))
+            connection
         )
 
 
