@@ -23,6 +23,13 @@
 - ``match`` function case. Pull request [#283](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/283) by [bader-tayeb](https://github.com/bader-tayeb). 
 - [alembic] Missing column on reflection. Pull request [#277](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/277) by [littlebtc](https://github.com/littlebtc). Solves issue [#280](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/280). 
 - [alembic] Use `replace_existing=True` for alembic_version.version_num column. Pull request [#275](https://github.com/xzkostyan/clickhouse-sqlalchemy/pull/275) by [leemurus](https://github.com/leemurus). Solves issue [#288](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/288).
+
+## [0.2.7] - 2024-10-18
+### Fixed
+- ClickHouse dialect extensions (FINAL, SAMPLE, LIMIT BY etc.) rendering in SQLAlchemy version 1.4.
+- Unhashable type dict caused by full join. Solves issue [#276](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/276).
+
+## [0.2.6] - 2024-03-25
 - [alembic] Table reflection for alembic version < 1.11. Solves issue [#274](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/274).
 
 ## [0.3.0] - 2023-11-06
@@ -356,7 +363,9 @@ Log, TinyLog, Null.
 [Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.2...HEAD
 [0.3.2]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.1...0.3.2
 [0.3.1]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.3.0...0.3.1
-[0.3.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.5...0.3.0
+[0.3.0]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.7...0.3.0
+[0.2.7]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.6...0.2.7
+[0.2.6]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.5...0.2.6
 [0.2.5]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.4...0.2.5
 [0.2.4]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.3...0.2.4
 [0.2.3]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.2.2...0.2.3

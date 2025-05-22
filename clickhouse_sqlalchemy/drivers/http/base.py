@@ -31,11 +31,13 @@ class ClickHouseDialect_http(ClickHouseDialect):
         db_name = url.database or 'default'
         endpoint = url.query.get('endpoint', '')
 
+        query = dict(url.query)
         self.engine_reflection = asbool(
-            url.query.get('engine_reflection', 'true')
+            query.pop('engine_reflection', 'true')
         )
+        url = url.set(query=query)
 
-        kwargs.update(url.query)
+        kwargs.update(query)
         if kwargs.get('verify') and kwargs['verify'] in ('False', 'false'):
             kwargs['verify'] = False
 
