@@ -1,0 +1,136 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clickhouse-sqlalchemy"
+version = "0.3.2"
+description = "SQLAlchemy dialect for ClickHouse"
+authors = [
+    {name = "Konstantin Lebedev", email = "kostyan.lebedev@gmail.com"},
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.7"
+keywords = ["clickhouse", "sqlalchemy", "orm", "dialect"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: SQL",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "asynch>=0.2.2,!=0.2.4,!=0.2.5,<0.4.0",
+    "clickhouse-driver>=0.2.9",
+    "requests>=2.31.0",
+    "sqlalchemy>=1.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/xzkostyan/clickhouse-sqlalchemy"
+Documentation = "https://clickhouse-sqlalchemy.readthedocs.io/en/latest/"
+Repository = "https://github.com/xzkostyan/clickhouse-sqlalchemy"
+Issues = "https://github.com/fastapi/fastapi/issues"
+Changelog = "https://github.com/xzkostyan/clickhouse-sqlalchemy/blob/master/CHANGELOG.md"
+PyPI = "https://pypi.org/project/clickhouse-sqlalchemy/"
+
+[project.entry-points."sqlalchemy.dialects"]
+"clickhouse" = "clickhouse_sqlalchemy.drivers.http.base:ClickHouseDialect_http"
+"clickhouse.asynch" = "clickhouse_sqlalchemy.drivers.asynch.base:ClickHouseDialect_asynch"
+"clickhouse.http" = "clickhouse_sqlalchemy.drivers.http.base:ClickHouseDialect_http"
+"clickhouse.native" = "clickhouse_sqlalchemy.drivers.native.base:ClickHouseDialect_native"
+
+[dependency-groups]
+docs = [
+    "sphinx>=5.3.0",
+    # https://github.com/sphinx-toolbox/sphinx-pyproject
+    "sphinx-pyproject>=0.3.0",
+]
+lint = [
+    "mypy>=1.4.1",
+    "ruff>=0.11.12",
+]
+test = [
+    "alembic>=1.12.1",
+    "parameterized>=0.9.0",
+    "pytest>=7.4.4",
+    "pytest-asyncio>=0.21.2",
+    "responses>=0.23.3",
+]
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["clickhouse_sqlalchemy"]
+
+[tool.pytest.ini_options]
+minversion = "7.4"
+addopts = [
+    "--maxfail=1",
+    "--strict-config",
+    "--strict-markers",
+    "--ignore=docs",
+]
+xfail_strict = true
+testpaths = ["tests"]
+asyncio_mode = "strict"
+
+[tool.ruff]
+line-length = 80
+respect-gitignore = true
+target-version = "py37"
+
+[tool.ruff.lint]
+select = [
+    # "A",  # flake8-builtins
+    # "ANN",  # flake8-annotations
+    # "ARG",  # flake8-unused-arguments
+    "ASYNC",  # flake8-async
+    # "B",  # flake8-bugbear
+    # "C4",  # flake8-comprehensions
+    # # "D",  # pydocstyle
+    # "DTZ",  # flake8-datetimez
+    "E",  # pycodestyle errors
+    "F",  # pyflakes
+    # "FBT",  # flake8-boolean-trap
+    # "I",  # isort
+    "ICN",  # flake8-import-conventions
+    # "ISC",  # flake8-implicit-str-concat
+    "PERF",  # perflint
+    # "PIE",  # flake8-pie
+    # "PLE",  # pylint errors
+    # "PLR",  # pylint refactor
+    # "PLW",  # pylint warning
+    # "PT",  # flake8-pytest-style
+    "PYI",  # flake8-pyi
+    # "Q",  # flake8-quotes
+    # "RET",  # flake8-return
+    # "RSE",  # flake8-raise
+    # # "SIM",  # flake8-simplify
+    "T10",  # flake8-debugger
+    "T20",  # flake8-print
+    # "TC",  # flake8-type-checking
+    # "TID",  # flake8-tidy-imports
+    # "TRY",  # tryceratops
+    # "UP",  # pyupgrade
+    "W",  # pycodestyle warnings
+]
+fixable = ["I"]
