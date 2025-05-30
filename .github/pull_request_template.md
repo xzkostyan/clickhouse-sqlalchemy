@@ -7,7 +7,7 @@ Link to relevant issue(s) or previous PR(s), one per line. Use "fixes" to automa
 <!--
 Ensure each step in the "CONTRIBUTING.rst" file is completed by adding an "x" inside each box below.
 
-If only docs are changed, the checklist below may be removed.
+If only the documentation is changed, the checklist below may be removed.
 -->
 
 Checklist:
