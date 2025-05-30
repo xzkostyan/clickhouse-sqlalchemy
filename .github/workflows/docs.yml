@@ -14,7 +14,7 @@ jobs:
       - name: Update tools
         run: pip install --upgrade pip setuptools wheel
       - name: Install sphinx
-        run: pip install sphinx
+        run: pip install sphinx sphinx-pyproject
       - name: Install package
         run: pip install -e .
       - name: Build docs
