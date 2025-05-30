@@ -1,21 +1,19 @@
 <!--
-Link to relevant issues or previous PRs, one per line. Use "fixes" to
-automatically close an issue.
+Link to relevant issue(s) or previous PR(s), one per line. Use "fixes" to automatically close the related issue.
 -->
 
 - fixes #<issue number>
 
 <!--
-Ensure each step in CONTRIBUTING.rst is complete by adding an "x" to
-each box below.
+Ensure each step in the "CONTRIBUTING.rst" file is completed by adding an "x" inside each box below.
 
-If only docs were changed, these aren't relevant and can be removed.
+If only docs are changed, the checklist below may be removed.
 -->
 
 Checklist:
 
-- [ ] Add tests that demonstrate the correct behavior of the change. Tests should fail without the change.
-- [ ] Add or update relevant docs, in the docs folder and in code.
-- [ ] Ensure PR doesn't contain untouched code reformatting: spaces, etc.
-- [ ] Run `flake8` and fix issues.
-- [ ] Run `pytest` no tests failed. See https://clickhouse-sqlalchemy.readthedocs.io/en/latest/development.html.
+- [ ] Add tests demonstrating the correct behavior of the change. All tests should pass.
+- [ ] Add/Update relevant docs in the code and in the `docs` directory.
+- [ ] Ensure the PR doesn't contain the code non-conformant with project formatting and linting rules.
+- [ ] Run `flake8`/`ruff` and fix issues.
+- [ ] Run `pytest` no tests failed. See the [development](https://clickhouse-sqlalchemy.readthedocs.io/en/latest/development.html) section.
