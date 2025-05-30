@@ -42,4 +42,6 @@ class Enum8TestCase(BaseTestCase):
         value = _TestEnum.First
         with self.create_table(self.table):
             self.session.execute(self.table.insert(), [{"x": value}])
-            self.assertEqual(self.session.query(self.table.c.x).scalar(), value)
+            self.assertEqual(
+                self.session.query(self.table.c.x).scalar(), value
+            )

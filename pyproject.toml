@@ -94,7 +94,7 @@ testpaths = ["tests"]
 asyncio_mode = "strict"
 
 [tool.ruff]
-line-length = 80
+line-length = 79
 respect-gitignore = true
 target-version = "py37"
 
