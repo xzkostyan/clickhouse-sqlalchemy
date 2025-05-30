@@ -16,18 +16,14 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-from clickhouse_sqlalchemy import __version__, VERSION
+# https://github.com/sphinx-toolbox/sphinx-pyproject
+from sphinx_pyproject import SphinxConfig
 
 # -- Project information -----------------------------------------------------
 
-project = 'clickhouse-sqlalchemy'
-copyright = '2017-2022, clickhouse-sqlalchemy authors'
-author = 'clickhouse-sqlalchemy authors'
-
-# The short X.Y version
-version = '.'.join(str(x) for x in VERSION[:2])
-# The full version, including alpha/beta/rc tags
-release = __version__
+config = SphinxConfig("../pyproject.toml", globalns=globals())
+author = config.author
+project = config.name
 
 
 # -- General configuration ---------------------------------------------------
