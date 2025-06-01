@@ -40,14 +40,14 @@ dependencies = [
     "asynch>=0.2.2,!=0.2.4,!=0.2.5,<0.4.0",
     "clickhouse-driver>=0.2.9",
     "requests>=2.31.0",
-    "sqlalchemy>=1.4",
+    "sqlalchemy>=2.0.0,<2.1.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/xzkostyan/clickhouse-sqlalchemy"
 Documentation = "https://clickhouse-sqlalchemy.readthedocs.io/en/latest/"
 Repository = "https://github.com/xzkostyan/clickhouse-sqlalchemy"
-Issues = "https://github.com/fastapi/fastapi/issues"
+Issues = "https://github.com/xzkostyan/clickhouse-sqlalchemy/issues"
 Changelog = "https://github.com/xzkostyan/clickhouse-sqlalchemy/blob/master/CHANGELOG.md"
 PyPI = "https://pypi.org/project/clickhouse-sqlalchemy/"
 
