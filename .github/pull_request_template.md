@@ -15,5 +15,5 @@ Checklist:
 - [ ] Add tests demonstrating the correct behavior of the change. All tests should pass.
 - [ ] Add/Update relevant docs in the code and in the `docs` directory.
 - [ ] Ensure the PR doesn't contain the code non-conformant with project formatting and linting rules.
-- [ ] Run `flake8`/`ruff` and fix issues.
+- [ ] Run `ruff` and fix issues.
 - [ ] Run `pytest` no tests failed. See the [development](https://clickhouse-sqlalchemy.readthedocs.io/en/latest/development.html) section.
