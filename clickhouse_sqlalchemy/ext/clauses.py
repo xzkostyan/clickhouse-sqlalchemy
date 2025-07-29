@@ -57,5 +57,16 @@ class Lambda(ColumnElement):
         self.func = func
 
 
+class WithFill(ColumnElement):
+    """Represent a ``WITH FILL`` expression."""
+    __visit_name__ = 'with_fill'
+
+    def __init__(self, column, from_=None, to=None, step=None):
+        self.column = column
+        self.from_ = from_
+        self.to = to
+        self.step = step
+
+
 class ArrayJoin(ClauseList):
     __visit_name__ = 'array_join'

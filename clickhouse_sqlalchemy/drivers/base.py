@@ -17,6 +17,7 @@ from sqlalchemy.sql.compiler import crud
 
 from .. import Table, types
 from .. import engines
+from ..ext.clauses import WithFill
 from ..util import compat
 
 # Column specifications
@@ -171,6 +172,35 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         args = [literal_column(arg) for arg in spec.args]
         text += self.process(func(*args), **kw)
+
+        return text
+
+    def visit_with_fill(self, with_fill: WithFill, **kw):
+        column = with_fill.column
+        column_types = {
+            types.Date: "toDate('%s')",
+            types.DateTime64: "toDateTime64('%s', %s)",
+            types.DateTime: "toDateTime('%s')",
+        }
+
+        column_template = column_types.get(type(column.type), '%s')
+        text = f'{column} WITH FILL'
+
+
+        if with_fill.from_:
+            if isinstance(column.type, types.DateTime64):
+                text += ' FROM ' + column_template % (with_fill.from_, str(column.type.precision))
+            else:
+                text += ' FROM ' + column_template % with_fill.from_
+
+        if with_fill.to:
+            if isinstance(column.type, types.DateTime64):
+                text += ' TO ' + column_template % (with_fill.to, column.type.precision)
+            else:
+                text += ' TO ' + column_template % with_fill.to
+
+        if with_fill.step:
+            text += ' STEP ' + str(with_fill.step)
 
         return text
 

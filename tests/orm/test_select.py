@@ -1,7 +1,7 @@
 from sqlalchemy import Column, exc, func, literal, select, text, tuple_
 
 from clickhouse_sqlalchemy import types, Table, engines
-from clickhouse_sqlalchemy.ext.clauses import Lambda
+from clickhouse_sqlalchemy.ext.clauses import Lambda, WithFill
 from tests.testcase import NativeSessionTestCase, CompilationTestCase
 
 
@@ -146,6 +146,183 @@ class SelectTestCase(CompilationTestCase):
             ") AS test"
         )
 
+    def test_with_fill(self):
+        columns = [Column('y', types.Int32), Column('z', types.Int32)]
+        table = self._make_table(*columns)
+
+        query = self.session.query(table.c.x) \
+            .order_by(WithFill(table.c.x))
+
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x '
+            'WITH FILL'
+        )
+
+    def test_with_fill_from(self):
+        columns = [Column('y', types.Int32), Column('z', types.Int32)]
+        table = self._make_table(*columns)
+
+        query = self.session.query(table.c.x) \
+            .order_by(WithFill(table.c.x, from_=2))
+
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x '
+            'WITH FILL FROM 2'
+        )
+
+
+    def test_with_fill_from_to(self):
+        columns = [Column('y', types.Int32), Column('z', types.Int32)]
+        table = self._make_table(*columns)
+
+        query = self.session.query(table.c.x) \
+            .order_by(WithFill(table.c.x, from_=2, to=5))
+
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x '
+            'WITH FILL FROM 2 TO 5'
+        )
+
+
+    def test_with_fill_from_to_step(self):
+        columns = [Column('y', types.Int32), Column('z', types.Int32)]
+        table = self._make_table(*columns)
+
+        query = self.session.query(table.c.x) \
+            .order_by(WithFill(table.c.x, from_=1, to=5, step=1))
+
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x '
+            'WITH FILL FROM 1 TO 5 STEP 1'
+        )
+
+    def test_with_fill_from_to_step_multiply(self):
+        columns = [Column('y', types.Int32), Column('z', types.Int32)]
+        table = self._make_table(*columns)
+
+        query = self.session.query(table.c.x) \
+            .order_by(WithFill(table.c.x, from_=1, to=5, step=1), WithFill(table.c.z, from_=2, to=6, step=1))
+
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 ORDER BY t1.x '
+            'WITH FILL FROM 1 TO 5 STEP 1, t1.z WITH FILL FROM 2 TO 6 STEP 1'
+        )
+
+
+    def test_with_fill_from_date(self):
+        from datetime import date
+        columns = [Column('y', types.Int32), Column('date', types.Date)]
+        table = self._make_table(*columns)
+
+        query = self.session.query(table.c.x) \
+            .order_by(WithFill(table.c.date, from_=date(year=2025, month=1, day=1)))
+
+        self.assertEqual(
+            self.compile(query),
+            "SELECT t1.x AS t1_x FROM t1 ORDER BY t1.date "
+            "WITH FILL FROM toDate('2025-01-01')"
+        )
+
+
+    def test_with_fill_from_to_step_date(self):
+        from datetime import date
+        columns = [Column('y', types.Int32), Column('date', types.Date)]
+        table = self._make_table(*columns)
+
+        query = self.session.query(table.c.x) \
+            .order_by(
+            WithFill(
+                table.c.date,
+                from_=date(year=2025, month=1, day=1),
+                to=date(year=2025, month=2, day=1),
+                step=1
+            )
+        )
+
+        self.assertEqual(
+            self.compile(query),
+            "SELECT t1.x AS t1_x FROM t1 ORDER BY t1.date "
+            "WITH FILL FROM toDate('2025-01-01') TO toDate('2025-02-01') STEP 1"
+        )
+
+    def test_with_fill_from_to_step_with_datetime(self):
+        from datetime import date, datetime
+        columns = [Column('y', types.Int32), Column('datetime', types.DateTime)]
+        table = self._make_table(*columns)
+
+        query = self.session.query(table.c.x) \
+            .order_by(
+            WithFill(
+                table.c.datetime,
+                from_=date(year=2025, month=1, day=1),
+                to=date(year=2025, month=2, day=2),
+                step=1
+            )
+        )
+
+        self.assertEqual(
+            self.compile(query),
+            "SELECT t1.x AS t1_x FROM t1 ORDER BY t1.datetime "
+            "WITH FILL FROM toDateTime('2025-01-01') TO toDateTime('2025-02-02') STEP 1"
+        )
+
+        query = self.session.query(table.c.x) \
+            .order_by(
+            WithFill(
+                table.c.datetime,
+                from_=datetime(year=2025, month=1, day=1, hour=1,minute=1,second=1),
+                to=datetime(year=2025, month=2, day=2),
+                step=1
+            )
+        )
+
+        self.assertEqual(
+            self.compile(query),
+            "SELECT t1.x AS t1_x FROM t1 ORDER BY t1.datetime "
+            "WITH FILL FROM toDateTime('2025-01-01 01:01:01') TO toDateTime('2025-02-02 00:00:00') STEP 1"
+        )
+
+    def test_with_fill_from_to_step_with_datetime64(self):
+        from datetime import date, datetime
+        columns = [Column('y', types.Int32), Column('datetime', types.DateTime64)]
+        table = self._make_table(*columns)
+
+        query = self.session.query(table.c.x) \
+            .order_by(
+            WithFill(
+                table.c.datetime,
+                from_=date(year=2025, month=1, day=1),
+                to=date(year=2025, month=2, day=2),
+                step=1
+            )
+        )
+
+        self.assertEqual(
+            self.compile(query),
+            "SELECT t1.x AS t1_x FROM t1 ORDER BY t1.datetime "
+            "WITH FILL FROM toDateTime64('2025-01-01', 3) TO toDateTime64('2025-02-02', 3) STEP 1"
+        )
+
+        query = self.session.query(table.c.x) \
+            .order_by(
+            WithFill(
+                table.c.datetime,
+                from_=datetime(year=2025, month=1, day=1, hour=1, minute=1, second=1),
+                to=datetime(year=2025, month=2, day=2),
+                step=1
+            )
+        )
+
+        self.assertEqual(
+            self.compile(query),
+            "SELECT t1.x AS t1_x FROM t1 ORDER BY t1.datetime "
+            "WITH FILL FROM toDateTime64('2025-01-01 01:01:01', 3) TO toDateTime64('2025-02-02 00:00:00', 3) STEP 1"
+        )
 
 class JoinTestCase(CompilationTestCase):
     def test_joins(self):
