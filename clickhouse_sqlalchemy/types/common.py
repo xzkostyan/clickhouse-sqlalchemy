@@ -107,9 +107,21 @@ class Float64(Float):
 class Date(types.Date, ClickHouseTypeEngine):
     __visit_name__ = 'date'
 
+    def literal_processor(self, dialect):
+        def process(value):
+            return "'%s'" % value
+
+        return process
+
 
 class DateTime(types.Date, ClickHouseTypeEngine):
     __visit_name__ = 'datetime'
+
+    def literal_processor(self, dialect):
+        def process(value):
+            return "'%s'" % value
+
+        return process
 
 
 class DateTime64(DateTime, ClickHouseTypeEngine):
@@ -119,6 +131,12 @@ class DateTime64(DateTime, ClickHouseTypeEngine):
         self.precision = precision
         self.timezone = timezone
         super(DateTime64, self).__init__()
+
+    def literal_processor(self, dialect):
+        def process(value):
+            return "'%s'" % value
+
+        return process
 
 
 class Enum(types.Enum, ClickHouseTypeEngine):

@@ -177,30 +177,19 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
     def visit_with_fill(self, with_fill: WithFill, **kw):
         column = with_fill.column
-        column_types = {
-            types.Date: "toDate('%s')",
-            types.DateTime64: "toDateTime64('%s', %s)",
-            types.DateTime: "toDateTime('%s')",
-        }
-
-        column_template = column_types.get(type(column.type), '%s')
+        # column_type = column.type
         text = f'{column} WITH FILL'
 
+        if with_fill.from_ is not None:
 
-        if with_fill.from_:
-            if isinstance(column.type, types.DateTime64):
-                text += ' FROM ' + column_template % (with_fill.from_, str(column.type.precision))
-            else:
-                text += ' FROM ' + column_template % with_fill.from_
+            text += ' FROM ' + self.process(with_fill.from_, **kw)
 
-        if with_fill.to:
-            if isinstance(column.type, types.DateTime64):
-                text += ' TO ' + column_template % (with_fill.to, column.type.precision)
-            else:
-                text += ' TO ' + column_template % with_fill.to
+        if with_fill.to is not None:
 
-        if with_fill.step:
-            text += ' STEP ' + str(with_fill.step)
+            text += ' TO ' + self.process(with_fill.to, **kw)
+
+        if with_fill.step is not None:
+            text += ' STEP ' + self.process(with_fill.step, **kw)
 
         return text
 

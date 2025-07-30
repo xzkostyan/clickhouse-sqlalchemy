@@ -62,6 +62,7 @@ class WithFill(ColumnElement):
     __visit_name__ = 'with_fill'
 
     def __init__(self, column, from_=None, to=None, step=None):
+
         self.column = column
         self.from_ = from_
         self.to = to
