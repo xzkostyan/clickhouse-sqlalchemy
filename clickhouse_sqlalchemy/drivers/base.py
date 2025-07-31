@@ -17,6 +17,7 @@ from sqlalchemy.sql.compiler import crud
 
 from .. import Table, types
 from .. import engines
+from ..ext.clauses import WithFill
 from ..util import compat
 
 # Column specifications
@@ -171,6 +172,23 @@ class ClickHouseCompiler(compiler.SQLCompiler):
 
         args = [literal_column(arg) for arg in spec.args]
         text += self.process(func(*args), **kw)
+
+        return text
+
+    def visit_with_fill(self, with_fill: WithFill, **kw):
+        column = with_fill.column
+        text = f'{column} WITH FILL'
+
+        if with_fill.from_ is not None:
+
+            text += ' FROM ' + self.process(with_fill.from_, **kw)
+
+        if with_fill.to is not None:
+
+            text += ' TO ' + self.process(with_fill.to, **kw)
+
+        if with_fill.step is not None:
+            text += ' STEP ' + self.process(with_fill.step, **kw)
 
         return text
 
