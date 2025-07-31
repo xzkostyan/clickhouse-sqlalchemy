@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.1.12] - 2025-07-31
+### Added
+- ``WITH FILL`` clause.
+
 ## [0.1.11] - 2024-03-25
 ### Fixed (backported from 0.2.x and 0.3.x )
 - [alembic] Table reflection for alembic version < 1.11. Solves issue [#274](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/274).
@@ -262,7 +266,8 @@ Log, TinyLog, Null.
 - Chunked `INSERT INTO` in one request.
 - Engines: MergeTree, CollapsingMergeTree, SummingMergeTree, Buffer, Memory. 
 
-[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.11...HEAD
+[Unreleased]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.12...HEAD
+[0.1.12]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.11...0.1.12
 [0.1.11]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.10...0.1.11
 [0.1.10]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.9...0.1.10
 [0.1.9]: https://github.com/xzkostyan/clickhouse-sqlalchemy/compare/0.1.8...0.1.9
