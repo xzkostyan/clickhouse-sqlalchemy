@@ -2,10 +2,10 @@ from datetime import date, datetime
 from decimal import Decimal
 from unittest.mock import patch
 
-from responses import mock
-from sqlalchemy import Column, func
+from responses import mock, matchers
+from sqlalchemy import Column, func, create_engine, literal
 
-from clickhouse_sqlalchemy import types, Table
+from clickhouse_sqlalchemy import types, Table, make_session
 from clickhouse_sqlalchemy.drivers.http.base import ClickHouseDialect_http
 from tests.testcase import HttpSessionTestCase
 
@@ -215,3 +215,46 @@ class TransportCase(HttpSessionTestCase):
 
         rv = self.session.query(*table.c).all()
         self.assertEqual(rv, [(None, )])
+
+    @mock.activate
+    def test_auth_header(self):
+        url = 'clickhouse+http://testuser:password@{host}:{port}'.format(
+            host=self.host, port=self.port
+        )
+        http_engine = create_engine(url)
+        http_session = make_session(http_engine)
+        mock.add(
+            mock.POST, self.url, status=200,
+            body='version()\nString\n23.3.13.6\n',
+            match=[
+                matchers.header_matcher(
+                    {"Authorization": "Basic dGVzdHVzZXI6cGFzc3dvcmQ="}
+                ),
+            ],
+        )
+
+        rv = http_session.query(literal(1)).scalar()
+        self.assertEqual(rv, '23.3.13.6')
+
+    @mock.activate
+    def test_auth_header_without_auth(self):
+        url = 'clickhouse+http://{host}:{port}'.format(
+            host=self.host, port=self.port
+        )
+        http_engine = create_engine(url)
+        http_session = make_session(http_engine)
+
+        def match_no_auth_header(request):
+            auth_headers = [
+                name for name, _ in request.headers.items()
+                if name == "Authorization"
+            ]
+            return (len(auth_headers) == 0, 'Authorization header is sent')
+        mock.add(
+            mock.POST, self.url, status=200,
+            body='version()\nString\n23.3.13.6\n',
+            match=[match_no_auth_header],
+        )
+
+        rv = http_session.query(literal(1)).scalar()
+        self.assertEqual(rv, '23.3.13.6')
