@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, time
 from decimal import Decimal
 import enum
 import uuid
@@ -47,6 +47,16 @@ class Escaper(object):
         # XXX: shouldn't this be `toDateTime64(...)`?
         return self.escape_string(item.strftime('%Y-%m-%d %H:%M:%S.%f'))
 
+    def escape_time(self, item):
+        # Trim trailing zeros to keep output compatible with Time64 precisions
+        if item.microsecond:
+            value = item.strftime('%H:%M:%S.%f').rstrip('0')
+            if value[-1] == '.':
+                value = value[:-1]
+        else:
+            value = item.strftime('%H:%M:%S')
+        return self.escape_string(value)
+
     def escape_decimal(self, item):
         return float(item)
 
@@ -60,6 +70,8 @@ class Escaper(object):
             return self.escape_number(item)
         elif isinstance(item, datetime):
             return self.escape_datetime(item)
+        elif isinstance(item, time):
+            return self.escape_time(item)
         elif isinstance(item, date):
             return self.escape_date(item)
         elif isinstance(item, Decimal):

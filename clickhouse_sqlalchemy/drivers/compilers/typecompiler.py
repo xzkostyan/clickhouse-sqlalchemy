@@ -3,6 +3,21 @@ from sqlalchemy.sql.ddl import CreateColumn
 
 
 class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
+    def _resolve_server_version(self):
+        """Return the server version tuple if it is known."""
+        version = getattr(self.dialect, "server_version_info", None)
+        if version:
+            return version
+
+        forced = getattr(self.dialect, "forced_server_version_string", None)
+        if forced:
+            return tuple(
+                int(part) if part.isdigit() else part
+                for part in forced.split('.')
+            )
+
+        return None
+
     def visit_string(self, type_, **kw):
         if type_.length is None:
             return 'String'
@@ -179,3 +194,21 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         return "SimpleAggregateFunction(%s, %s)" % (
             agg_str, ", ".join(type_strings)
         )
+
+    def visit_time(self, type_, **kw):
+        version = self._resolve_server_version()
+        if version and version < (25, 6, 0):
+            return 'DateTime'
+
+        return 'Time'
+
+    def visit_time64(self, type_, **kw):
+        # Always validate precision regardless of server version
+        if type_.precision not in [3, 6, 9]:
+            raise ValueError("Invalid precision value. Expected one of [3, 6, 9].")
+
+        version = self._resolve_server_version()
+        if version and version < (25, 6, 0):
+            return f'DateTime64({type_.precision})'
+
+        return f'Time64({type_.precision})'

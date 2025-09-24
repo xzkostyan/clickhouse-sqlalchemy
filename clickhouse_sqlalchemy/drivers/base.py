@@ -38,6 +38,8 @@ ischema_names = {
     'Date32': types.Date32,
     'DateTime': types.DateTime,
     'DateTime64': types.DateTime64,
+    'Time': types.Time,
+    'Time64': types.Time64,
     'Float64': types.Float64,
     'Float32': types.Float32,
     'Decimal': types.Decimal,
@@ -313,6 +315,9 @@ class ClickHouseDialect(default.DefaultDialect):
         elif spec.startswith('DateTime'):
             coltype = self.ischema_names['DateTime']
             return coltype(*self._parse_detetime_params(spec))
+        elif spec.startswith('Time64'):
+            coltype = self.ischema_names['Time64']
+            return coltype(*self._parse_time64_params(spec))
         else:
             try:
                 return self.ischema_names[spec]
@@ -344,6 +349,13 @@ class ClickHouseDialect(default.DefaultDialect):
         if not inner_spec:
             return []
         return [inner_spec]
+
+    @staticmethod
+    def _parse_time64_params(spec):
+        inner_spec = get_inner_spec(spec)
+        if not inner_spec:
+            return []
+        return [int(inner_spec)]
 
     @staticmethod
     def _parse_options(option_string):

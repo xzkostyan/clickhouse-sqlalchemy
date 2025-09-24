@@ -1,6 +1,6 @@
 import re
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from functools import partial
 
@@ -35,6 +35,32 @@ def datetime_converter(x):
         return datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
 
 
+def time_converter(x):
+    if x is None:
+        return None
+
+    time_part, _, fractional = x.partition('.')
+    dt = datetime.strptime(time_part, '%H:%M:%S')
+
+    if fractional:
+        fractional = fractional.rstrip('0')
+        if fractional:
+            digits = len(fractional)
+            if digits <= 6:
+                microsecond = int(fractional.ljust(6, '0'))
+            else:
+                scale = 10 ** (digits - 6)
+                # Python's datetime supports up to microsecond precision, so round here.
+                microsecond = (int(fractional) + scale // 2) // scale
+                if microsecond == 1000000:
+                    dt += timedelta(seconds=1)
+                    microsecond = 0
+                    if dt.day != 1:
+                        dt -= timedelta(days=1)
+            dt = dt.replace(microsecond=microsecond)
+    return dt.time()
+
+
 def nullable_converter(subtype_str, x):
     if x is None:
         return None
@@ -66,6 +92,8 @@ converters = {
     'Date': date_converter,
     'DateTime': datetime_converter,
     'DateTime64': datetime_converter,
+    'Time': time_converter,
+    'Time64': time_converter,
     'IPv4': IPv4Address,
     'IPv6': IPv6Address,
     'Nullable': nullable_converter,
@@ -80,6 +108,8 @@ def _get_type(type_str):
     # sometimes type_str is DateTime64(x)
     if type_str.startswith('DateTime64'):
         return converters['DateTime64']
+    if type_str.startswith('Time64'):
+        return converters['Time64']
     if type_str.startswith('Decimal'):
         return converters['Decimal']
     if type_str.startswith('Nullable('):

@@ -1,3 +1,4 @@
+import datetime
 from typing import Type, Union
 
 from sqlalchemy import types
@@ -254,3 +255,53 @@ class SimpleAggregateFunction(ClickHouseTypeEngine):
             agg_str = f'sa.func.{self.agg_func}'
 
         return f"SimpleAggregateFunction({agg_str}, {', '.join(type_strs)})"
+
+
+class Time(ClickHouseTypeEngine):
+    __visit_name__ = "time"
+
+    def load_dialect_impl(self, dialect):
+        version = getattr(dialect, "server_version_info", None)
+
+        if not version:
+            forced = getattr(dialect, "forced_server_version_string", None)
+            if forced:
+                version = tuple(
+                    int(part) if part.isdigit() else part for part in forced.split(".")
+                )
+
+        if version and version < (25, 6, 0):  # Time requires ClickHouse 25.6+
+            return DateTime()
+
+        return self
+
+    @property
+    def python_type(self):
+        return datetime.time
+
+
+class Time64(ClickHouseTypeEngine):
+    __visit_name__ = "time64"
+
+    def __init__(self, precision=3):
+        self.precision = precision
+        super().__init__()
+
+    def load_dialect_impl(self, dialect):
+        version = getattr(dialect, "server_version_info", None)
+
+        if not version:
+            forced = getattr(dialect, "forced_server_version_string", None)
+            if forced:
+                version = tuple(
+                    int(part) if part.isdigit() else part for part in forced.split(".")
+                )
+
+        if version and version < (25, 6, 0):  # Time64 requires ClickHouse 25.6+
+            return DateTime64(self.precision)
+
+        return self
+
+    @property
+    def python_type(self):
+        return datetime.time
