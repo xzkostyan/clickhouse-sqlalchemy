@@ -267,10 +267,11 @@ class Time(ClickHouseTypeEngine):
             forced = getattr(dialect, "forced_server_version_string", None)
             if forced:
                 version = tuple(
-                    int(part) if part.isdigit() else part for part in forced.split(".")
+                    int(part) if part.isdigit() else part
+                    for part in forced.split(".")
                 )
 
-        if version and version < (25, 6, 0):  # Time requires ClickHouse 25.6+
+        if version and version < (25, 6, 0):
             return DateTime()
 
         return self
@@ -294,10 +295,11 @@ class Time64(ClickHouseTypeEngine):
             forced = getattr(dialect, "forced_server_version_string", None)
             if forced:
                 version = tuple(
-                    int(part) if part.isdigit() else part for part in forced.split(".")
+                    int(part) if part.isdigit() else part
+                    for part in forced.split(".")
                 )
 
-        if version and version < (25, 6, 0):  # Time64 requires ClickHouse 25.6+
+        if version and version < (25, 6, 0):
             return DateTime64(self.precision)
 
         return self

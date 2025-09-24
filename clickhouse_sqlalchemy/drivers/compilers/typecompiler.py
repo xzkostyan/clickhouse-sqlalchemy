@@ -204,7 +204,9 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
 
     def visit_time64(self, type_, **kw):
         if type_.precision not in [3, 6, 9]:
-            raise ValueError("Invalid precision value. Expected one of [3, 6, 9].")
+            raise ValueError(
+                "Invalid precision value. Expected one of [3, 6, 9]."
+            )
 
         version = self._resolve_server_version()
         if version and version < (25, 6, 0):

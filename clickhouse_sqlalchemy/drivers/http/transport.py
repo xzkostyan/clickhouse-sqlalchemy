@@ -50,7 +50,7 @@ def time_converter(x):
                 microsecond = int(fractional.ljust(6, '0'))
             else:
                 scale = 10 ** (digits - 6)
-                # Python's datetime supports up to microsecond precision, so round here.
+                # datetime supports up to microsec precision-round here.
                 microsecond = (int(fractional) + scale // 2) // scale
                 if microsecond == 1000000:
                     dt += timedelta(seconds=1)

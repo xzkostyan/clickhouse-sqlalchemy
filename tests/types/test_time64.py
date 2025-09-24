@@ -89,13 +89,18 @@ class Time64TestCase(BaseTestCase):
                 conn.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
                 conn.execute(
                     text(
-                        f"CREATE TABLE {table_name} (x Time64(3)) ENGINE = Memory SETTINGS enable_time_time64_type = 1"
+                        f"""
+                        CREATE TABLE {table_name} (x Time64(3)) ENGINE = Memory
+                        SETTINGS enable_time_time64_type = 1
+                        """
                     )
                 )
                 conn.execute(
                     text(f"INSERT INTO {table_name} (x) VALUES ('{time_val}')")
                 )
-                result = conn.execute(text(f"SELECT x FROM {table_name}")).scalar()
+                result = conn.execute(
+                    text(f"SELECT x FROM {table_name}")
+                ).scalar()
                 self.assertEqual(result, time_val)
 
             finally:
