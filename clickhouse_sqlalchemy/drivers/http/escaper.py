@@ -48,7 +48,6 @@ class Escaper(object):
         return self.escape_string(item.strftime('%Y-%m-%d %H:%M:%S.%f'))
 
     def escape_time(self, item):
-        # Trim trailing zeros to keep output compatible with Time64 precisions
         if item.microsecond:
             value = item.strftime('%H:%M:%S.%f').rstrip('0')
             if value[-1] == '.':

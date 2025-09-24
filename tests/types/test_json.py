@@ -37,7 +37,7 @@ class JSONTestCase(BaseTestCase):
     )
 
     def test_select_insert(self):
-        # Native driver doesn't support Time64 type yet
+        # Native driver doesn't support JSON type yet
         if self.session.bind.driver == "native":
             self.skipTest("Native driver doesn't support JSON type yet")
 
