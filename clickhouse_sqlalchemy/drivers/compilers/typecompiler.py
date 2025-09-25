@@ -3,21 +3,6 @@ from sqlalchemy.sql.ddl import CreateColumn
 
 
 class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
-    def _resolve_server_version(self):
-        """Return the server version tuple if it is known."""
-        version = getattr(self.dialect, "server_version_info", None)
-        if version:
-            return version
-
-        forced = getattr(self.dialect, "forced_server_version_string", None)
-        if forced:
-            return tuple(
-                int(part) if part.isdigit() else part
-                for part in forced.split('.')
-            )
-
-        return None
-
     def visit_string(self, type_, **kw):
         if type_.length is None:
             return 'String'
