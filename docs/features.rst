@@ -933,6 +933,45 @@ becomes (respectively)
         SELECT ... FROM ... GROUP BY ... WITH ROLLUP
         SELECT ... FROM ... GROUP BY ... WITH TOTALS
 
+PREWHERE
++++++++++
+
+PREWHERE clause allows efficient pre-filtering of data before reading from disk.
+
+    .. code-block:: python
+
+        session.query(table.c.x).prefilter(table.c.x > 10)
+
+or
+
+    .. code-block:: python
+
+        select([table.c.x]).prewhere(table.c.x > 10)
+
+becomes
+
+    .. code-block:: sql
+
+        SELECT ... FROM ... PREWHERE x > 10
+
+PREWHERE can be combined with WHERE clause for additional filtering:
+
+    .. code-block:: python
+
+        session.query(table.c.x).prefilter(table.c.x > 10).filter(table.c.x < 100)
+
+or
+
+    .. code-block:: python
+
+        select([table.c.x]).prewhere(table.c.x > 10).where(table.c.x < 100)
+
+becomes
+
+    .. code-block:: sql
+
+        SELECT ... FROM ... PREWHERE x > 10 WHERE x < 100
+
 FINAL
 +++++
 

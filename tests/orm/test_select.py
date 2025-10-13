@@ -231,10 +231,13 @@ class SelectTestCase(CompilationTestCase):
     def test_prefilter_multiple_clauses(self):
         table = self._make_table()
 
-        query = self.session.query(table.c.x).prefilter(table.c.x > 10, table.c.x < 100)
+        query = self.session.query(table.c.x).prefilter(
+            table.c.x > 10, table.c.x < 100
+        )
         self.assertEqual(
             self.compile(query),
-            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x > %(param_1)s AND t1.x < %(param_2)s'
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x > %(param_1)s AND '
+            't1.x < %(param_2)s'
         )
         self.assertEqual(
             self.compile(query, literal_binds=True),
@@ -257,10 +260,13 @@ class SelectTestCase(CompilationTestCase):
     def test_prefilter_with_filter(self):
         table = self._make_table()
 
-        query = self.session.query(table.c.x).prefilter(table.c.x > 10).filter(table.c.x < 100)
+        query = self.session.query(table.c.x).prefilter(
+            table.c.x > 10
+        ).filter(table.c.x < 100)
         self.assertEqual(
             self.compile(query),
-            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x > %(param_1)s WHERE t1.x < %(param_2)s'
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x > %(param_1)s WHERE '
+            't1.x < %(param_2)s'
         )
         self.assertEqual(
             self.compile(query, literal_binds=True),

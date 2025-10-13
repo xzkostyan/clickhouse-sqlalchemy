@@ -100,10 +100,13 @@ class SelectTestCase(BaseTestCase):
     def test_prewhere_multiple_clauses(self):
         table = self._make_table()
 
-        query = select(table.c.x).prewhere(table.c.x > 10, table.c.x < 100)
+        query = select(table.c.x).prewhere(
+            table.c.x > 10, table.c.x < 100
+        )
         self.assertEqual(
             self.compile(query),
-            'SELECT t1.x FROM t1 PREWHERE t1.x > %(param_1)s AND t1.x < %(param_2)s'
+            'SELECT t1.x FROM t1 PREWHERE t1.x > %(param_1)s AND '
+            't1.x < %(param_2)s'
         )
         self.assertEqual(
             self.compile(query, literal_binds=True),
@@ -113,10 +116,13 @@ class SelectTestCase(BaseTestCase):
     def test_prewhere_with_where(self):
         table = self._make_table()
 
-        query = select(table.c.x).prewhere(table.c.x > 10).where(table.c.x < 100)
+        query = select(table.c.x).prewhere(
+            table.c.x > 10
+        ).where(table.c.x < 100)
         self.assertEqual(
             self.compile(query),
-            'SELECT t1.x FROM t1 PREWHERE t1.x > %(param_1)s WHERE t1.x < %(param_2)s'
+            'SELECT t1.x FROM t1 PREWHERE t1.x > %(param_1)s WHERE '
+            't1.x < %(param_2)s'
         )
         self.assertEqual(
             self.compile(query, literal_binds=True),

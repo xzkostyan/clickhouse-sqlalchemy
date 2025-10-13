@@ -118,16 +118,16 @@ class Query(BaseQuery):
     @_generative
     def prefilter_by(self, **kwargs):
         clauses = []
-        
+
         for key, value in kwargs.items():
             entity = self._entities[0]
             if hasattr(entity, 'entity'):
                 entity = entity.entity
-            
+
             if hasattr(entity, key):
                 column = getattr(entity, key)
                 clauses.append(column == value)
-        
+
         if len(clauses) == 1:
             self._prewhere = clauses[0]
         else:
