@@ -304,6 +304,11 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         if final_clause is not None:
             text += self.final_clause()
 
+        prewhere_clause = getattr(select, '_prewhere_clause', None)
+
+        if prewhere_clause is not None:
+            text += self.prewhere_clause(select, **kwargs)
+
         if select._where_criteria:
             t = self._generate_delimited_and_list(
                 select._where_criteria, from_linter=from_linter, **kwargs
@@ -345,6 +350,11 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
 
     def final_clause(self):
         return " \nFINAL"
+
+    def prewhere_clause(self, select, **kw):
+        if select._prewhere_clause is None:
+            return ""
+        return " \nPREWHERE " + self.process(select._prewhere_clause, **kw)
 
     def group_by_clause(self, select, **kw):
         text = ""

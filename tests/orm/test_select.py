@@ -215,6 +215,98 @@ class SelectTestCase(CompilationTestCase):
             'SELECT t1.x AS t1_x FROM t1 FINAL GROUP BY t1.x'
         )
 
+    def test_prefilter(self):
+        table = self._make_table()
+
+        query = self.session.query(table.c.x).prefilter(table.c.x > 10)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x > %(param_1)s'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x > 10'
+        )
+
+    def test_prefilter_multiple_clauses(self):
+        table = self._make_table()
+
+        query = self.session.query(table.c.x).prefilter(table.c.x > 10, table.c.x < 100)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x > %(param_1)s AND t1.x < %(param_2)s'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x > 10 AND t1.x < 100'
+        )
+
+    def test_prefilter_by(self):
+        table = self._make_table()
+
+        query = self.session.query(table.c.x).prefilter_by(x=10)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x = %(param_1)s'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x = 10'
+        )
+
+    def test_prefilter_with_filter(self):
+        table = self._make_table()
+
+        query = self.session.query(table.c.x).prefilter(table.c.x > 10).filter(table.c.x < 100)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x > %(param_1)s WHERE t1.x < %(param_2)s'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE t1.x > 10 WHERE t1.x < 100'
+        )
+
+    def test_prefilter_with_final(self):
+        table = self._make_table()
+
+        query = self.session.query(table.c.x).prefilter(table.c.x > 10).final()
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 FINAL PREWHERE t1.x > %(param_1)s'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x AS t1_x FROM t1 FINAL PREWHERE t1.x > 10'
+        )
+
+    def test_prefilter_empty_clauses(self):
+        table = self._make_table()
+
+        query = self.session.query(table.c.x).prefilter()
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1'
+        )
+
+    def test_prefilter_by_empty_kwargs(self):
+        table = self._make_table()
+
+        query = self.session.query(table.c.x).prefilter_by()
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1'
+        )
+
+    def test_prefilter_invalid_clause_type(self):
+        table = self._make_table()
+
+        query = self.session.query(table.c.x).prefilter("invalid_string")
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x AS t1_x FROM t1 PREWHERE %(param_1)s'
+        )
+
     def test_limit_by(self):
         table = self._make_table()
 

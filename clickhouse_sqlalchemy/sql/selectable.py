@@ -8,6 +8,7 @@ from ..ext.clauses import (
     LeftArrayJoin,
     LimitByClause,
     sample_clause,
+    prewhere_clause,
 )
 
 
@@ -22,6 +23,7 @@ class Select(StandardSelect):
     _sample_clause = None
     _limit_by_clause = None
     _array_join = None
+    _prewhere_clause = None
 
     @_generative
     def with_cube(self):
@@ -41,6 +43,11 @@ class Select(StandardSelect):
     @_generative
     def final(self):
         self._final_clause = True
+        return self
+
+    @_generative
+    def prewhere(self, *clauses):
+        self._prewhere_clause = prewhere_clause(*clauses)
         return self
 
     @_generative

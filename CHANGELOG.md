@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- PREWHERE clause support for efficient pre-filtering in ClickHouse queries. Core SQL: `.prewhere()` method, ORM: `.prefilter()` and `.prefilter_by()` methods. Follows the same pattern as the FINAL clause implementation.
 
 ## [0.3.2] - 2024-06-12
 ### Added

@@ -1,5 +1,5 @@
 from sqlalchemy import exc
-from sqlalchemy.sql import type_api, roles
+from sqlalchemy.sql import type_api, roles, and_
 from sqlalchemy.sql.elements import (
     BindParameter,
     ColumnElement,
@@ -28,6 +28,15 @@ def sample_clause(element):
         return element
     else:
         return SampleParam(None, element, unique=True)
+
+
+def prewhere_clause(*clauses):
+    if not clauses:
+        return None
+    elif len(clauses) == 1:
+        return clauses[0]
+    else:
+        return and_(*clauses)
 
 
 class LimitByClause:

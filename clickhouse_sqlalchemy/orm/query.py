@@ -1,6 +1,7 @@
 from functools import partial
 
 from sqlalchemy import exc
+from sqlalchemy.sql import and_
 from sqlalchemy.sql.base import _generative
 from sqlalchemy.orm.query import Query as BaseQuery
 
@@ -9,6 +10,7 @@ from ..ext.clauses import (
     LeftArrayJoin,
     LimitByClause,
     sample_clause,
+    prewhere_clause,
 )
 
 
@@ -23,6 +25,7 @@ def _compile_state_factory(orig_compile_state_factory, query, statement,
     new_stmt._sample_clause = sample_clause(query._sample)
     new_stmt._limit_by_clause = query._limit_by
     new_stmt._array_join = query._array_join
+    new_stmt._prewhere_clause = query._prewhere
     return rv
 
 
@@ -34,6 +37,7 @@ class Query(BaseQuery):
     _sample = None
     _limit_by = None
     _array_join = None
+    _prewhere = None
 
     def _statement_20(self, *args, **kwargs):
         statement = super(Query, self)._statement_20(*args, **kwargs)
@@ -104,6 +108,30 @@ class Query(BaseQuery):
     @_generative
     def final(self):
         self._final = True
+        return self
+
+    @_generative
+    def prefilter(self, *clauses):
+        self._prewhere = prewhere_clause(*clauses)
+        return self
+
+    @_generative
+    def prefilter_by(self, **kwargs):
+        clauses = []
+        
+        for key, value in kwargs.items():
+            entity = self._entities[0]
+            if hasattr(entity, 'entity'):
+                entity = entity.entity
+            
+            if hasattr(entity, key):
+                column = getattr(entity, key)
+                clauses.append(column == value)
+        
+        if len(clauses) == 1:
+            self._prewhere = clauses[0]
+        else:
+            self._prewhere = and_(*clauses)
         return self
 
     @_generative

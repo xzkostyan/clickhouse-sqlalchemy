@@ -84,6 +84,76 @@ class SelectTestCase(BaseTestCase):
             'SELECT t1.x FROM t1 FINAL GROUP BY t1.x'
         )
 
+    def test_prewhere(self):
+        table = self._make_table()
+
+        query = select(table.c.x).prewhere(table.c.x > 10)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x FROM t1 PREWHERE t1.x > %(param_1)s'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x FROM t1 PREWHERE t1.x > 10'
+        )
+
+    def test_prewhere_multiple_clauses(self):
+        table = self._make_table()
+
+        query = select(table.c.x).prewhere(table.c.x > 10, table.c.x < 100)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x FROM t1 PREWHERE t1.x > %(param_1)s AND t1.x < %(param_2)s'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x FROM t1 PREWHERE t1.x > 10 AND t1.x < 100'
+        )
+
+    def test_prewhere_with_where(self):
+        table = self._make_table()
+
+        query = select(table.c.x).prewhere(table.c.x > 10).where(table.c.x < 100)
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x FROM t1 PREWHERE t1.x > %(param_1)s WHERE t1.x < %(param_2)s'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x FROM t1 PREWHERE t1.x > 10 WHERE t1.x < 100'
+        )
+
+    def test_prewhere_with_final(self):
+        table = self._make_table()
+
+        query = select(table.c.x).prewhere(table.c.x > 10).final()
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x FROM t1 FINAL PREWHERE t1.x > %(param_1)s'
+        )
+        self.assertEqual(
+            self.compile(query, literal_binds=True),
+            'SELECT t1.x FROM t1 FINAL PREWHERE t1.x > 10'
+        )
+
+    def test_prewhere_empty_clauses(self):
+        table = self._make_table()
+
+        query = select(table.c.x).prewhere()
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x FROM t1'
+        )
+
+    def test_prewhere_invalid_clause_type(self):
+        table = self._make_table()
+
+        query = select(table.c.x).prewhere("invalid_string")
+        self.assertEqual(
+            self.compile(query),
+            'SELECT t1.x FROM t1 PREWHERE %(param_1)s'
+        )
+
     def test_limit_by(self):
         table = self._make_table()
 
