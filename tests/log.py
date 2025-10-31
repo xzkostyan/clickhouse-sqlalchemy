@@ -10,19 +10,19 @@ def configure(level):
             "formatters": {
                 "standard": {"format": fmt},
             },
-        },
-        'handlers': {
-            'default': {
-                'level': level,
-                'formatter': 'standard',
-                'class': 'logging.StreamHandler',
+            "handlers": {
+                "default": {
+                    "level": level,
+                    "formatter": "standard",
+                    "class": "logging.StreamHandler",
+                },
             },
-        },
-        'loggers': {
-            '': {
-                'handlers': ['default'],
-                'level': level,
-                'propagate': True
+            "loggers": {
+                "": {
+                    "handlers": ["default"],
+                    "level": level,
+                    "propagate": True,
+                },
             },
         }
-    })
+    )
