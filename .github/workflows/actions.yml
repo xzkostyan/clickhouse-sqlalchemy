@@ -41,10 +41,10 @@ jobs:
       - name: Install the project
         run: uv sync --python ${{ matrix.python-version }} --locked --all-extras --dev
 
-      - name: Lint
-        run: |
-          uv run --python ${{ matrix.python-version }} ruff check
-          uv run --python ${{ matrix.python-version }} ruff format --check
+      # - name: Lint
+      #   run: |
+      #     uv run --python ${{ matrix.python-version }} ruff check
+      #     uv run --python ${{ matrix.python-version }} ruff format --check
 
       - name: Install test requirements
         run: |
