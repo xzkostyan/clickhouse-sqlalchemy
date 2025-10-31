@@ -6,17 +6,16 @@ from .util import parse_columns
 
 
 class MergeTree(Engine):
-
-    __visit_name__ = 'merge_tree'
+    __visit_name__ = "merge_tree"
 
     def __init__(
-            self,
-            partition_by=None,
-            order_by=None,
-            primary_key=None,
-            sample_by=None,
-            ttl=None,
-            **settings
+        self,
+        partition_by=None,
+        order_by=None,
+        primary_key=None,
+        sample_by=None,
+        ttl=None,
+        **settings,
     ):
         self.partition_by = None
         if partition_by is not None:
@@ -60,25 +59,31 @@ class MergeTree(Engine):
 
     @classmethod
     def _reflect_merge_tree(
-            cls, table, partition_key=None, sorting_key=None, primary_key=None,
-            sampling_key=None, ttl=None, **kwargs):
-
+        cls,
+        table,
+        partition_key=None,
+        sorting_key=None,
+        primary_key=None,
+        sampling_key=None,
+        ttl=None,
+        **kwargs,
+    ):
         # TODO: reflect settings
         rv = {}
         if partition_key:
             partition_by = parse_columns(partition_key)
-            rv['partition_by'] = cls.wrap_with_text(table, partition_by)
+            rv["partition_by"] = cls.wrap_with_text(table, partition_by)
         if sorting_key:
             order_by = parse_columns(sorting_key)
-            rv['order_by'] = cls.wrap_with_text(table, order_by)
+            rv["order_by"] = cls.wrap_with_text(table, order_by)
         if primary_key:
             primary_key = parse_columns(primary_key)
-            rv['primary_key'] = cls.wrap_with_text(table, primary_key)
+            rv["primary_key"] = cls.wrap_with_text(table, primary_key)
         if sampling_key:
             sample_by = parse_columns(sampling_key)
-            rv['sample_by'] = cls.wrap_with_text(table, sample_by)
+            rv["sample_by"] = cls.wrap_with_text(table, sample_by)
         if ttl:
-            rv['ttl'] = cls.wrap_with_text(table, parse_columns(ttl))
+            rv["ttl"] = cls.wrap_with_text(table, parse_columns(ttl))
 
         return rv
 
@@ -92,7 +97,6 @@ class AggregatingMergeTree(MergeTree):
 
 
 class GraphiteMergeTree(MergeTree):
-
     def __init__(self, config_name, *args, **kwargs):
         super(GraphiteMergeTree, self).__init__(*args, **kwargs)
         self.config_name = config_name
@@ -102,13 +106,10 @@ class GraphiteMergeTree(MergeTree):
 
     @classmethod
     def reflect(cls, table, engine_full, **kwargs):
-        engine = parse_columns(engine_full, delimeter=' ')[0]
-        config_name = engine[len(cls.__name__):].strip("()'")
+        engine = parse_columns(engine_full, delimeter=" ")[0]
+        config_name = engine[len(cls.__name__) :].strip("()'")
 
-        return cls(
-            config_name,
-            **cls._reflect_merge_tree(table, **kwargs)
-        )
+        return cls(config_name, **cls._reflect_merge_tree(table, **kwargs))
 
 
 class CollapsingMergeTree(MergeTree):
@@ -126,13 +127,10 @@ class CollapsingMergeTree(MergeTree):
 
     @classmethod
     def reflect(cls, table, engine_full, **kwargs):
-        engine = parse_columns(engine_full, delimeter=' ')[0]
-        sign_col = engine[len(cls.__name__):].strip('()')
+        engine = parse_columns(engine_full, delimeter=" ")[0]
+        sign_col = engine[len(cls.__name__) :].strip("()")
 
-        return cls(
-            sign_col,
-            **cls._reflect_merge_tree(table, **kwargs)
-        )
+        return cls(sign_col, **cls._reflect_merge_tree(table, **kwargs))
 
 
 class VersionedCollapsingMergeTree(MergeTree):
@@ -153,19 +151,18 @@ class VersionedCollapsingMergeTree(MergeTree):
 
     @classmethod
     def reflect(cls, table, engine_full, **kwargs):
-        engine = parse_columns(engine_full, delimeter=' ')[0]
-        columns = engine[len(cls.__name__):].strip('()')
+        engine = parse_columns(engine_full, delimeter=" ")[0]
+        columns = engine[len(cls.__name__) :].strip("()")
         sign_col, version_col = parse_columns(columns)
 
         return cls(
-            sign_col, version_col,
-            **cls._reflect_merge_tree(table, **kwargs)
+            sign_col, version_col, **cls._reflect_merge_tree(table, **kwargs)
         )
 
 
 class SummingMergeTree(MergeTree):
     def __init__(self, *args, **kwargs):
-        summing_cols = kwargs.pop('columns', None)
+        summing_cols = kwargs.pop("columns", None)
         super(SummingMergeTree, self).__init__(*args, **kwargs)
 
         self.summing_cols = None
@@ -185,19 +182,16 @@ class SummingMergeTree(MergeTree):
 
     @classmethod
     def reflect(cls, table, engine_full, **kwargs):
-        engine = parse_columns(engine_full, delimeter=' ')[0]
-        columns = engine[len(cls.__name__):].strip('()')
+        engine = parse_columns(engine_full, delimeter=" ")[0]
+        columns = engine[len(cls.__name__) :].strip("()")
         columns = parse_columns(columns) or None
 
-        return cls(
-            columns=columns,
-            **cls._reflect_merge_tree(table, **kwargs)
-        )
+        return cls(columns=columns, **cls._reflect_merge_tree(table, **kwargs))
 
 
 class ReplacingMergeTree(MergeTree):
     def __init__(self, *args, **kwargs):
-        version_col = kwargs.pop('version', None)
+        version_col = kwargs.pop("version", None)
         super(ReplacingMergeTree, self).__init__(*args, **kwargs)
 
         self.version_col = None
@@ -216,10 +210,9 @@ class ReplacingMergeTree(MergeTree):
 
     @classmethod
     def reflect(cls, table, engine_full, **kwargs):
-        engine = parse_columns(engine_full, delimeter=' ')[0]
-        version_col = engine[len(cls.__name__):].strip('()') or None
+        engine = parse_columns(engine_full, delimeter=" ")[0]
+        version_col = engine[len(cls.__name__) :].strip("()") or None
 
         return cls(
-            version=version_col,
-            **cls._reflect_merge_tree(table, **kwargs)
+            version=version_col, **cls._reflect_merge_tree(table, **kwargs)
         )

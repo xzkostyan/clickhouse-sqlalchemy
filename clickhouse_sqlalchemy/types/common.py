@@ -31,11 +31,11 @@ class Boolean(types.Boolean, ClickHouseTypeEngine):
 
 
 class JSON(types.JSON, ClickHouseTypeEngine):
-    __visit_name__ = 'json'
+    __visit_name__ = "json"
 
 
 class Array(ClickHouseTypeEngine):
-    __visit_name__ = 'array'
+    __visit_name__ = "array"
 
     hashable = False
 
@@ -45,9 +45,10 @@ class Array(ClickHouseTypeEngine):
         super(Array, self).__init__()
 
     def __repr__(self):
-        nested_type_str = \
-            f'{self.item_type_impl.__module__}.{self.item_type_impl!r}'
-        return f'Array({nested_type_str})'
+        nested_type_str = (
+            f"{self.item_type_impl.__module__}.{self.item_type_impl!r}"
+        )
+        return f"Array({nested_type_str})"
 
     @property
     def python_type(self):
@@ -62,12 +63,13 @@ class Array(ClickHouseTypeEngine):
                 if item_processor:
                     x = item_processor(x)
                 processed_value.append(x)
-            return '[' + ', '.join(processed_value) + ']'
+            return "[" + ", ".join(processed_value) + "]"
+
         return process
 
 
 class Nullable(ClickHouseTypeEngine):
-    __visit_name__ = 'nullable'
+    __visit_name__ = "nullable"
 
     def __init__(self, nested_type):
         self.nested_type = to_instance(nested_type)
@@ -75,87 +77,87 @@ class Nullable(ClickHouseTypeEngine):
 
 
 class UUID(String):
-    __visit_name__ = 'uuid'
+    __visit_name__ = "uuid"
 
 
 class LowCardinality(ClickHouseTypeEngine):
-    __visit_name__ = 'lowcardinality'
+    __visit_name__ = "lowcardinality"
 
     def __init__(self, nested_type):
         self.nested_type = to_instance(nested_type)
         super(LowCardinality, self).__init__()
 
     def __repr__(self):
-        nested_type_str = f'{self.nested_type.__module__}.{self.nested_type!r}'
-        return f'LowCardinality({nested_type_str})'
+        nested_type_str = f"{self.nested_type.__module__}.{self.nested_type!r}"
+        return f"LowCardinality({nested_type_str})"
 
 
 class Int8(Int):
-    __visit_name__ = 'int8'
+    __visit_name__ = "int8"
 
 
 class UInt8(Int):
-    __visit_name__ = 'uint8'
+    __visit_name__ = "uint8"
 
 
 class Int16(Int):
-    __visit_name__ = 'int16'
+    __visit_name__ = "int16"
 
 
 class UInt16(Int):
-    __visit_name__ = 'uint16'
+    __visit_name__ = "uint16"
 
 
 class Int32(Int):
-    __visit_name__ = 'int32'
+    __visit_name__ = "int32"
 
 
 class UInt32(Int):
-    __visit_name__ = 'uint32'
+    __visit_name__ = "uint32"
 
 
 class Int64(Int):
-    __visit_name__ = 'int64'
+    __visit_name__ = "int64"
 
 
 class UInt64(Int):
-    __visit_name__ = 'uint64'
+    __visit_name__ = "uint64"
 
 
 class Int128(Int):
-    __visit_name__ = 'int128'
+    __visit_name__ = "int128"
 
 
 class UInt128(Int):
-    __visit_name__ = 'uint128'
+    __visit_name__ = "uint128"
 
 
 class Int256(Int):
-    __visit_name__ = 'int256'
+    __visit_name__ = "int256"
 
 
 class UInt256(Int):
-    __visit_name__ = 'uint256'
+    __visit_name__ = "uint256"
 
 
 class Float32(Float):
-    __visit_name__ = 'float32'
+    __visit_name__ = "float32"
 
 
 class Float64(Float):
-    __visit_name__ = 'float64'
+    __visit_name__ = "float64"
 
 
 class Date(types.Date, ClickHouseTypeEngine):
-    __visit_name__ = 'date'
+    __visit_name__ = "date"
 
 
 class Date32(types.Date, ClickHouseTypeEngine):
-    __visit_name__ = 'date32'
+    __visit_name__ = "date32"
 
 
 class DateTime(types.DateTime, ClickHouseTypeEngine):
-    __visit_name__ = 'datetime'
+    __visit_name__ = "datetime"
 
     def __init__(self, timezone=None):
         super(DateTime, self).__init__()
@@ -163,7 +165,7 @@ class DateTime(types.DateTime, ClickHouseTypeEngine):
 
 
 class DateTime64(DateTime, ClickHouseTypeEngine):
-    __visit_name__ = 'datetime64'
+    __visit_name__ = "datetime64"
 
     def __init__(self, precision=3, timezone=None):
         self.precision = precision
@@ -171,30 +173,30 @@ class DateTime64(DateTime, ClickHouseTypeEngine):
 
 
 class Enum(types.Enum, ClickHouseTypeEngine):
-    __visit_name__ = 'enum'
+    __visit_name__ = "enum"
     native_enum = True
 
     def __init__(self, *enums, **kw):
         if not enums:
-            enums = kw.get('_enums', ())  # passed as keyword
+            enums = kw.get("_enums", ())  # passed as keyword
 
         super(Enum, self).__init__(*enums, **kw, convert_unicode=False)
 
 
 class Enum8(Enum):
-    __visit_name__ = 'enum8'
+    __visit_name__ = "enum8"
 
 
 class Enum16(Enum):
-    __visit_name__ = 'enum16'
+    __visit_name__ = "enum16"
 
 
 class Decimal(types.Numeric, ClickHouseTypeEngine):
-    __visit_name__ = 'numeric'
+    __visit_name__ = "numeric"
 
 
 class Tuple(ClickHouseTypeEngine):
-    __visit_name__ = 'tuple'
+    __visit_name__ = "tuple"
 
     def __init__(self, *nested_types):
         self.nested_types = nested_types
@@ -202,7 +204,7 @@ class Tuple(ClickHouseTypeEngine):
 
 
 class Map(ClickHouseTypeEngine):
-    __visit_name__ = 'map'
+    __visit_name__ = "map"
 
     def __init__(self, key_type, value_type):
         self.key_type = key_type
@@ -211,7 +213,7 @@ class Map(ClickHouseTypeEngine):
 
 
 class AggregateFunction(ClickHouseTypeEngine):
-    __visit_name__ = 'aggregatefunction'
+    __visit_name__ = "aggregatefunction"
 
     def __init__(
         self,
@@ -223,18 +225,18 @@ class AggregateFunction(ClickHouseTypeEngine):
         super(AggregateFunction, self).__init__()
 
     def __repr__(self) -> str:
-        type_strs = [f'{val.__module__}.{val!r}' for val in self.nested_types]
+        type_strs = [f"{val.__module__}.{val!r}" for val in self.nested_types]
 
         if isinstance(self.agg_func, str):
             agg_str = self.agg_func
         else:
-            agg_str = f'sa.func.{self.agg_func}'
+            agg_str = f"sa.func.{self.agg_func}"
 
         return f"AggregateFunction({agg_str}, {', '.join(type_strs)})"
 
 
 class SimpleAggregateFunction(ClickHouseTypeEngine):
-    __visit_name__ = 'simpleaggregatefunction'
+    __visit_name__ = "simpleaggregatefunction"
 
     def __init__(
         self,
@@ -246,11 +248,11 @@ class SimpleAggregateFunction(ClickHouseTypeEngine):
         super(SimpleAggregateFunction, self).__init__()
 
     def __repr__(self) -> str:
-        type_strs = [f'{val.__module__}.{val!r}' for val in self.nested_types]
+        type_strs = [f"{val.__module__}.{val!r}" for val in self.nested_types]
 
         if isinstance(self.agg_func, str):
             agg_str = self.agg_func
         else:
-            agg_str = f'sa.func.{self.agg_func}'
+            agg_str = f"sa.func.{self.agg_func}"
 
         return f"SimpleAggregateFunction({agg_str}, {', '.join(type_strs)})"

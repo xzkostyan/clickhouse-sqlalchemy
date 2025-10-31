@@ -6,11 +6,11 @@ from clickhouse_driver.errors import Error as DriverError
 from ...exceptions import DatabaseException
 
 # PEP 249 module globals
-apilevel = '2.0'
+apilevel = "2.0"
 # Threads may share the module and connections.
 threadsafety = 2
 # Python extended format codes, e.g. ...WHERE name=%(name)s
-paramstyle = 'pyformat'
+paramstyle = "pyformat"
 
 
 class Error(Exception):
@@ -18,6 +18,7 @@ class Error(Exception):
     Exception that is the base class of all other error exceptions.
     You can use this to catch all errors with one single except statement.
     """
+
     pass
 
 
@@ -57,12 +58,9 @@ class Cursor(object):
     Cursors are not isolated, i.e., any changes done to the database
     by a cursor are immediately visible by other cursors or connections.
     """
+
     class States(object):
-        (
-            NONE,
-            RUNNING,
-            FINISHED
-        ) = range(3)
+        (NONE, RUNNING, FINISHED) = range(3)
 
     _states = States()
 
@@ -90,7 +88,7 @@ class Cursor(object):
         self._connection.transport.disconnect()
 
     def make_external_tables(self, dialect, execution_options):
-        external_tables = execution_options.get('external_tables')
+        external_tables = execution_options.get("external_tables")
         if external_tables is None:
             return
 
@@ -103,11 +101,13 @@ class Cursor(object):
                 type_ = type_compiler.process(c.type, type_expression=c)
                 structure.append((c.name, type_))
 
-            tables.append({
-                'name': table.name,
-                'structure': structure,
-                'data': table.dialect_options['clickhouse']['data']
-            })
+            tables.append(
+                {
+                    "name": table.name,
+                    "structure": structure,
+                    "data": table.dialect_options["clickhouse"]["data"],
+                }
+            )
 
         return tables
 
@@ -124,22 +124,23 @@ class Cursor(object):
 
         transport = self._connection.transport
         execute = transport.execute
-        execute_iter = getattr(transport, 'execute_iter', None)
+        execute_iter = getattr(transport, "execute_iter", None)
 
-        self._stream_results = execution_options.get('stream_results', False)
-        settings = execution_options.get('settings')
+        self._stream_results = execution_options.get("stream_results", False)
+        settings = execution_options.get("settings")
 
         if self._stream_results and execute_iter:
             execute = execute_iter
             settings = settings or {}
-            settings['max_block_size'] = (
-                execution_options.get('max_row_buffer', 1000))
+            settings["max_block_size"] = execution_options.get(
+                "max_row_buffer", 1000
+            )
 
         execute_kwargs = {
-            'settings': settings,
-            'external_tables': external_tables,
-            'types_check': execution_options.get('types_check', False),
-            'query_id': execution_options.get('query_id', None)
+            "settings": settings,
+            "external_tables": external_tables,
+            "types_check": execution_options.get("types_check", False),
+            "query_id": execution_options.get("query_id", None),
         }
 
         return execute, execute_kwargs
@@ -151,8 +152,10 @@ class Cursor(object):
         try:
             execute, execute_kwargs = self._prepare(context)
             response = execute(
-                operation, params=parameters, with_column_types=True,
-                **execute_kwargs
+                operation,
+                params=parameters,
+                with_column_types=True,
+                **execute_kwargs,
             )
 
         except DriverError as orig:

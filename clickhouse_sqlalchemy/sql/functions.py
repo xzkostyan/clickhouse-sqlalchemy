@@ -12,15 +12,18 @@ from clickhouse_sqlalchemy import types
 if TYPE_CHECKING:
     from sqlalchemy.sql._typing import _ColumnExpressionArgument
 
-_T = TypeVar('_T', bound=Any)
+_T = TypeVar("_T", bound=Any)
 
 
 class quantile(GenericFunction[_T]):
     inherit_cache = True
 
     def __init__(
-        self, level: float, expr: _ColumnExpressionArgument[Any],
-        condition: _ColumnExpressionArgument[Any] = None, **kwargs: Any
+        self,
+        level: float,
+        expr: _ColumnExpressionArgument[Any],
+        condition: _ColumnExpressionArgument[Any] = None,
+        **kwargs: Any,
     ):
         arg: ColumnElement[Any] = coercions.expect(
             roles.ExpressionElementRole, expr, apply_propagate_attrs=self
@@ -29,8 +32,9 @@ class quantile(GenericFunction[_T]):
         args = [arg]
         if condition is not None:
             condition = coercions.expect(
-                roles.ExpressionElementRole, condition,
-                apply_propagate_attrs=self
+                roles.ExpressionElementRole,
+                condition,
+                apply_propagate_attrs=self,
             )
             args.append(condition)
 
@@ -45,8 +49,8 @@ class quantile(GenericFunction[_T]):
         else:
             return_type = types.Float64
 
-        kwargs['type_'] = return_type
-        kwargs['_parsed_args'] = args
+        kwargs["type_"] = return_type
+        kwargs["_parsed_args"] = args
         super().__init__(arg, **kwargs)
 
 
@@ -54,8 +58,8 @@ class quantileIf(quantile[_T]):
     inherit_cache = True
 
 
-@compiles(quantile, 'clickhouse')
-@compiles(quantileIf, 'clickhouse')
+@compiles(quantile, "clickhouse")
+@compiles(quantileIf, "clickhouse")
 def compile_quantile(element, compiler, **kwargs):
     args_str = compiler.function_argspec(element, **kwargs)
-    return f'{element.name}({element.level}){args_str}'
+    return f"{element.name}({element.level}){args_str}"

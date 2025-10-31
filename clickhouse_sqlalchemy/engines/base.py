@@ -3,7 +3,7 @@ from sqlalchemy.sql.schema import ColumnCollectionMixin, SchemaItem, Constraint
 
 
 class Engine(Constraint):
-    __visit_name__ = 'engine'
+    __visit_name__ = "engine"
 
     def __init__(self, *args, **kwargs):
         pass

@@ -1,7 +1,5 @@
 from sqlalchemy import Table as TableBase
-from sqlalchemy.sql.base import (
-    DialectKWArgs, Immutable
-)
+from sqlalchemy.sql.base import DialectKWArgs, Immutable
 from sqlalchemy.sql.schema import SchemaItem
 from sqlalchemy.sql.selectable import FromClause
 from sqlalchemy.sql.selectable import Join
@@ -15,19 +13,31 @@ class Table(TableBase):
     def drop(self, bind=None, checkfirst=False, if_exists=False):
         if bind is None:
             bind = self.bind
-        bind._run_ddl_visitor(ddl.SchemaDropper, self,
-                              checkfirst=checkfirst, if_exists=if_exists)
+        bind._run_ddl_visitor(
+            ddl.SchemaDropper, self, checkfirst=checkfirst, if_exists=if_exists
+        )
 
-    def join(self, right, onclause=None, isouter=False, full=False,
-             type=None, strictness=None, distribution=None):
-        flags = tuple({
-            'full': full,
-            'type': type,
-            'strictness': strictness,
-            'distribution': distribution
-        }.items())
-        return Join(self, right, onclause=onclause, isouter=isouter,
-                    full=flags)
+    def join(
+        self,
+        right,
+        onclause=None,
+        isouter=False,
+        full=False,
+        type=None,
+        strictness=None,
+        distribution=None,
+    ):
+        flags = tuple(
+            {
+                "full": full,
+                "type": type,
+                "strictness": strictness,
+                "distribution": distribution,
+            }.items()
+        )
+        return Join(
+            self, right, onclause=onclause, isouter=isouter, full=flags
+        )
 
     def select(self, whereclause=None, **params):
         if whereclause:
@@ -54,7 +64,7 @@ class Table(TableBase):
 
 
 class MaterializedView(DialectKWArgs, SchemaItem, Immutable, FromClause):
-    __visit_name__ = 'materialized_view'
+    __visit_name__ = "materialized_view"
 
     def __init__(self, *args, **kwargs):
         pass
@@ -67,9 +77,17 @@ class MaterializedView(DialectKWArgs, SchemaItem, Immutable, FromClause):
     def metadata(self):
         return self.inner_table.metadata
 
-    def __new__(cls, inner_model, selectable, if_not_exists=False,
-                cluster=None, populate=False, use_to=None,
-                mv_suffix='_mv', name=None):
+    def __new__(
+        cls,
+        inner_model,
+        selectable,
+        if_not_exists=False,
+        cluster=None,
+        populate=False,
+        use_to=None,
+        mv_suffix="_mv",
+        name=None,
+    ):
         rv = object.__new__(cls)
         rv.__init__()
 
@@ -91,12 +109,12 @@ class MaterializedView(DialectKWArgs, SchemaItem, Immutable, FromClause):
 
         rv.name = name
 
-        metadata.info.setdefault('mat_views', set()).add(name)
-        if not hasattr(metadata, 'mat_views'):
+        metadata.info.setdefault("mat_views", set()).add(name)
+        if not hasattr(metadata, "mat_views"):
             metadata.mat_views = {}
         metadata.mat_views[name] = rv
 
-        table.info['mv_storage'] = True
+        table.info["mv_storage"] = True
 
         return rv
 
@@ -104,26 +122,31 @@ class MaterializedView(DialectKWArgs, SchemaItem, Immutable, FromClause):
         args = [repr(self.name), repr(self.metadata)]
 
         if self.to:
-            args += ['TO ' + repr(self.inner_table.name)]
+            args += ["TO " + repr(self.inner_table.name)]
         else:
             args += (
                 [repr(x) for x in self.inner_table.columns]
                 + [repr(self.inner_table.engine)]
-                + ['%s=%s' % (k, repr(getattr(self, k))) for k in ['schema']]
+                + ["%s=%s" % (k, repr(getattr(self, k))) for k in ["schema"]]
             )
 
-        args += ['AS ' + str(self.mv_selectable)]
+        args += ["AS " + str(self.mv_selectable)]
 
-        return 'MaterializedView(%s)' % ', '.join(args)
+        return "MaterializedView(%s)" % ", ".join(args)
 
     def create(self, bind=None, checkfirst=False, if_not_exists=False):
         if bind is None:
             bind = self.bind
-        bind._run_ddl_visitor(ddl.SchemaGenerator, self, checkfirst=checkfirst,
-                              if_not_exists=if_not_exists)
+        bind._run_ddl_visitor(
+            ddl.SchemaGenerator,
+            self,
+            checkfirst=checkfirst,
+            if_not_exists=if_not_exists,
+        )
 
     def drop(self, bind=None, checkfirst=False, if_exists=False):
         if bind is None:
             bind = self.bind
-        bind._run_ddl_visitor(ddl.SchemaDropper, self, checkfirst=checkfirst,
-                              if_exists=if_exists)
+        bind._run_ddl_visitor(
+            ddl.SchemaDropper, self, checkfirst=checkfirst, if_exists=if_exists
+        )

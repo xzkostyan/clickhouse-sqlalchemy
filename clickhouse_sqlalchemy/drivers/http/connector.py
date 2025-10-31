@@ -4,11 +4,11 @@ from .escaper import Escaper
 from .transport import RequestsTransport
 
 # PEP 249 module globals
-apilevel = '2.0'
+apilevel = "2.0"
 # Threads may share the module and connections.
 threadsafety = 2
 # Python extended format codes, e.g. ...WHERE name=%(name)s
-paramstyle = 'pyformat'
+paramstyle = "pyformat"
 
 
 class Error(Exception):
@@ -16,6 +16,7 @@ class Error(Exception):
     Exception that is the base class of all other error exceptions.
     You can use this to catch all errors with one single except statement.
     """
+
     pass
 
 
@@ -30,8 +31,7 @@ class Connection(object):
     transport_cls = RequestsTransport
 
     def __init__(self, *args, **kwargs):
-
-        stream = bool(kwargs.pop('stream', None))
+        stream = bool(kwargs.pop("stream", None))
         self._prefetch = not stream
 
         # TODO: support `stream` argument in the transport.
@@ -59,12 +59,9 @@ class Cursor(object):
     Cursors are not isolated, i.e., any changes done to the database
     by a cursor are immediately visible by other cursors or connections.
     """
+
     class States(object):
-        (
-            NONE,
-            RUNNING,
-            FINISHED
-        ) = range(3)
+        (NONE, RUNNING, FINISHED) = range(3)
 
     _states = States()
 
@@ -107,7 +104,7 @@ class Cursor(object):
         else:
             execution_options = {}
 
-        settings = execution_options.get('settings')
+        settings = execution_options.get("settings")
         if settings:
             raw_settings = ", ".join(
                 f"{key}={value}" for key, value in settings.items()
@@ -126,7 +123,7 @@ class Cursor(object):
         self._begin_query()
 
         transport = self._connection.transport
-        params = {'query_id': self._query_id}
+        params = {"query_id": self._query_id}
         raw_sql = self._prepare(raw_sql, context)
         response_gen = transport.execute(raw_sql, params=params)
 
@@ -134,9 +131,9 @@ class Cursor(object):
         self._end_query()
 
     def executemany(self, operation, seq_of_parameters, context=None):
-        index = operation.index('VALUES') + 7
+        index = operation.index("VALUES") + 7
         values_tpl = operation[index:]
-        params = ', '.join(
+        params = ", ".join(
             values_tpl % self._params_escaper.escape(params)
             for params in seq_of_parameters
         )
@@ -215,8 +212,8 @@ class Cursor(object):
 
         # Try to cancel query by sending query with the same query_id.
         transport = self._connection.transport
-        params = {'query_id': self._query_id}
-        transport.execute('SELECT 1', params=params)
+        params = {"query_id": self._query_id}
+        transport.execute("SELECT 1", params=params)
 
         self._end_query()
         self._query_id = None

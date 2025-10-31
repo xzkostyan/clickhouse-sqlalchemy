@@ -16,7 +16,7 @@ class ClickHouseAsynchExecutionContext(ClickHouseExecutionContext):
 
 
 class ClickHouseDialect_asynch(ClickHouseDialect_native):
-    driver = 'asynch'
+    driver = "asynch"
     execution_ctx_cls = ClickHouseAsynchExecutionContext
 
     is_async = True

@@ -11,7 +11,7 @@ from ..ext.clauses import (
 )
 
 
-__all__ = ('Select', 'select')
+__all__ = ("Select", "select")
 
 
 class Select(StandardSelect):
@@ -68,16 +68,27 @@ class Select(StandardSelect):
         self._add_array_join(columns, left=True)
         return self
 
-    def join(self, right, onclause=None, isouter=False, full=False, type=None,
-             strictness=None, distribution=None):
-        flags = tuple({
-            'full': full,
-            'type': type,
-            'strictness': strictness,
-            'distribution': distribution
-        }.items())
-        return super().join(right, onclause=onclause, isouter=isouter,
-                            full=flags)
+    def join(
+        self,
+        right,
+        onclause=None,
+        isouter=False,
+        full=False,
+        type=None,
+        strictness=None,
+        distribution=None,
+    ):
+        flags = tuple(
+            {
+                "full": full,
+                "type": type,
+                "strictness": strictness,
+                "distribution": distribution,
+            }.items()
+        )
+        return super().join(
+            right, onclause=onclause, isouter=isouter, full=flags
+        )
 
 
 select = Select
