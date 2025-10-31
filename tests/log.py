@@ -2,14 +2,13 @@ from logging.config import dictConfig
 
 
 def configure(level):
+    fmt = "%(asctime)s %(levelname)-8s %(name)s: %(message)s"
     dictConfig(
         {
             "version": 1,
             "disable_existing_loggers": False,
             "formatters": {
-                "standard": {
-                    "format": "%(asctime)s %(levelname)-8s %(name)s: %(message)s"
-                },
+                "standard": {"format": fmt},
             },
             "handlers": {
                 "default": {

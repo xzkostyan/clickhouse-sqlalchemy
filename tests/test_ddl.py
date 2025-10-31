@@ -527,10 +527,10 @@ class DDLTestCase(BaseTestCase):
             comment="table_comment",
         )
 
-        self.assertEqual(
-            self.compile(CreateTable(table)),
-            "CREATE TABLE t1 (x Int32) ENGINE = Memory COMMENT 'table_comment'",
+        stmt = (
+            "CREATE TABLE t1 (x Int32) ENGINE = Memory COMMENT 'table_comment'"
         )
+        self.assertEqual(self.compile(CreateTable(table)), stmt)
 
     def test_create_table_with_column_comment(self):
         table = Table(

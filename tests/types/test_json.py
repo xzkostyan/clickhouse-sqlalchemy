@@ -40,7 +40,10 @@ class JSONTestCase(BaseTestCase):
     )
 
     @pytest.mark.skip(
-        reason="clickhouse_sqlalchemy.exceptions.DatabaseException: Orig exception: Code: 50. Unknown type JSON"
+        reason=(
+            "clickhouse_sqlalchemy.exceptions.DatabaseException: "
+            "Orig exception: Code: 50. Unknown type JSON"
+        )
     )
     def test_select_insert(self):
         data = {"k1": 1, "k2": "2", "k3": True}
