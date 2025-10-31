@@ -2,25 +2,21 @@ on: [push, pull_request]
 name: build-docs
 jobs:
   tests:
-    runs-on: ubuntu-22.04
     name: Build docs
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.12"
     steps:
       - uses: actions/checkout@v5
-  
-      # - name: Set up Python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: 3.12
-      #     architecture: x64
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-
-      # - name: Update tools
-      #   run: pip install --upgrade pip setuptools wheel
 
       - name: Install sphinx
         run: uv sync --python ${{ matrix.python-version }} --group docs

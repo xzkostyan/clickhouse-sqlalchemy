@@ -28,15 +28,9 @@ jobs:
           - 8123:8123
           - 9000:9000
 
-    name: ${{ matrix.python-version }} CH=${{ matrix.clickhouse-version }}
+    name: "Py=${{ matrix.python-version }}; CH=${{ matrix.clickhouse-version }}"
     steps:
       - uses: actions/checkout@v5
-
-      # - name: Set up Python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: ${{ matrix.python-version }}
-      #     architecture: x64
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
@@ -54,26 +48,25 @@ jobs:
 
       - name: Install test requirements
         run: |
-          pip install --upgrade pip setuptools wheel
-          pip install flake8 flake8-print coverage
-          python testsrequire.py
-          python setup.py develop
           # Limit each test time execution.
-          pip install pytest-timeout
-    
+          uv pip install --python ${{ matrix.python-version }} pytest-timeout
+
       - name: Run tests
         run: coverage run --source=clickhouse_sqlalchemy -m pytest --timeout=10 -v
         timeout-minutes: 2
+
       - name: Set up Python for coverage submission
         if: ${{ matrix.python-version == '2.7' }}
         uses: actions/setup-python@v5
         with:
           python-version: 3.8
           architecture: x64
+
       - name: Install coveralls
         run: |
           # Newer coveralls do not work with github actions.
-          pip install 'coveralls<3.0.0'
+          uv pip install --python ${{ matrix.python-version }} "coveralls<3.0.0"
+
       - name: Upload coverage
         run: coveralls
         env:
