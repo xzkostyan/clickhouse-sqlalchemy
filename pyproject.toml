@@ -37,8 +37,8 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "asynch>=0.2.2,!=0.2.4,!=0.2.5,<0.4.0",
-    "clickhouse-driver>=0.2.9",
+    "asynch>=0.2.2,<=0.2.4",
+    "clickhouse-driver>=0.1.2",
     "requests>=2.31.0",
     "sqlalchemy>=2.0.0,<2.1.0",
 ]
@@ -58,21 +58,21 @@ PyPI = "https://pypi.org/project/clickhouse-sqlalchemy/"
 "clickhouse.native" = "clickhouse_sqlalchemy.drivers.native.base:ClickHouseDialect_native"
 
 [dependency-groups]
+dev = [
+    "alembic>=1.12.1",
+    "mypy>=1.4.1",
+    "parameterized>=0.9.0",
+    "pytest>=7.4.4",
+    "pytest-asyncio>=0.21.2",
+    "pytest-cov>=4.1.0",
+    "requests>=2.31.0",
+    "responses>=0.23.3",
+    "ruff>=0.11.12",
+]
 docs = [
     "sphinx>=5.3.0",
     # https://github.com/sphinx-toolbox/sphinx-pyproject
     "sphinx-pyproject>=0.3.0",
-]
-lint = [
-    "mypy>=1.4.1",
-    "ruff>=0.11.12",
-]
-test = [
-    "alembic>=1.12.1",
-    "parameterized>=0.9.0",
-    "pytest>=7.4.4",
-    "pytest-asyncio>=0.21.2",
-    "responses>=0.23.3",
 ]
 
 [tool.setuptools]
