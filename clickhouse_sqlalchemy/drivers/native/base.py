@@ -5,9 +5,7 @@ from sqlalchemy.util import asbool
 
 from . import connector
 from ..base import (
-    ClickHouseDialect,
-    ClickHouseExecutionContextBase,
-    ClickHouseSQLCompiler,
+    ClickHouseDialect, ClickHouseExecutionContextBase, ClickHouseSQLCompiler,
 )
 from sqlalchemy.engine.interfaces import ExecuteStyle
 from sqlalchemy import __version__ as sqlalchemy_version
@@ -16,42 +14,39 @@ from sqlalchemy import __version__ as sqlalchemy_version
 VERSION = (0, 0, 2, None)
 
 sqlalchemy_version = tuple(
-    (int(x) if x.isdigit() else x) for x in sqlalchemy_version.split(".")
+    (int(x) if x.isdigit() else x) for x in sqlalchemy_version.split('.')
 )
 
 
 class ClickHouseExecutionContext(ClickHouseExecutionContextBase):
     def pre_exec(self):
         # Always do executemany on INSERT with VALUES clause.
-        if (
-            self.isinsert
-            and self.compiled.statement.select is None
-            and self.parameters != [{}]
-        ):
+        if (self.isinsert and self.compiled.statement.select is None and
+                self.parameters != [{}]):
             self.execute_style = ExecuteStyle.EXECUTEMANY
 
 
 class ClickHouseNativeSQLCompiler(ClickHouseSQLCompiler):
+
     def visit_insert(self, insert_stmt, asfrom=False, **kw):
         rv = super(ClickHouseNativeSQLCompiler, self).visit_insert(
-            insert_stmt, asfrom=asfrom, **kw
-        )
+            insert_stmt, asfrom=asfrom, **kw)
 
-        if kw.get("literal_binds") or insert_stmt._values:
+        if kw.get('literal_binds') or insert_stmt._values:
             return rv
 
-        pos = rv.lower().rfind("values (")
+        pos = rv.lower().rfind('values (')
         # Remove (%s)-templates from VALUES clause if exists.
         # ClickHouse server since version 19.3.3 parse query after VALUES and
         # allows inplace parameters.
         # Example: INSERT INTO test (x) VALUES (1), (2).
         if pos != -1:
-            rv = rv[: pos + 6]
+            rv = rv[:pos + 6]
         return rv
 
 
 class ClickHouseDialect_native(ClickHouseDialect):
-    driver = "native"
+    driver = 'native'
     execution_ctx_cls = ClickHouseExecutionContext
     statement_compiler = ClickHouseNativeSQLCompiler
 
@@ -64,7 +59,7 @@ class ClickHouseDialect_native(ClickHouseDialect):
     def create_connect_args(self, url):
         use_quote = sqlalchemy_version < (2, 0, 24)
 
-        url = url.set(drivername="clickhouse")
+        url = url.set(drivername='clickhouse')
         if url.username:
             username = quote(url.username) if use_quote else url.username
             url = url.set(username=username)
@@ -74,10 +69,12 @@ class ClickHouseDialect_native(ClickHouseDialect):
             url = url.set(password=password)
 
         query = dict(url.query)
-        self.engine_reflection = asbool(query.pop("engine_reflection", "true"))
+        self.engine_reflection = asbool(
+            query.pop('engine_reflection', 'true')
+        )
         url = url.set(query=query)
 
-        return (url.render_as_string(hide_password=False),), {}
+        return (url.render_as_string(hide_password=False), ), {}
 
     def _execute(self, connection, sql, scalar=False, **kwargs):
         if isinstance(sql, str):

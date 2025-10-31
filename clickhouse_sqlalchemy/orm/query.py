@@ -12,9 +12,8 @@ from ..ext.clauses import (
 )
 
 
-def _compile_state_factory(
-    orig_compile_state_factory, query, statement, *args, **kwargs
-):
+def _compile_state_factory(orig_compile_state_factory, query, statement,
+                           *args, **kwargs):
     rv = orig_compile_state_factory(statement, *args, **kwargs)
     new_stmt = rv.statement
     new_stmt._with_cube = query._with_cube
@@ -119,19 +118,19 @@ class Query(BaseQuery):
 
     def join(self, target, onclause=None, **kwargs):
         spec = {
-            "type": kwargs.pop("type", None),
-            "strictness": kwargs.pop("strictness", None),
-            "distribution": kwargs.pop("distribution", None),
+            'type': kwargs.pop('type', None),
+            'strictness': kwargs.pop('strictness', None),
+            'distribution': kwargs.pop('distribution', None)
         }
         rv = super().join(target, onclause, **kwargs)
         x = rv._setup_joins[-1]
         x_spec = dict(spec)
         # use 'full' key to pass extra flags
-        x_spec["full"] = x[-1]["full"]
-        x[-1]["full"] = tuple(x_spec.items())
+        x_spec['full'] = x[-1]['full']
+        x[-1]['full'] = tuple(x_spec.items())
 
         return rv
 
     def outerjoin(self, *props, **kwargs):
-        kwargs["type"] = kwargs.get("type") or "LEFT OUTER"
+        kwargs['type'] = kwargs.get('type') or 'LEFT OUTER'
         return self.join(*props, **kwargs)

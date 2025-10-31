@@ -12,11 +12,10 @@ class ClickHouseDeclarativeMeta(DeclarativeMeta):
     Generates __tablename__ automatically. Taken from flask-sqlalchemy.
     Also adds custom __table_cls__.
     """
-
-    _camelcase_re = re.compile(r"([A-Z]+)(?=[a-z0-9])")
+    _camelcase_re = re.compile(r'([A-Z]+)(?=[a-z0-9])')
 
     def __new__(cls, name, bases, d):
-        tablename = d.get("__tablename__")
+        tablename = d.get('__tablename__')
 
         has_pks = any(
             v.primary_key for k, v in d.items() if isinstance(v, Column)
@@ -27,18 +26,16 @@ class ClickHouseDeclarativeMeta(DeclarativeMeta):
         # attach a primary key to support model inheritance that does
         # not use joins.  We also don't want a table name if a whole
         # table is defined
-        if not tablename and d.get("__table__") is None and has_pks:
-
+        if not tablename and d.get('__table__') is None and has_pks:
             def _join(match):
                 word = match.group()
                 if len(word) > 1:
-                    return ("_%s_%s" % (word[:-1], word[-1])).lower()
-                return "_" + word.lower()
+                    return ('_%s_%s' % (word[:-1], word[-1])).lower()
+                return '_' + word.lower()
+            d['__tablename__'] = cls._camelcase_re.sub(_join, name).lstrip('_')
 
-            d["__tablename__"] = cls._camelcase_re.sub(_join, name).lstrip("_")
-
-        if "__table_cls__" not in d:
-            d["__table_cls__"] = Table
+        if '__table_cls__' not in d:
+            d['__table_cls__'] = Table
 
         return DeclarativeMeta.__new__(cls, name, bases, d)
 

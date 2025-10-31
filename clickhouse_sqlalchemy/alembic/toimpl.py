@@ -9,52 +9,48 @@ def create_mat_view(operations, operation):
     impl = operations.impl
     ddl_compiler = impl.dialect.ddl_compiler(impl.dialect, None)
 
-    text = "CREATE MATERIALIZED VIEW "
+    text = 'CREATE MATERIALIZED VIEW '
 
-    if operation.kwargs.get("if_not_exists"):
-        text += "IF NOT EXISTS "
+    if operation.kwargs.get('if_not_exists'):
+        text += 'IF NOT EXISTS '
 
     text += operation.name
 
-    if operation.kwargs.get("on_cluster"):
-        text += " ON CLUSTER " + operation.kwargs["on_cluster"]
+    if operation.kwargs.get('on_cluster'):
+        text += ' ON CLUSTER ' + operation.kwargs['on_cluster']
 
-    text += (
-        " ("
-        + ", ".join(
-            ddl_compiler.process(CreateColumn(c)) for c in operation.columns
-        )
-        + ") "
-    )
+    text += ' (' + ', '.join(
+        ddl_compiler.process(CreateColumn(c)) for c in operation.columns
+    ) + ') '
 
-    text += "ENGINE = " + operation.engine
+    text += 'ENGINE = ' + operation.engine
 
-    if operation.kwargs.get("populate"):
-        text += " POPULATE"
+    if operation.kwargs.get('populate'):
+        text += ' POPULATE'
 
-    text += " AS " + operation.selectable
+    text += ' AS ' + operation.selectable
 
     operations.execute(text)
 
 
 @Operations.implementation_for(operations.CreateMatViewToTableOp)
 def create_mat_view_to_table(operations, operation):
-    text = "CREATE MATERIALIZED VIEW "
+    text = 'CREATE MATERIALIZED VIEW '
 
-    if operation.kwargs.get("if_not_exists"):
-        text += "IF NOT EXISTS "
+    if operation.kwargs.get('if_not_exists'):
+        text += 'IF NOT EXISTS '
 
     text += operation.name
 
-    if operation.kwargs.get("on_cluster"):
-        text += " ON CLUSTER " + operation.kwargs["on_cluster"]
+    if operation.kwargs.get('on_cluster'):
+        text += ' ON CLUSTER ' + operation.kwargs['on_cluster']
 
-    text += " TO " + operation.inner_name
+    text += ' TO ' + operation.inner_name
 
-    if operation.kwargs.get("populate"):
-        text += " POPULATE"
+    if operation.kwargs.get('populate'):
+        text += ' POPULATE'
 
-    text += " AS " + operation.selectable
+    text += ' AS ' + operation.selectable
 
     operations.execute(text)
 
@@ -64,24 +60,20 @@ def attach_mat_view(operations, operation):
     impl = operations.impl
     ddl_compiler = impl.dialect.ddl_compiler(impl.dialect, None)
 
-    text = "ATTACH MATERIALIZED VIEW "
+    text = 'ATTACH MATERIALIZED VIEW '
 
-    if operation.kwargs.get("if_not_exists"):
-        text += "IF NOT EXISTS "
+    if operation.kwargs.get('if_not_exists'):
+        text += 'IF NOT EXISTS '
 
-    text += operation.name + " "
+    text += operation.name + ' '
 
-    if operation.kwargs.get("on_cluster"):
-        text += " ON CLUSTER " + operation.kwargs["on_cluster"]
+    if operation.kwargs.get('on_cluster'):
+        text += ' ON CLUSTER ' + operation.kwargs['on_cluster']
 
-    text += (
-        " ("
-        + ", ".join(
-            ddl_compiler.process(CreateColumn(c)) for c in operation.columns
-        )
-        + ") "
-    )
+    text += ' (' + ', '.join(
+        ddl_compiler.process(CreateColumn(c)) for c in operation.columns
+    ) + ') '
 
-    text += "ENGINE = " + operation.engine + " AS " + operation.selectable
+    text += 'ENGINE = ' + operation.engine + ' AS ' + operation.selectable
 
     operations.execute(text)

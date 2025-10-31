@@ -7,11 +7,11 @@ from .common import Array
 
 
 class Nested(types.TypeEngine):
-    __visit_name__ = "nested"
+    __visit_name__ = 'nested'
 
     def __init__(self, *columns):
         if not columns:
-            raise ValueError("columns must be specified for nested type")
+            raise ValueError('columns must be specified for nested type')
         self.columns = columns
         self._columns_dict = {col.name: col for col in columns}
         super(Nested, self).__init__()
@@ -44,7 +44,9 @@ class NestedColumn(ColumnClause):
         else:
             table = self.parent.table
         super(NestedColumn, self).__init__(
-            sub_column.name, sub_column.type, _selectable=table
+            sub_column.name,
+            sub_column.type,
+            _selectable=table
         )
 
 
@@ -54,11 +56,9 @@ def _comp(element, compiler, **kw):
     if isinstance(element.parent, Label):
         from_labeled_label = True
     return "%s.%s" % (
-        compiler.process(
-            element.parent,
-            from_labeled_label=from_labeled_label,
-            within_label_clause=False,
-            within_columns_clause=True,
-        ),
+        compiler.process(element.parent,
+                         from_labeled_label=from_labeled_label,
+                         within_label_clause=False,
+                         within_columns_clause=True),
         compiler.visit_column(element, include_table=False),
     )

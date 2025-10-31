@@ -1,11 +1,6 @@
 from sqlalchemy import exc, literal_column
-from sqlalchemy.sql import (
-    compiler,
-    elements,
-    COLLECT_CARTESIAN_PRODUCTS,
-    WARN_LINTING,
-    crud,
-)
+from sqlalchemy.sql import compiler, elements, COLLECT_CARTESIAN_PRODUCTS, \
+    WARN_LINTING, crud
 from sqlalchemy.sql import type_api
 from sqlalchemy.util import inspect_getfullargspec
 
@@ -16,11 +11,8 @@ from ... import types
 
 class ClickHouseSQLCompiler(compiler.SQLCompiler):
     def visit_mod_binary(self, binary, operator, **kw):
-        return (
-            self.process(binary.left, **kw)
-            + " %% "
-            + self.process(binary.right, **kw)
-        )
+        return self.process(binary.left, **kw) + ' %% ' + \
+            self.process(binary.right, **kw)
 
     def visit_is_not_distinct_from_binary(self, binary, operator, **kw):
         """
@@ -53,65 +45,62 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         )
 
     def post_process_text(self, text):
-        return text.replace("%", "%%")
+        return text.replace('%', '%%')
 
     def visit_count_func(self, fn, **kw):
         # count accepts zero arguments.
-        return "count%s" % self.process(fn.clause_expr, **kw)
+        return 'count%s' % self.process(fn.clause_expr, **kw)
 
     def visit_case(self, clause, **kwargs):
-        text = "CASE "
+        text = 'CASE '
         if clause.value is not None:
-            text += clause.value._compiler_dispatch(self, **kwargs) + " "
+            text += clause.value._compiler_dispatch(self, **kwargs) + ' '
         for cond, result in clause.whens:
-            text += (
-                "WHEN "
-                + cond._compiler_dispatch(self, **kwargs)
-                + " THEN "
-                + result._compiler_dispatch(self, **kwargs)
-                + " "
-            )
+            text += 'WHEN ' + cond._compiler_dispatch(
+                self, **kwargs
+            ) + ' THEN ' + result._compiler_dispatch(
+                self, **kwargs) + " "
 
         if clause.else_ is not None:
-            text += (
-                "ELSE " + clause.else_._compiler_dispatch(self, **kwargs) + " "
-            )
+            text += 'ELSE ' + clause.else_._compiler_dispatch(
+                self, **kwargs
+            ) + ' '
 
-        text += "END"
+        text += 'END'
         return text
 
     def visit_if__func(self, func, **kw):
         return "(%s) ? (%s) : (%s)" % (
             self.process(func.clauses.clauses[0], **kw),
             self.process(func.clauses.clauses[1], **kw),
-            self.process(func.clauses.clauses[2], **kw),
+            self.process(func.clauses.clauses[2], **kw)
         )
 
     def limit_by_clause(self, select, **kw):
-        text = ""
+        text = ''
         limit_by_clause = select._limit_by_clause
         if limit_by_clause:
-            text += " LIMIT "
+            text += ' LIMIT '
             if limit_by_clause.offset is not None:
-                text += self.process(limit_by_clause.offset, **kw) + ", "
+                text += self.process(limit_by_clause.offset, **kw) + ', '
             text += self.process(limit_by_clause.limit, **kw)
             limit_by_exprs = limit_by_clause.by_clauses._compiler_dispatch(
                 self, **kw
             )
-            text += " BY " + limit_by_exprs
+            text += ' BY ' + limit_by_exprs
 
         return text
 
     def limit_clause(self, select, **kw):
-        text = ""
+        text = ''
         if select._limit_clause is not None:
-            text += " \n LIMIT "
+            text += ' \n LIMIT '
             if select._offset_clause is not None:
-                text += self.process(select._offset_clause, **kw) + ", "
+                text += self.process(select._offset_clause, **kw) + ', '
             text += self.process(select._limit_clause, **kw)
         else:
             if select._offset_clause is not None:
-                raise exc.CompileError("OFFSET without LIMIT is not supported")
+                raise exc.CompileError('OFFSET without LIMIT is not supported')
 
         return text
 
@@ -120,7 +109,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         spec = inspect_getfullargspec(func)
 
         if spec.varargs:
-            raise exc.CompileError("Lambdas with *args are not supported")
+            raise exc.CompileError('Lambdas with *args are not supported')
 
         try:
             # ArgSpec in SA>=1.3.0b2
@@ -130,9 +119,9 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             keywords = spec.varkw
 
         if keywords:
-            raise exc.CompileError("Lambdas with **kwargs are not supported")
+            raise exc.CompileError('Lambdas with **kwargs are not supported')
 
-        text = ", ".join(spec.args) + " -> "
+        text = ', '.join(spec.args) + ' -> '
 
         args = [literal_column(arg) for arg in spec.args]
         text += self.process(func(*args), **kw)
@@ -142,19 +131,19 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
     def visit_extract(self, extract, **kw):
         field = self.extract_map.get(extract.field, extract.field)
         column = self.process(extract.expr, **kw)
-        if field == "year":
-            return "toYear(%s)" % column
-        elif field == "month":
-            return "toMonth(%s)" % column
-        elif field == "day":
-            return "toDayOfMonth(%s)" % column
+        if field == 'year':
+            return 'toYear(%s)' % column
+        elif field == 'month':
+            return 'toMonth(%s)' % column
+        elif field == 'day':
+            return 'toDayOfMonth(%s)' % column
         else:
             return column
 
     def visit_join(self, join, asfrom=False, **kwargs):
         text = join.left._compiler_dispatch(self, asfrom=True, **kwargs)
 
-        if text[0] == "(" and text[-1] == ")":
+        if text[0] == '(' and text[-1] == ')':
             text = text[1:-1]
 
         flags = join.full
@@ -162,19 +151,19 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             if isinstance(flags, tuple):
                 flags = dict(flags)
             else:
-                flags = {"full": flags}
+                flags = {'full': flags}
         # need to make a variable to prevent leaks in some debuggers
-        join_type = flags.get("type")
+        join_type = flags.get('type')
         if join_type is None:
-            if flags.get("full"):
-                join_type = "FULL OUTER"
+            if flags.get('full'):
+                join_type = 'FULL OUTER'
             elif join.isouter:
-                join_type = "LEFT OUTER"
+                join_type = 'LEFT OUTER'
             else:
-                join_type = "INNER"
+                join_type = 'INNER'
         else:
             join_type = join_type.upper()
-            if join.isouter and "INNER" in join_type:
+            if join.isouter and 'INNER' in join_type:
                 raise exc.CompileError(
                     "can't compile join with specified "
                     "INNER type and isouter=True"
@@ -186,59 +175,68 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             #         "OUTER type and isouter=False"
             #     )
 
-        strictness = flags.get("strictness")
+        strictness = flags.get('strictness')
         if strictness:
-            join_type = strictness.upper() + " " + join_type
+            join_type = strictness.upper() + ' ' + join_type
 
-        distribution = flags.get("distribution")
+        distribution = flags.get('distribution')
         if distribution:
-            join_type = distribution.upper() + " " + join_type
+            join_type = distribution.upper() + ' ' + join_type
 
         if join_type is not None:
-            text += " " + join_type.upper() + " JOIN "
+            text += ' ' + join_type.upper() + ' JOIN '
 
         onclause = join.onclause
 
         text += join.right._compiler_dispatch(self, asfrom=True, **kwargs)
         if isinstance(onclause, elements.Tuple):
-            text += " USING " + onclause._compiler_dispatch(
+            text += ' USING ' + onclause._compiler_dispatch(
                 self, include_table=False, **kwargs
             )
         else:
-            text += " ON " + onclause._compiler_dispatch(self, **kwargs)
+            text += ' ON ' + onclause._compiler_dispatch(self, **kwargs)
         return text
 
     def visit_array_join(self, array_join, **kwargs):
-        kwargs["within_columns_clause"] = True
+        kwargs['within_columns_clause'] = True
 
-        return " \nARRAY JOIN {columns}".format(
-            columns=", ".join(
-                col._compiler_dispatch(
-                    self, within_label_clause=False, **kwargs
-                )
+        return ' \nARRAY JOIN {columns}'.format(
+            columns=', '.join(
+                col._compiler_dispatch(self,
+                                       within_label_clause=False,
+                                       **kwargs)
                 for col in array_join.clauses
+
             )
         )
 
     def visit_left_array_join(self, array_join, **kwargs):
-        kwargs["within_columns_clause"] = True
+        kwargs['within_columns_clause'] = True
 
-        return " \nLEFT ARRAY JOIN {columns}".format(
-            columns=", ".join(
-                col._compiler_dispatch(
-                    self, within_label_clause=False, **kwargs
-                )
+        return ' \nLEFT ARRAY JOIN {columns}'.format(
+            columns=', '.join(
+                col._compiler_dispatch(self,
+                                       within_label_clause=False,
+                                       **kwargs)
                 for col in array_join.clauses
+
             )
         )
 
-    def visit_label(self, label, from_labeled_label=False, **kw):
+    def visit_label(self,
+                    label,
+                    from_labeled_label=False,
+                    **kw):
         if from_labeled_label:
             return super(ClickHouseSQLCompiler, self).visit_label(
-                label, render_label_as_label=label
+                label,
+                render_label_as_label=label
             )
         else:
-            return super(ClickHouseSQLCompiler, self).visit_label(label, **kw)
+            return super(ClickHouseSQLCompiler, self).visit_label(
+                label,
+                **kw
+            )
 
     def _compose_select_body(
         self,
@@ -273,7 +271,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
                             asfrom=True,
                             fromhints=byfrom,
                             from_linter=from_linter,
-                            **kwargs,
+                            **kwargs
                         )
                         for f in froms
                     ]
@@ -285,7 +283,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
                             self,
                             asfrom=True,
                             from_linter=from_linter,
-                            **kwargs,
+                            **kwargs
                         )
                         for f in froms
                     ]
@@ -293,15 +291,15 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         else:
             text += self.default_from()
 
-        sample_clause = getattr(select, "_sample_clause", None)
+        sample_clause = getattr(select, '_sample_clause', None)
 
         if sample_clause is not None:
             text += self.sample_clause(select, **kwargs)
 
-        if getattr(select, "_array_join", None) is not None:
+        if getattr(select, '_array_join', None) is not None:
             text += select._array_join._compiler_dispatch(self, **kwargs)
 
-        final_clause = getattr(select, "_final_clause", None)
+        final_clause = getattr(select, '_final_clause', None)
 
         if final_clause is not None:
             text += self.final_clause()
@@ -329,7 +327,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         if select._order_by_clauses:
             text += self.order_by_clause(select, **kwargs)
 
-        limit_by_clause = getattr(select, "_limit_by_clause", None)
+        limit_by_clause = getattr(select, '_limit_by_clause', None)
 
         if limit_by_clause is not None:
             text += self.limit_by_clause(select, **kwargs)
@@ -351,18 +349,19 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
     def group_by_clause(self, select, **kw):
         text = ""
 
-        group_by = select._group_by_clause._compiler_dispatch(self, **kw)
+        group_by = select._group_by_clause._compiler_dispatch(
+            self, **kw)
 
         if group_by:
             text = " GROUP BY " + group_by
 
-            if getattr(select, "_with_cube", False):
+            if getattr(select, '_with_cube', False):
                 text += " WITH CUBE"
 
-            if getattr(select, "_with_rollup", False):
+            if getattr(select, '_with_rollup', False):
                 text += " WITH ROLLUP"
 
-            if getattr(select, "_with_totals", False):
+            if getattr(select, '_with_totals', False):
                 text += " WITH TOTALS"
 
         return text
@@ -370,7 +369,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
     def visit_delete(self, delete_stmt, **kw):
         if not self.dialect.supports_delete:
             raise exc.CompileError(
-                "ALTER DELETE is not supported by this server version"
+                'ALTER DELETE is not supported by this server version'
             )
 
         compile_state = delete_stmt._compile_state_factory(
@@ -404,7 +403,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             if t:
                 text += " WHERE " + t
         else:
-            raise exc.CompileError("WHERE clause is required")
+            raise exc.CompileError('WHERE clause is required')
 
         self.stack.pop(-1)
 
@@ -413,7 +412,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
     def visit_update(self, update_stmt, **kw):
         if not self.dialect.supports_update:
             raise exc.CompileError(
-                "ALTER UPDATE is not supported by this server version"
+                'ALTER UPDATE is not supported by this server version'
             )
 
         compile_state = update_stmt._compile_state_factory(
@@ -444,9 +443,8 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
         text += table_text
         text += " UPDATE "
         text += ", ".join(
-            expr + "=" + value
-            for c, expr, value, _ in crud_params.single_params
-        )
+            expr + "=" + value for c,
+            expr, value, _ in crud_params.single_params)
 
         if update_stmt._where_criteria:
             t = self._generate_delimited_and_list(
@@ -455,7 +453,7 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
             if t:
                 text += " WHERE " + t
         else:
-            raise exc.CompileError("WHERE clause is required")
+            raise exc.CompileError('WHERE clause is required')
 
         self.stack.pop(-1)
 
@@ -464,14 +462,11 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
     def render_literal_value(self, value, type_):
         if isinstance(value, list):
             return (
-                "["
-                + ", ".join(
-                    self.render_literal_value(
+                '[' +
+                ', '.join(self.render_literal_value(
                         x, type_api._resolve_value_to_type(x)
-                    )
-                    for x in value
-                )
-                + "]"
+                    ) for x in value) +
+                ']'
             )
         else:
             return super(ClickHouseSQLCompiler, self).render_literal_value(
@@ -489,7 +484,9 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
 
     def visit_not_regexp_match_op_binary(self, binary, operator, **kw):
         return "NOT %s" % self.visit_regexp_match_op_binary(
-            binary, operator, **kw
+            binary,
+            operator,
+            **kw
         )
 
     def visit_ilike_case_insensitive_operand(self, element, **kw):
@@ -498,13 +495,13 @@ class ClickHouseSQLCompiler(compiler.SQLCompiler):
     def visit_ilike_op_binary(self, binary, operator, **kw):
         return "%s ILIKE %s" % (
             self.process(binary.left, **kw),
-            self.process(binary.right, **kw),
+            self.process(binary.right, **kw)
         )
 
     def visit_not_ilike_op_binary(self, binary, operator, **kw):
         return "%s NOT ILIKE %s" % (
             self.process(binary.left, **kw),
-            self.process(binary.right, **kw),
+            self.process(binary.right, **kw)
         )
 
     def get_select_precolumns(self, select, **kw):

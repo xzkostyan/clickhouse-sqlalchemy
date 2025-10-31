@@ -1,8 +1,6 @@
 from sqlalchemy.sql.ddl import (
-    SchemaDropper as SchemaDropperBase,
-    DropTable as DropTableBase,
-    SchemaGenerator as SchemaGeneratorBase,
-    _CreateDropBase,
+    SchemaDropper as SchemaDropperBase, DropTable as DropTableBase,
+    SchemaGenerator as SchemaGeneratorBase, _CreateDropBase
 )
 from sqlalchemy.sql.expression import UnaryExpression
 from sqlalchemy.sql.operators import custom_op
@@ -10,8 +8,9 @@ from sqlalchemy.sql.operators import custom_op
 
 class DropTable(DropTableBase):
     def __init__(self, element, bind=None, if_exists=False):
-        self.on_cluster = element.dialect_options["clickhouse"]["cluster"]
-        super(DropTable, self).__init__(element, if_exists=if_exists)
+        self.on_cluster = element.dialect_options['clickhouse']['cluster']
+        super(DropTable, self).__init__(element,
+                                        if_exists=if_exists)
 
 
 class DropView(DropTableBase):
@@ -68,14 +67,14 @@ class SchemaGenerator(SchemaGeneratorBase):
 
 
 def ttl_delete(expr):
-    return UnaryExpression(expr, modifier=custom_op("DELETE"))
+    return UnaryExpression(expr, modifier=custom_op('DELETE'))
 
 
 def ttl_to_disk(expr, disk):
-    assert isinstance(disk, str), "Disk must be str"
-    return expr.op("TO DISK")(disk)
+    assert isinstance(disk, str), 'Disk must be str'
+    return expr.op('TO DISK')(disk)
 
 
 def ttl_to_volume(expr, volume):
-    assert isinstance(volume, str), "Volume must be str"
-    return expr.op("TO VOLUME")(volume)
+    assert isinstance(volume, str), 'Volume must be str'
+    return expr.op('TO VOLUME')(volume)

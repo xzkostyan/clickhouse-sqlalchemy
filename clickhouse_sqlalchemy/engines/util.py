@@ -1,6 +1,7 @@
-def parse_columns(
-    str_columns, delimeter=",", quote_symbol="`", escape_symbol="\\"
-):
+
+
+def parse_columns(str_columns, delimeter=',', quote_symbol='`',
+                  escape_symbol='\\'):
     if not str_columns:
         return []
 
@@ -10,21 +11,21 @@ def parse_columns(
     brackets_count = 0
 
     rv = []
-    col = ""
+    col = ''
     for i, x in enumerate(str_columns + delimeter):
         if x == delimeter and not quoted and brackets_count == 0:
             in_column = False
             rv.append(col)
-            col = ""
+            col = ''
 
-        elif x == " " and not in_column:
+        elif x == ' ' and not in_column:
             continue
 
-        elif x == "(":
+        elif x == '(':
             brackets_count += 1
             col += x
 
-        elif x == ")":
+        elif x == ')':
             brackets_count -= 1
             col += x
 

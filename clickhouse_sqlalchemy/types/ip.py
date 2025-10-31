@@ -31,26 +31,16 @@ class BaseIPComparator(UserDefinedType.Comparator):
     def in_(self, other):
         if isinstance(other, (list, tuple)):
             addresses, networks = self._split_other(other)
-            addresses_clause = (
-                super(BaseIPComparator, self).in_(
-                    self._wrap_to_ip(x) for x in addresses
+            addresses_clause = super(BaseIPComparator, self).in_(
+                self._wrap_to_ip(x) for x in addresses
+            ) if addresses else None
+            networks_clause = or_(*[
+                and_(
+                    self >= self._wrap_to_ip(net[0]),
+                    self <= self._wrap_to_ip(net[-1])
                 )
-                if addresses
-                else None
-            )
-            networks_clause = (
-                or_(
-                    *[
-                        and_(
-                            self >= self._wrap_to_ip(net[0]),
-                            self <= self._wrap_to_ip(net[-1]),
-                        )
-                        for net in networks
-                    ]
-                )
-                if networks
-                else None
-            )
+                for net in networks
+            ]) if networks else None
             if addresses_clause is not None and networks_clause is not None:
                 return or_(addresses_clause, networks_clause)
             elif addresses_clause is not None and networks_clause is None:
@@ -66,32 +56,22 @@ class BaseIPComparator(UserDefinedType.Comparator):
 
         return and_(
             self >= self._wrap_to_ip(other[0]),
-            self <= self._wrap_to_ip(other[-1]),
+            self <= self._wrap_to_ip(other[-1])
         )
 
     def not_in(self, other):
         if isinstance(other, (list, tuple)):
             addresses, networks = self._split_other(other)
-            addresses_clause = (
-                super(BaseIPComparator, self).notin_(
-                    self._wrap_to_ip(x) for x in addresses
+            addresses_clause = super(BaseIPComparator, self).notin_(
+                self._wrap_to_ip(x) for x in addresses
+            ) if addresses else None
+            networks_clause = and_(*[
+                or_(
+                    self < self._wrap_to_ip(net[0]),
+                    self > self._wrap_to_ip(net[-1])
                 )
-                if addresses
-                else None
-            )
-            networks_clause = (
-                and_(
-                    *[
-                        or_(
-                            self < self._wrap_to_ip(net[0]),
-                            self > self._wrap_to_ip(net[-1]),
-                        )
-                        for net in networks
-                    ]
-                )
-                if networks
-                else None
-            )
+                for net in networks
+            ]) if networks else None
             if addresses_clause is not None and networks_clause is not None:
                 return and_(addresses_clause, networks_clause)
             elif addresses_clause is not None and networks_clause is None:
@@ -107,7 +87,7 @@ class BaseIPComparator(UserDefinedType.Comparator):
 
         return or_(
             self < self._wrap_to_ip(other[0]),
-            self > self._wrap_to_ip(other[-1]),
+            self > self._wrap_to_ip(other[-1])
         )
 
 
@@ -132,7 +112,7 @@ class IPv4(types.UserDefinedType):
 
     def bind_expression(self, bindvalue):
         if isinstance(bindvalue.value, (list, tuple)):
-            bindvalue.value = [func.toIPv4(x) for x in bindvalue.value]
+            bindvalue.value = ([func.toIPv4(x) for x in bindvalue.value])
             return bindvalue
         return func.toIPv4(bindvalue)
 
@@ -164,7 +144,7 @@ class IPv6(types.UserDefinedType):
 
     def bind_expression(self, bindvalue):
         if isinstance(bindvalue.value, (list, tuple)):
-            bindvalue.value = [func.toIPv6(x) for x in bindvalue.value]
+            bindvalue.value = ([func.toIPv6(x) for x in bindvalue.value])
             return bindvalue
         return func.toIPv6(bindvalue)
 
