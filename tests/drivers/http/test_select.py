@@ -5,6 +5,7 @@ from tests.testcase import HttpSessionTestCase
 
 
 class FormatSectionTestCase(HttpSessionTestCase):
+
     @property
     def execution_ctx_cls(self):
         return self.session.bind.dialect.execution_ctx_cls
@@ -30,11 +31,15 @@ class FormatSectionTestCase(HttpSessionTestCase):
         bind.cursor = lambda: None
 
         table = Table(
-            "t1", metadata, Column("x", types.Int32, primary_key=True)
+            't1', metadata,
+            Column('x', types.Int32, primary_key=True)
         )
 
         statement = self.compile(self.session.query(table.c.x), bind=bind)
-        self.assertEqual(statement, "SELECT t1.x AS t1_x FROM t1")
+        self.assertEqual(
+            statement,
+            'SELECT t1.x AS t1_x FROM t1'
+        )
 
     def test_insert_from_select_no_format_clause(self):
         metadata = self.metadata()
@@ -42,12 +47,18 @@ class FormatSectionTestCase(HttpSessionTestCase):
         bind = self.session.bind
         bind.cursor = lambda: None
 
-        t1 = Table("t1", metadata, Column("x", types.Int32, primary_key=True))
+        t1 = Table(
+            't1', metadata,
+            Column('x', types.Int32, primary_key=True)
+        )
 
-        t2 = Table("t2", metadata, Column("x", types.Int32, primary_key=True))
+        t2 = Table(
+            't2', metadata,
+            Column('x', types.Int32, primary_key=True)
+        )
 
-        query = t2.insert().from_select(["x"], self.session.query(t1.c.x))
+        query = t2.insert().from_select(['x'], self.session.query(t1.c.x))
         statement = self.compile(query, bind=bind)
         self.assertEqual(
-            statement, "INSERT INTO t2 (x) SELECT t1.x AS t1_x FROM t1"
+            statement, 'INSERT INTO t2 (x) SELECT t1.x AS t1_x FROM t1'
         )

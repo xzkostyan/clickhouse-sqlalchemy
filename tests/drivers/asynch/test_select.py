@@ -10,10 +10,9 @@ class SanityTestCase(AsynchSessionTestCase):
         with mocked_engine(self.session) as engine:
             metadata = self.metadata()
             Table(
-                "t1",
-                metadata,
-                Column("x", types.Int32, primary_key=True),
-                engines.Memory(),
+                't1', metadata,
+                Column('x', types.Int32, primary_key=True),
+                engines.Memory()
             )
 
             prev_has_table = engine.dialect_cls.has_table
@@ -21,6 +20,6 @@ class SanityTestCase(AsynchSessionTestCase):
 
             await self.run_sync(metadata.drop_all)
 
-            self.assertEqual(engine.history, ["DROP TABLE t1"])
+            self.assertEqual(engine.history, ['DROP TABLE t1'])
 
             engine.dialect_cls.has_table = prev_has_table

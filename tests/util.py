@@ -10,16 +10,16 @@ from tests.session import http_session, native_session
 
 def skip_by_server_version(testcase, version_required):
     testcase.skipTest(
-        "Mininum revision required: {}".format(
-            ".".join(str(x) for x in version_required)
+        'Mininum revision required: {}'.format(
+            '.'.join(str(x) for x in version_required)
         )
     )
 
 
 async def _get_version(conn):
     cursor = await greenlet_spawn(lambda: conn.cursor())
-    await greenlet_spawn(lambda: cursor.execute("SELECT version()"))
-    version = cursor.fetchall()[0][0].split(".")
+    await greenlet_spawn(lambda: cursor.execute('SELECT version()'))
+    version = cursor.fetchall()[0][0].split('.')
     return tuple(int(x) for x in version[:3])
 
 
@@ -31,22 +31,21 @@ def require_server_version(*version_required, is_async=False):
             if not is_async:
                 conn = self.session.bind.raw_connection()
             else:
-
                 async def _get_conn(session):
                     return await session.bind.raw_connection()
 
                 conn = run_async(lambda: _get_conn(self.session))()
 
             dialect = self.session.bind.dialect.name
-            if dialect in ["clickhouse+native", "clickhouse+asynch"]:
+            if dialect in ['clickhouse+native', 'clickhouse+asynch']:
                 i = conn.transport.connection.server_info
                 current = (i.version_major, i.version_minor, i.version_patch)
 
             else:
                 if not is_async:
                     cursor = conn.cursor()
-                    cursor.execute("SELECT version()")
-                    version = cursor.fetchall()[0][0].split(".")
+                    cursor.execute('SELECT version()')
+                    version = cursor.fetchall()[0][0].split('.')
                     current = tuple(int(x) for x in version[:3])
 
                 else:
@@ -57,8 +56,8 @@ def require_server_version(*version_required, is_async=False):
                 return f(*args, **kwargs)
             else:
                 self.skipTest(
-                    "Mininum revision required: {}".format(
-                        ".".join(str(x) for x in version_required)
+                    'Mininum revision required: {}'.format(
+                        '.'.join(str(x) for x in version_required)
                     )
                 )
 
@@ -79,7 +78,7 @@ def mock_object_attr(dialect, attr, new_value):
 
 
 def class_name_func(cls, num, params_dict):
-    suffix = "HTTP" if params_dict["session"] is http_session else "Native"
+    suffix = 'HTTP' if params_dict['session'] is http_session else 'Native'
     return cls.__name__ + suffix
 
 
@@ -87,7 +86,6 @@ def run_async(f):
     """
     Decorator to create asyncio context for asyncio methods or functions.
     """
-
     @wraps(f)
     def g(*args, **kwargs):
         coro = f(*args, **kwargs)
@@ -101,11 +99,10 @@ def run_async(f):
                 asyncio.set_event_loop(loop)
 
         return loop.run_until_complete(coro)
-
     return g
 
 
-with_native_and_http_sessions = parameterized_class(
-    [{"session": http_session}, {"session": native_session}],
-    class_name_func=class_name_func,
-)
+with_native_and_http_sessions = parameterized_class([
+    {'session': http_session},
+    {'session': native_session}
+], class_name_func=class_name_func)

@@ -16,65 +16,35 @@ registry.register(
 )
 
 file_config = configparser.ConfigParser()
-file_config.read(["setup.cfg"])
+file_config.read(['setup.cfg'])
 
-log.configure(file_config.get("log", "level"))
+log.configure(file_config.get('log', 'level'))
 
-host = file_config.get("db", "host")
-port = file_config.getint("db", "port")
-http_port = file_config.getint("db", "http_port")
-database = file_config.get("db", "database")
-user = file_config.get("db", "user")
-password = file_config.get("db", "password")
+host = file_config.get('db', 'host')
+port = file_config.getint('db', 'port')
+http_port = file_config.getint('db', 'http_port')
+database = file_config.get('db', 'database')
+user = file_config.get('db', 'user')
+password = file_config.get('db', 'password')
 
-uri_template = "{schema}://{user}:{password}@{host}:{port}/{database}"
+uri_template = '{schema}://{user}:{password}@{host}:{port}/{database}'
 
 http_uri = uri_template.format(
-    schema="clickhouse+http",
-    user=user,
-    password=password,
-    host=host,
-    port=http_port,
-    database=database,
-)
+    schema='clickhouse+http', user=user, password=password, host=host,
+    port=http_port, database=database)
 native_uri = uri_template.format(
-    schema="clickhouse+native",
-    user=user,
-    password=password,
-    host=host,
-    port=port,
-    database=database,
-)
+    schema='clickhouse+native', user=user, password=password, host=host,
+    port=port, database=database)
 asynch_uri = uri_template.format(
-    schema="clickhouse+asynch",
-    user=user,
-    password=password,
-    host=host,
-    port=port,
-    database=database,
-)
+    schema='clickhouse+asynch', user=user, password=password, host=host,
+    port=port, database=database)
 
 system_http_uri = uri_template.format(
-    schema="clickhouse+http",
-    user=user,
-    password=password,
-    host=host,
-    port=http_port,
-    database="system",
-)
+    schema='clickhouse+http', user=user, password=password, host=host,
+    port=http_port, database='system')
 system_native_uri = uri_template.format(
-    schema="clickhouse+native",
-    user=user,
-    password=password,
-    host=host,
-    port=port,
-    database="system",
-)
+    schema='clickhouse+native', user=user, password=password, host=host,
+    port=port, database='system')
 system_asynch_uri = uri_template.format(
-    schema="clickhouse+asynch",
-    user=user,
-    password=password,
-    host=host,
-    port=port,
-    database="system",
-)
+    schema='clickhouse+asynch', user=user, password=password, host=host,
+    port=port, database='system')
