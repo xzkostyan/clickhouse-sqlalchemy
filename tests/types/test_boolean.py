@@ -7,20 +7,21 @@ from tests.testcase import CompilationTestCase
 
 class BooleanCompilationTestCase(CompilationTestCase):
     table = Table(
-        'test', CompilationTestCase.metadata(),
-        Column('x', Boolean),
-        engines.Memory()
+        "test",
+        CompilationTestCase.metadata(),
+        Column("x", Boolean),
+        engines.Memory(),
     )
 
     def test_create_table(self):
         self.assertEqual(
             self.compile(CreateTable(self.table)),
-            'CREATE TABLE test (x Bool) ENGINE = Memory'
+            "CREATE TABLE test (x Bool) ENGINE = Memory",
         )
 
     def test_literals(self):
         query = self.session.query(self.table.c.x).filter(self.table.c.x)
         self.assertEqual(
             self.compile(query),
-            'SELECT test.x AS test_x FROM test WHERE test.x'
+            "SELECT test.x AS test_x FROM test WHERE test.x",
         )

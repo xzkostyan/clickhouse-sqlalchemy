@@ -13,29 +13,25 @@ class DeclarativeTestCase(BaseTestCase):
             x = Column(types.Int32, primary_key=True)
             y = Column(types.String)
 
-            __table_args__ = (
-                engines.Memory(),
-            )
+            __table_args__ = (engines.Memory(),)
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
-            'CREATE TABLE test_table (x Int32, y String) ENGINE = Memory'
+            "CREATE TABLE test_table (x Int32, y String) ENGINE = Memory",
         )
 
     def test_create_table_custom_name(self):
         base = get_declarative_base()
 
         class TestTable(base):
-            __tablename__ = 'testtable'
+            __tablename__ = "testtable"
 
             x = Column(types.Int32, primary_key=True)
             y = Column(types.String)
 
-            __table_args__ = (
-                engines.Memory(),
-            )
+            __table_args__ = (engines.Memory(),)
 
         self.assertEqual(
             self.compile(CreateTable(TestTable.__table__)),
-            'CREATE TABLE testtable (x Int32, y String) ENGINE = Memory'
+            "CREATE TABLE testtable (x Int32, y String) ENGINE = Memory",
         )
