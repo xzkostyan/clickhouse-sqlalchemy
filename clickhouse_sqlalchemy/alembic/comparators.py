@@ -17,21 +17,14 @@ alembic_version = tuple(
 )
 
 
-def _get_reflected_table(connection, table_name, schema=None):
-    # Для Alembic < 1.11
+def _alembic_reflect_table(connection, table_name, schema=None):
     if alembic_version < (1, 11):
         from alembic.util.sqla_compat import _reflect_table
-
         return _reflect_table(connection, table_name, schema)
 
-    # Для Alembic >= 1.11
     inspector = inspect(connection)
     columns = inspector.get_columns(table_name, schema=schema)
-    # Соберите Table объект при необходимости
     return columns
-
-
-_alembic_reflect_table = _get_reflected_table
 
 
 def _extract_to_table_name(create_table_query):
