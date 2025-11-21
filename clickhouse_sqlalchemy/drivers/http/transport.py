@@ -47,6 +47,14 @@ def nothing_converter(x):
     return None
 
 
+def bool_converter(x):
+    if x in (1, '1', True, 'true'):
+        return True
+    elif x in (0, '0', False, 'false'):
+        return False
+    return None
+
+
 converters = {
     'Int8': int,
     'UInt8': int,
@@ -70,6 +78,7 @@ converters = {
     'IPv6': IPv6Address,
     'Nullable': nullable_converter,
     'Nothing': nothing_converter,
+    'Bool': bool_converter,
 }
 
 

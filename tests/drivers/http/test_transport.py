@@ -215,3 +215,23 @@ class TransportCase(HttpSessionTestCase):
 
         rv = self.session.query(*table.c).all()
         self.assertEqual(rv, [(None, )])
+
+    @mock.activate
+    def test_parse_bool(self):
+        mock.add(
+            mock.POST, self.url, status=200,
+            body=(
+                'a\n' +
+                'Bool\n' +
+                '\\N\n' +
+                'true\n'
+            )
+        )
+
+        table = Table(
+            't1', self.metadata(),
+            Column('a', types.Boolean)
+        )
+
+        rv = self.session.query(*table.c).all()
+        self.assertEqual(rv, [(True, )])
