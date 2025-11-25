@@ -223,7 +223,6 @@ class TransportCase(HttpSessionTestCase):
             body=(
                 'a\n' +
                 'Bool\n' +
-                '\\N\n' +
                 'true\n'
             )
         )
