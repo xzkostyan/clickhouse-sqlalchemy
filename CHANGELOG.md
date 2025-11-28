@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- Broken alembic import with alembic 1.15. Solves issue [#368](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/368)
 
 ## [0.3.2] - 2024-06-12
 ### Added
