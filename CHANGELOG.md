@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Added support for Time and Time64 columns (available in ClickHouse server 25.6+). Closes [#390](https://github.com/xzkostyan/clickhouse-sqlalchemy/issues/390)
 
 ## [0.3.2] - 2024-06-12
 ### Added

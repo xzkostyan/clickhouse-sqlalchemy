@@ -254,3 +254,15 @@ class SimpleAggregateFunction(ClickHouseTypeEngine):
             agg_str = f'sa.func.{self.agg_func}'
 
         return f"SimpleAggregateFunction({agg_str}, {', '.join(type_strs)})"
+
+
+class Time(ClickHouseTypeEngine):
+    __visit_name__ = "time"
+
+
+class Time64(ClickHouseTypeEngine):
+    __visit_name__ = "time64"
+
+    def __init__(self, precision=3):
+        self.precision = precision
+        super().__init__()

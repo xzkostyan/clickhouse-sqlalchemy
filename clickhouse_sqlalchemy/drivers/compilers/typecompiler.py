@@ -179,3 +179,14 @@ class ClickHouseTypeCompiler(compiler.GenericTypeCompiler):
         return "SimpleAggregateFunction(%s, %s)" % (
             agg_str, ", ".join(type_strings)
         )
+
+    def visit_time(self, type_, **kw):
+        return 'Time'
+
+    def visit_time64(self, type_, **kw):
+        if type_.precision not in [3, 6, 9]:
+            raise ValueError(
+                "Invalid precision value. Expected one of [3, 6, 9]."
+            )
+
+        return f'Time64({type_.precision})'

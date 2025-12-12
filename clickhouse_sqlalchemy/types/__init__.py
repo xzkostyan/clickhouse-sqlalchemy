@@ -37,6 +37,8 @@ __all__ = [
     'Map',
     'AggregateFunction',
     'SimpleAggregateFunction',
+    'Time',
+    'Time64',
 ]
 
 from .common import String
@@ -74,6 +76,8 @@ from .common import Tuple
 from .common import Map
 from .common import AggregateFunction
 from .common import SimpleAggregateFunction
+from .common import Time
+from .common import Time64
 from .ip import IPv4
 from .ip import IPv6
 from .nested import Nested

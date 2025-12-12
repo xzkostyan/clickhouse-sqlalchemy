@@ -37,6 +37,10 @@ class JSONTestCase(BaseTestCase):
     )
 
     def test_select_insert(self):
+        # Native driver doesn't support JSON type yet
+        if self.session.bind.driver == "native":
+            self.skipTest("Native driver doesn't support JSON type yet")
+
         data = {'k1': 1, 'k2': '2', 'k3': True}
 
         self.table.drop(bind=self.session.bind, if_exists=True)
