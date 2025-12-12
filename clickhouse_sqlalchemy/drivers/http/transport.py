@@ -98,7 +98,7 @@ class RequestsTransport(object):
 
         self.db_url = db_url
         self.db_name = db_name
-        self.auth = (username, password)
+        self.auth = (username, password) if username is not None else None
         self.timeout = float(timeout) if timeout is not None else None
         self.verify = kwargs.pop('verify', True)
         self.cert = kwargs.pop('cert', None)
