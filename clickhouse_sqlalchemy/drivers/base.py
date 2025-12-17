@@ -51,6 +51,7 @@ ischema_names = {
     'Enum8': types.Enum8,
     'Enum16': types.Enum16,
     'Object(\'json\')': types.JSON,
+    'Dynamic': types.Dynamic,
     '_array': types.Array,
     '_nullable': types.Nullable,
     '_lowcardinality': types.LowCardinality,
