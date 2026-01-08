@@ -60,6 +60,7 @@ converters = {
     'UInt128': int,
     'Int256': int,
     'UInt256': int,
+    'BFloat16': float,
     'Float32': float,
     'Float64': float,
     'Decimal': Decimal,

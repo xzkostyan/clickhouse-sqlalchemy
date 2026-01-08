@@ -19,6 +19,7 @@ __all__ = [
     'UInt128',
     'Int256',
     'UInt256',
+    'BFloat16',
     'Float32',
     'Float64',
     'Date',
@@ -59,6 +60,7 @@ from .common import Int128
 from .common import UInt128
 from .common import Int256
 from .common import UInt256
+from .common import BFloat16
 from .common import Float32
 from .common import Float64
 from .common import Date

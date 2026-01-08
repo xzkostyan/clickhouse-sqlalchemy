@@ -138,6 +138,10 @@ class UInt256(Int):
     __visit_name__ = 'uint256'
 
 
+class BFloat16(Float):
+    __visit_name__ = 'bfloat16'
+
+
 class Float32(Float):
     __visit_name__ = 'float32'
 
