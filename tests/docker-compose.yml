@@ -2,8 +2,12 @@ version: '3'
 
 services:
   clickhouse-server:
-    image: "$ORG/clickhouse-server:$VERSION"
+    image: "${ORG:-clickhouse}/clickhouse-server:${VERSION:-latest}"
     container_name: test-clickhouse-server
     ports:
-      - "127.0.0.1:9000:9000"
-      - "127.0.0.1:8123:8123"
+      - "9000:9000"
+      - "8123:8123"
+
+networks:
+  default:
+    name: clickhouse-net
