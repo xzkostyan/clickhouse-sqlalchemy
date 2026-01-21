@@ -1,4 +1,4 @@
-
+from .kafka import Kafka
 from .mergetree import (
     MergeTree, AggregatingMergeTree, GraphiteMergeTree, CollapsingMergeTree,
     VersionedCollapsingMergeTree, ReplacingMergeTree, SummingMergeTree
@@ -36,5 +36,6 @@ __all__ = (
     Log,
     Memory,
     Null,
-    File
+    File,
+    Kafka
 )

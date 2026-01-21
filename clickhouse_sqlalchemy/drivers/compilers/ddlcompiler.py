@@ -170,6 +170,24 @@ class ClickHouseDDLCompiler(compiler.DDLCompiler):
             )
         return text
 
+    def visit_kafka(self, engine):
+        text = f"{engine.name}()"
+        if not engine.settings:
+            return text
+
+        if engine.settings:
+            text += ' SETTINGS '
+            formatted = []
+            for key, value in sorted(engine.settings.items()):
+                if isinstance(value, str):
+                    formatted.append(f"{key} = '{value}'")
+                else:
+                    formatted.append(f"{key} = {value}")
+
+            text += ', '.join(formatted)
+
+        return text
+
     def visit_engine(self, engine):
         engine_params = engine.get_parameters()
         text = engine.name

@@ -708,3 +708,33 @@ class TTLTestCase(EngineTestCaseBase):
             '    date + toIntervalDay(1) TO DISK \'hdd\', '
             '    date + toIntervalDay(1) TO VOLUME \'slow\''
         )
+
+
+class KafkaTestCase(EngineTestCaseBase):
+    def test_basic(self):
+        class TestTable(self.base):
+            date = Column(types.Date, primary_key=True)
+            x = Column(types.Int32)
+            y = Column(types.String)
+            version = Column(types.Int32)
+
+            __table_args__ = (
+                engines.Kafka(
+                    kafka_broker_list=["host1:port1", "host2:port2"],
+                    kafka_topic_list=["test_topic"],
+                    kafka_group_name="test_group",
+                    kafka_format="JSONEachRow",
+                ),
+            )
+
+        self.assertEqual(
+            self.compile(CreateTable(TestTable.__table__)),
+            "CREATE TABLE test_table "
+            "(date Date, x Int32, y String, version Int32) "
+            "ENGINE = Kafka() "
+            "SETTINGS "
+            "kafka_broker_list = 'host1:port1,host2:port2', "
+            "kafka_format = 'JSONEachRow', "
+            "kafka_group_name = 'test_group', "
+            "kafka_topic_list = 'test_topic'"
+        )

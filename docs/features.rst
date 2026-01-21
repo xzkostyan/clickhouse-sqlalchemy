@@ -255,6 +255,7 @@ Currently supported engines:
 * Memory
 * Null
 * File
+* Kafka
 
 Each engine has it's own parameters. Please refer to ClickHouse documentation
 about engines.
