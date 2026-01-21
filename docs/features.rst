@@ -694,6 +694,23 @@ INSERT FROM SELECT statement:
             .from_select(['day', 'value'], select_query)
         )
 
+Streaming insert:
+
+    .. code-block:: python
+        from datetime import datetime
+        from clickhouse_sqlalchemy import sql
+
+        def generator():
+            for i in range(100):
+                yield [datetime.now(), 1, i]
+
+        session.execute(
+            sql.insert(Statistics).values_iterator(
+                [Statistics.date, Statistics.sign, Statistics.grouping],
+                generator()
+            )
+        )
+
 UPDATE and DELETE
 -----------------
 
