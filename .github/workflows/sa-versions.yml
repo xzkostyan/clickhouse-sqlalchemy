@@ -1,24 +1,42 @@
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
 name: "SQLAlchemy >=2.0.0 versions"
+
 jobs:
   tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         python-version:
           - "3.12"
         clickhouse-version:
-          - 23.8.4.69
-        sa-version: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]
+          - "26.2.4.23"
+        sa-version:
+          - "2.0.0"   # first 2.0
+          - "2.0.11"  # bytes handler removed, Row serialization changed
+          - "2.0.18"  # regexp_match/regexp_replace flags backwards-incompatible
+          - "2.0.19"  # Row.t/tuple -> _t/_tuple
+          - "2.0.23"  # compare_against_backend removed (Alembic)
+          - "2.0.24"  # URL quoting, async_fallback deprecated
+          - "2.0.25"  # post-2.0.24 fixes
+          - "2.0.37"  # PEP 695 TypeAliasType in type map (revised in 2.0.44)
+          - "2.0.41"  # __getattr__ removed from sqlalchemy/__init__
+          - "2.0.44"  # revises 2.0.37 type alias behavior
+          - "2.0.46"  # latest
     services:
       clickhouse-server:
         image: clickhouse/clickhouse-server:${{ matrix.clickhouse-version }}
+        env:
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: secret
         ports:
           - 8123:8123
           - 9000:9000
 
-    name: ${{ matrix.python-version }} SA=2.0.${{ matrix.sa-version }}
+    name: ${{ matrix.python-version }} SA=${{ matrix.sa-version }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -34,7 +52,7 @@ jobs:
           # Limit each test time execution.
           pip install pytest-timeout
       - name: Install SQLAlchemy
-        run: pip install sqlalchemy==2.0.${{ matrix.sa-version }}
+        run: pip install sqlalchemy==${{ matrix.sa-version }}
       - name: Run tests
-        run: pytest --timeout=10 -v
+        run: pytest --timeout=10 -v -x
         timeout-minutes: 2

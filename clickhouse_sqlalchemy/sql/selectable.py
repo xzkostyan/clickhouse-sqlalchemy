@@ -15,6 +15,7 @@ __all__ = ('Select', 'select')
 
 
 class Select(StandardSelect):
+    inherit_cache = True
     _with_cube = False
     _with_rollup = False
     _with_totals = False

@@ -1,3 +1,5 @@
+import re
+
 import asynch
 
 from sqlalchemy.sql.elements import TextClause
@@ -8,6 +10,22 @@ from ..native.base import ClickHouseDialect_native, ClickHouseExecutionContext
 
 # Export connector version
 VERSION = (0, 0, 1, None)
+
+
+try:
+    from importlib.metadata import version
+    _asynch_version = version('asynch')
+except Exception:
+    _asynch_version = getattr(asynch, '__version__', None) or '0'
+
+_asynch_031 = tuple(
+    int(x) if x.isdigit() else 0 for x in str(_asynch_version).split('.')[:3]
+) >= (0, 3, 1)
+_pyformat_param_re = re.compile(r'%\(([^)]+)\)s')
+
+
+def _format_asynch_statement(statement):
+    return _pyformat_param_re.sub(r'{\1}', statement).replace('%%', '%')
 
 
 class ClickHouseAsynchExecutionContext(ClickHouseExecutionContext):
@@ -40,9 +58,13 @@ class ClickHouseDialect_asynch(ClickHouseDialect_native):
         return f(sql, kwargs)
 
     def do_execute(self, cursor, statement, parameters, context=None):
+        if _asynch_031:
+            statement = _format_asynch_statement(statement)
         cursor.execute(statement, parameters, context)
 
     def do_executemany(self, cursor, statement, parameters, context=None):
+        if _asynch_031:
+            statement = _format_asynch_statement(statement)
         cursor.executemany(statement, parameters, context)
 
 

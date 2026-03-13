@@ -71,13 +71,13 @@ setup(
 
         'Programming Language :: SQL',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
 
         'Topic :: Database',
         'Topic :: Software Development',
@@ -94,12 +94,14 @@ setup(
         'Changes': github_url + '/blob/master/CHANGELOG.md'
     },
     packages=find_packages('.', exclude=["tests*"]),
-    python_requires='>=3.7, <4',
+    python_requires='>=3.8, <4',
     install_requires=[
         'sqlalchemy>=2.0.0,<2.1.0',
         'requests',
-        'clickhouse-driver>=0.1.2',
-        'asynch>=0.2.5',
+        'clickhouse-driver',
+        'asynch==0.2.4; python_version < "3.9"',
+        'asynch; python_version >= "3.9"',
+        'tzlocal<5; python_version < "3.9"',
     ],
     # Registering `clickhouse` as dialect.
     entry_points={

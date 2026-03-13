@@ -2,9 +2,7 @@ import logging
 
 from alembic import __version__ as alembic_version
 from alembic.autogenerate import comparators
-from alembic.autogenerate.compare import _compare_columns
 from alembic.operations.ops import ModifyTableOps
-from alembic.util.sqla_compat import _reflect_table as _alembic_reflect_table
 from sqlalchemy import schema as sa_schema
 from sqlalchemy import text
 
@@ -16,6 +14,12 @@ logger = logging.getLogger(__name__)
 alembic_version = tuple(
     (int(x) if x.isdigit() else x) for x in alembic_version.split('.')
 )
+_alembic_118 = alembic_version >= (1, 18, 0)
+
+if _alembic_118:
+    from alembic.autogenerate.compare.tables import _compare_columns
+else:
+    from alembic.autogenerate.compare import _compare_columns
 
 
 def _extract_to_table_name(create_table_query):
@@ -28,20 +32,21 @@ def _extract_to_table_name(create_table_query):
 
 # Direct call .dispatch_for('schema', 'clickhouse') override an Alembic
 # default ('schema', 'default') comparator. To avoid it (as we have own
-# implementation only for a materialized views ) register default "schema"
+# implementation only for a materialized views) register default "schema"
 # comparators as "clickhouse" comparators too.
-for default_comparator in comparators._registry[('schema', 'default')]:
-    comparators.dispatch_for('schema', 'clickhouse')(default_comparator)
+if _alembic_118:
+    for (target, qualifier, priority), fns in comparators._registry.items():
+        if target == 'schema' and qualifier == 'default':
+            for fn, _ in fns:
+                comparators.dispatch_for(
+                    'schema', qualifier='clickhouse', priority=priority
+                )(fn)
+else:
+    for fn in comparators._registry[('schema', 'default')]:
+        comparators.dispatch_for('schema', qualifier='clickhouse')(fn)
 
 
-def _reflect_table(inspector, table):
-    if alembic_version >= (1, 11, 0):
-        return _alembic_reflect_table(inspector, table)
-    else:
-        return _alembic_reflect_table(inspector, table, None)
-
-
-@comparators.dispatch_for('schema', 'clickhouse')
+@comparators.dispatch_for('schema', qualifier='clickhouse')
 def compare_mat_view(autogen_context, upgrade_ops, schemas):
     connection = autogen_context.connection
     dialect = autogen_context.dialect
@@ -127,7 +132,7 @@ def compare_mat_view(autogen_context, upgrade_ops, schemas):
             )
         else:
             table = Table(name, existing_metadata)
-            _reflect_table(inspector, table)
+            inspector.reflect_table(table, include_columns=None)
 
             drop = operations.DropMatViewOp(
                 name, params.as_select, params.engine_full, *table.columns
@@ -144,7 +149,7 @@ def compare_mat_view(autogen_context, upgrade_ops, schemas):
             inner_name = '.inner.' + name
 
         conn_table = Table(inner_name, existing_metadata)
-        _reflect_table(inspector, conn_table)
+        inspector.reflect_table(conn_table, include_columns=None)
 
         if not autogen_context.run_object_filters(
             view, name, 'mat_view', False, conn_table

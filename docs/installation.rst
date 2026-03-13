@@ -6,7 +6,7 @@ Installation
 Python Version
 --------------
 
-Clickhouse-sqlalchemy supports Python 2.7 and newer.
+Clickhouse-sqlalchemy supports Python 3.8 and newer.
 
 Dependencies
 ------------
@@ -16,12 +16,10 @@ clickhouse-sqlalchemy:
 
 * `clickhouse-driver`_ ClickHouse Python Driver with native (TCP) interface support.
 * `requests`_ a simple and elegant HTTP library.
-* `ipaddress`_ backport ipaddress module.
 * `asynch`_ An asyncio ClickHouse Python Driver with native (TCP) interface support.
 
 .. _clickhouse-driver: https://pypi.org/project/clickhouse-driver/
 .. _requests: https://pypi.org/project/requests/
-.. _ipaddress: https://pypi.org/project/ipaddress/
 .. _asynch: https://pypi.org/project/asynch/
 
 If you are planning to use ``clickhouse-driver`` with compression you should

@@ -3,8 +3,25 @@ import asyncio
 from sqlalchemy.engine.interfaces import AdaptedConnection
 from sqlalchemy.util.concurrency import await_only
 
+try:
+    from sqlalchemy.connectors.asyncio import AsyncAdapt_dbapi_cursor
+except ImportError:
+    class AsyncAdapt_dbapi_cursor:
+        __slots__ = (
+            '_adapt_connection',
+            '_connection',
+            'await_',
+            '_cursor',
+            '_rows'
+        )
 
-class AsyncAdapt_asynch_cursor:
+        def __init__(self, adapt_connection):
+            self._adapt_connection = adapt_connection
+            self._connection = adapt_connection._connection  # noqa
+            self.await_ = adapt_connection.await_
+
+
+class AsyncAdapt_asynch_cursor(AsyncAdapt_dbapi_cursor):
     __slots__ = (
         '_adapt_connection',
         '_connection',
@@ -14,6 +31,7 @@ class AsyncAdapt_asynch_cursor:
     )
 
     def __init__(self, adapt_connection):
+        super().__init__(adapt_connection)
         self._adapt_connection = adapt_connection
         self._connection = adapt_connection._connection  # noqa
         self.await_ = adapt_connection.await_
@@ -107,6 +125,9 @@ class AsyncAdapt_asynch_cursor:
         self._rows[:] = []
         return retval
 
+    async def _async_soft_close(self) -> None:
+        return
+
 
 class AsyncAdapt_asynch_dbapi:
     def __init__(self, asynch):
@@ -176,10 +197,10 @@ class AsyncAdapt_asynch_connection(AdaptedConnection):
         return AsyncAdapt_asynch_cursor(self)
 
     def rollback(self):
-        self.await_(self._connection.rollback())
+        pass
 
     def commit(self):
-        self.await_(self._connection.commit())
+        pass
 
     def close(self):
         self.await_(self._connection.close())

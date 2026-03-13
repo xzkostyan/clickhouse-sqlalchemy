@@ -7,6 +7,8 @@ from sqlalchemy.util.concurrency import greenlet_spawn
 
 from tests.session import http_session, native_session
 
+_async_test_loop = None
+
 
 def skip_by_server_version(testcase, version_required):
     testcase.skipTest(
@@ -88,15 +90,15 @@ def run_async(f):
     """
     @wraps(f)
     def g(*args, **kwargs):
+        global _async_test_loop
         coro = f(*args, **kwargs)
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:
-            try:
-                loop = asyncio.get_event_loop_policy().get_event_loop()
-            except DeprecationWarning:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+            if _async_test_loop is None or _async_test_loop.is_closed():
+                _async_test_loop = asyncio.new_event_loop()
+            loop = _async_test_loop
+            asyncio.set_event_loop(loop)
 
         return loop.run_until_complete(coro)
     return g

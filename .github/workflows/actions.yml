@@ -1,29 +1,30 @@
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
 name: build
+
 jobs:
   tests:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version:
-          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
-        include:
-          - clickhouse-version: 18.14.9
-            clickhouse-org: yandex
-          - clickhouse-version: 19.3.5
-            clickhouse-org: yandex
-          - clickhouse-version: 22.5.1.2079
-            clickhouse-org: clickhouse
-          - clickhouse-version: 23.8.4.69
-            clickhouse-org: clickhouse
+          - "3.13"
+          - "3.14"
+        clickhouse-version:
+          - "26.2.4.23"
     services:
       clickhouse-server:
-        image: ${{ matrix.clickhouse-org }}/clickhouse-server:${{ matrix.clickhouse-version }}
+        image: clickhouse/clickhouse-server:${{ matrix.clickhouse-version }}
+        env:
+          CLICKHOUSE_USER: default
+          CLICKHOUSE_PASSWORD: secret
         ports:
           - 8123:8123
           - 9000:9000
@@ -47,19 +48,20 @@ jobs:
       - name: Run flake8
         run: flake8
       - name: Run tests
-        run: coverage run --source=clickhouse_sqlalchemy -m pytest --timeout=10 -v
+        if: matrix.python-version != '3.14'
+        run: pytest --timeout=10 -v -x
         timeout-minutes: 2
-      - name: Set up Python for coverage submission
-        if: ${{ matrix.python-version == '2.7' }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.8
-          architecture: x64
-      - name: Install coveralls
+      - name: Install coverage tools
+        if: matrix.python-version == '3.14'
         run: |
           # Newer coveralls do not work with github actions.
           pip install 'coveralls<3.0.0'
+      - name: Run tests with coverage
+        if: matrix.python-version == '3.14'
+        run: coverage run --source=clickhouse_sqlalchemy -m pytest --timeout=10 -v -x
+        timeout-minutes: 2
       - name: Upload coverage
+        if: matrix.python-version == '3.14'
         run: coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

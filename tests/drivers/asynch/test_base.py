@@ -1,6 +1,10 @@
+from unittest import TestCase
+
+from sqlalchemy import Column, Integer, MetaData, Table, bindparam, select
 from sqlalchemy.engine.url import URL
 
 from clickhouse_sqlalchemy.drivers.asynch.base import ClickHouseDialect_asynch
+from clickhouse_sqlalchemy.drivers.asynch.base import _format_asynch_statement
 from tests.testcase import BaseTestCase
 
 
@@ -45,4 +49,25 @@ class TestConnectArgs(BaseTestCase):
         connect_args = self.dialect.create_connect_args(url)
         self.assertEqual(
             str(connect_args[0][0]), 'clickhouse://localhost:9001/default'
+        )
+
+
+class TestStatementFormatting(TestCase):
+    def test_formats_expanding_params_for_asynch(self):
+        dialect = ClickHouseDialect_asynch()
+        table = Table('t', MetaData(), Column('x', Integer))
+        stmt = select(table.c.x).where(
+            table.c.x.in_(bindparam('vals', value=[1, 2], expanding=True))
+        )
+
+        compiled = stmt.compile(
+            dialect=dialect,
+            compile_kwargs={'render_postcompile': True}
+        )
+
+        self.assertEqual(
+            _format_asynch_statement(str(compiled)),
+            'SELECT t.x \n'
+            'FROM t \n'
+            'WHERE t.x IN ({vals_1}, {vals_2})'
         )
